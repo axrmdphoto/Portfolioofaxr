@@ -1997,14 +1997,80 @@
       }
 
       .orbit-stage {
-        height: 86svh;
-        min-height: 560px;
+        height: auto;
+        min-height: 0;
+        overflow: visible;
+        perspective: none;
+        cursor: default;
+        touch-action: auto;
+      }
+
+      .moments-orbit::before {
+        display: none;
+      }
+
+      .orbit-world {
+        position: relative;
+        top: auto;
+        left: auto;
+        width: auto;
+        height: auto;
+        display: flex;
+        flex-direction: column;
+        transform: none !important;
       }
 
       #moments-orbit-title {
-        width: min(84vw, 360px);
-        margin-left: min(-42vw, -180px);
+        position: relative;
+        top: auto;
+        left: auto;
+        order: 1;
+        width: auto;
+        margin: 0;
+        padding: 92px 24px 0;
         font-size: clamp(2rem, 8.5vw, 3.8rem);
+        text-align: left;
+        transform: none !important;
+        opacity: 1 !important;
+      }
+
+      #moments-orbit-title .orbit-title-inner {
+        transform: none;
+      }
+
+      .orbit-cards {
+        position: relative;
+        top: auto;
+        left: auto;
+        order: 2;
+        width: auto;
+        height: auto;
+        display: flex;
+        gap: 14px;
+        overflow-x: auto;
+        padding: 44px 24px 20px;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+        transform: none !important;
+        touch-action: pan-x;
+        overscroll-behavior-x: contain;
+      }
+
+      .orbit-cards::-webkit-scrollbar {
+        display: none;
+      }
+
+      .orbit-card {
+        position: relative;
+        top: auto;
+        left: auto;
+        flex: 0 0 min(76vw, 280px);
+        height: calc(min(76vw, 280px) * .66);
+        margin: 0;
+        opacity: 1 !important;
+        transform: none !important;
+        scroll-snap-align: center;
+        box-shadow: 0 8px 24px rgba(0,0,0,.28);
       }
 
       .orbit-card figcaption {
@@ -2019,7 +2085,10 @@
       }
 
       .orbit-hint {
-        bottom: 22px;
+        position: relative;
+        bottom: auto;
+        order: 3;
+        padding: 12px 24px 30px;
         font-size: .53rem;
         letter-spacing: .13em;
       }
@@ -3422,8 +3491,8 @@
     const orbitWorld = document.getElementById("orbitWorld");
     const orbitCards = document.getElementById("orbitCards");
     const orbitTitle = document.getElementById("moments-orbit-title");
-    const orbitPhotos = photos.slice(0, mobilePerformanceMode ? 12 : window.innerWidth <= 1024 ? 16 : 21);
-    const orbitImageBudget = mobilePerformanceMode ? 8 : window.innerWidth <= 1024 ? 12 : 21;
+    const orbitPhotos = photos.slice(0, mobilePerformanceMode ? 8 : window.innerWidth <= 1024 ? 16 : 21);
+    const orbitImageBudget = mobilePerformanceMode ? 4 : window.innerWidth <= 1024 ? 12 : 21;
     const orbitUnits = [];
     const orbitState = {
       radius: 300,
@@ -3454,6 +3523,16 @@
     };
 
     const orbitClamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+    const orbitMobileImageObserver = mobilePerformanceMode && "IntersectionObserver" in window
+      ? new IntersectionObserver(entries => {
+          entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            hydrateDeferredImage(entry.target);
+            orbitMobileImageObserver.unobserve(entry.target);
+          });
+        }, { root: orbitCards, rootMargin: "180px 120px" })
+      : null;
 
     function orbitLayout() {
       const width = window.innerWidth;
@@ -3504,6 +3583,8 @@
         image.alt = `${photo.title}, ${photo.category}, ${photo.location}`;
         image.loading = "lazy";
         image.decoding = "async";
+        if (mobilePerformanceMode && index < orbitImageBudget) hydrateDeferredImage(image);
+        else if (orbitMobileImageObserver) orbitMobileImageObserver.observe(image);
 
         const caption = document.createElement("figcaption");
         caption.textContent = photo.title;
@@ -3554,11 +3635,13 @@
     }
 
     function orbitInvalidate() {
+      if (mobilePerformanceMode) return;
       orbitState.dirty = true;
       if (orbitState.visible && !orbitState.frame) orbitState.frame = requestAnimationFrame(orbitFrame);
     }
 
     function orbitPointerDown(event) {
+      if (mobilePerformanceMode) return;
       if (event.target.closest(".orbit-card") && event.pointerType === "touch") {
         orbitState.cancelled = false;
       }
@@ -3574,6 +3657,7 @@
     }
 
     function orbitPointerMove(event) {
+      if (mobilePerformanceMode) return;
       if (orbitState.pointerId !== event.pointerId || orbitState.cancelled) return;
       const dxFromStart = event.clientX - orbitState.startX;
       const dyFromStart = event.clientY - orbitState.startY;
@@ -3604,6 +3688,7 @@
     }
 
     function orbitPointerUp(event) {
+      if (mobilePerformanceMode) return;
       if (orbitState.pointerId !== event.pointerId) return;
       if (orbitState.dragging) {
         orbitState.suppressClick = true;
@@ -3619,6 +3704,7 @@
 
     function orbitFrame() {
       orbitState.frame = 0;
+      if (mobilePerformanceMode) return;
       if (!orbitState.visible) return;
 
       const hasMomentum = Math.abs(orbitState.velocityX) > .002 || Math.abs(orbitState.velocityY) > .002;
