@@ -2069,16 +2069,16 @@
         left: auto;
         order: 2;
         width: auto;
-        height: auto;
-        display: flex;
-        gap: 14px;
-        overflow-x: auto;
-        padding: 44px 24px 20px;
-        scroll-snap-type: x mandatory;
+        height: 330px;
+        display: block;
+        overflow: visible;
+        padding: 0;
+        margin-top: 44px;
+        scroll-snap-type: none;
         scrollbar-width: none;
         transform: none !important;
-        touch-action: pan-x;
-        overscroll-behavior-x: contain;
+        touch-action: pan-y;
+        overscroll-behavior: auto;
       }
 
       .orbit-cards::-webkit-scrollbar {
@@ -2086,16 +2086,84 @@
       }
 
       .orbit-card {
-        position: relative;
+        position: absolute;
         top: auto;
         left: auto;
-        flex: 0 0 min(76vw, 280px);
-        height: calc(min(76vw, 280px) * .66);
-        margin: 0;
+        width: min(52vw, 210px);
+        height: calc(min(52vw, 210px) * .66);
+        margin: calc(min(52vw, 210px) * -.33) 0 0 calc(min(52vw, 210px) * -.5);
         opacity: 1 !important;
-        transform: none !important;
-        scroll-snap-align: center;
+        transform: translate3d(-50%, -50%, 0) rotate(0deg) scale(.68) !important;
         box-shadow: 0 8px 24px rgba(0,0,0,.28);
+        animation: orbit-float-center 7s ease-in-out infinite;
+      }
+
+      .orbit-card:nth-child(1) {
+        top: 43%;
+        left: 50%;
+        z-index: 5;
+        transform: translate3d(-50%, -50%, 28px) rotate(-5deg) scale(1.02) !important;
+        animation-name: orbit-float-center;
+      }
+
+      .orbit-card:nth-child(2) {
+        top: 24%;
+        left: 18%;
+        z-index: 3;
+        transform: translate3d(-50%, -50%, 0) rotate(-13deg) scale(.68) !important;
+        animation-name: orbit-float-left;
+        animation-delay: -1.8s;
+      }
+
+      .orbit-card:nth-child(3) {
+        top: 22%;
+        left: 82%;
+        z-index: 3;
+        transform: translate3d(-50%, -50%, 0) rotate(12deg) scale(.7) !important;
+        animation-name: orbit-float-right;
+        animation-delay: -3.2s;
+      }
+
+      .orbit-card:nth-child(4) {
+        top: 72%;
+        left: 16%;
+        z-index: 2;
+        transform: translate3d(-50%, -50%, 0) rotate(9deg) scale(.64) !important;
+        animation-name: orbit-float-left;
+        animation-delay: -4.4s;
+      }
+
+      .orbit-card:nth-child(5) {
+        top: 74%;
+        left: 84%;
+        z-index: 2;
+        transform: translate3d(-50%, -50%, 0) rotate(-10deg) scale(.64) !important;
+        animation-name: orbit-float-right;
+        animation-delay: -2.6s;
+      }
+
+      .orbit-card:nth-child(6) {
+        top: 88%;
+        left: 50%;
+        z-index: 1;
+        transform: translate3d(-50%, -50%, 0) rotate(4deg) scale(.58) !important;
+        animation-name: orbit-float-center;
+        animation-delay: -5.1s;
+      }
+
+      @keyframes orbit-float-center {
+        0%, 100% { translate: 0 0; }
+        50% { translate: 0 -8px; }
+      }
+
+      @keyframes orbit-float-left {
+        0%, 100% { translate: 0 0; }
+        50% { translate: -4px -10px; }
+      }
+
+      @keyframes orbit-float-right {
+        0%, 100% { translate: 0 0; }
+        50% { translate: 4px -9px; }
       }
 
       .orbit-card figcaption {
@@ -2344,7 +2412,7 @@
                     <h2 id="moments-orbit-title"><span class="orbit-title-inner">Moments <em>in motion.</em></span></h2>
                   </div>
                 </div>
-                <p class="orbit-hint">Swipe through the archive · Feel the blue orbit</p>
+                <p class="orbit-hint">Floating moments · Visual explorations below</p>
               </section>
               <section
                 class="section"
@@ -3516,8 +3584,8 @@
     const orbitWorld = document.getElementById("orbitWorld");
     const orbitCards = document.getElementById("orbitCards");
     const orbitTitle = document.getElementById("moments-orbit-title");
-    const orbitPhotos = photos.slice(0, mobilePerformanceMode ? 8 : window.innerWidth <= 1024 ? 16 : 21);
-    const orbitImageBudget = mobilePerformanceMode ? 4 : window.innerWidth <= 1024 ? 12 : 21;
+    const orbitPhotos = photos.slice(0, mobilePerformanceMode ? 6 : window.innerWidth <= 1024 ? 16 : 21);
+    const orbitImageBudget = mobilePerformanceMode ? 6 : window.innerWidth <= 1024 ? 12 : 21;
     const orbitUnits = [];
     const orbitState = {
       radius: 300,
