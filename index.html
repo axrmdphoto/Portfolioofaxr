@@ -2006,11 +2006,36 @@
       }
 
       .moments-orbit::before {
-        display: none;
+        inset: auto;
+        top: 136px;
+        left: 50%;
+        display: block;
+        width: calc(100vw - 34px);
+        height: calc(100vw - 34px);
+        border-color: rgba(137,170,204,.22);
+        box-shadow: 0 0 80px rgba(78,133,191,.16), inset 0 0 80px rgba(78,133,191,.08);
+        opacity: .9;
+        transform: translateX(-50%);
+      }
+
+      .moments-orbit::after {
+        position: absolute;
+        z-index: 0;
+        top: 182px;
+        left: 50%;
+        width: calc(100vw - 8px);
+        height: calc(100vw - 8px);
+        border: 1px solid rgba(78,133,191,.17);
+        border-radius: 50%;
+        content: "";
+        pointer-events: none;
+        box-shadow: 0 0 42px rgba(78,133,191,.11);
+        transform: translateX(-50%) rotate(-17deg) scaleY(.38);
       }
 
       .orbit-world {
         position: relative;
+        z-index: 1;
         top: auto;
         left: auto;
         width: auto;
@@ -2319,7 +2344,7 @@
                     <h2 id="moments-orbit-title"><span class="orbit-title-inner">Moments <em>in motion.</em></span></h2>
                   </div>
                 </div>
-                <p class="orbit-hint">Drag to move through the archive · Tilt to feel the depth</p>
+                <p class="orbit-hint">Swipe through the archive · Feel the blue orbit</p>
               </section>
               <section
                 class="section"
