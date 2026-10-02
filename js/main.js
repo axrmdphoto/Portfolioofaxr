@@ -1,3 +1,23 @@
+/* Keep the layout aligned with the visible phone viewport, even when the
+   browser's layout viewport is narrower because of zoom or embedded preview. */
+const visualViewportRoot = document.documentElement;
+
+function syncVisualViewport() {
+  const viewport = window.visualViewport;
+  visualViewportRoot.style.setProperty(
+    "--visual-viewport-width",
+    `${viewport?.width || visualViewportRoot.clientWidth}px`
+  );
+  visualViewportRoot.style.setProperty(
+    "--visual-viewport-height",
+    `${viewport?.height || window.innerHeight}px`
+  );
+}
+
+syncVisualViewport();
+window.addEventListener("resize", syncVisualViewport, { passive: true });
+window.visualViewport?.addEventListener("resize", syncVisualViewport, { passive: true });
+
 const photos = [
               
           {
