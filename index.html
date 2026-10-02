@@ -1,940 +1,2775 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>little_loopcrochet — Handcrafted with Love</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;0,700;1,500&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --cream:#FAF3EA;
-    --cream-2:#F1E7D8;
-    --plum:#4A2F44;
-    --rose:#C97B84;
-    --rose-dark:#B5616C;
-    --sage:#8A9B6E;
-    --gold:#D9A441;
-    --ink:#2E2420;
-    --white:#FFFDF9;
-    --radius:18px;
-    --shadow:0 10px 30px rgba(74,47,68,0.12);
-  }
-  *{box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
-  body{
-    margin:0;
-    background:var(--cream);
-    color:var(--ink);
-    font-family:'Nunito',sans-serif;
-    -webkit-font-smoothing:antialiased;
-  }
-  h1,h2,h3,.display{
-    font-family:'Fraunces',serif;
-    font-weight:700;
-    color:var(--plum);
-    margin:0;
-  }
-  a{text-decoration:none;color:inherit;}
-  img{max-width:100%;display:block;}
-  button{font-family:inherit;cursor:pointer;border:none;background:none;}
-
-  .thread{ width:100%; height:22px; margin:0 auto; }
-  .thread svg{width:100%;height:100%;display:block;}
-
-  /* NAV */
-  header{
-    position:sticky;top:0;z-index:50;
-    background:rgba(250,243,234,0.9);
-    backdrop-filter:blur(8px);
-    border-bottom:1px solid rgba(74,47,68,0.08);
-  }
-  .nav-inner{
-    max-width:1100px;margin:0 auto;
-    display:flex;align-items:center;justify-content:space-between;
-    padding:14px 20px;
-  }
-  .logo{
-    font-family:'Fraunces',serif;
-    font-weight:700;font-size:1.4rem;
-    color:var(--plum);
-    display:flex;align-items:center;gap:8px;
-  }
-  .logo::before{
-    content:"";
-    width:14px;height:14px;border-radius:50%;
-    background:var(--rose);
-    box-shadow:4px 2px 0 -2px var(--sage), -4px -2px 0 -2px var(--gold);
-  }
-  .tagline-small{font-size:0.72rem;color:var(--rose-dark);font-weight:600;letter-spacing:.03em;}
-
-  /* HERO */
-  .hero{
-    position:relative;
-    min-height:88vh;
-    display:flex;align-items:flex-end;
-    background:linear-gradient(180deg, rgba(46,36,32,0.15) 0%, rgba(46,36,32,0.55) 100%),
-               url('https://i.ibb.co/qYfgDYMb/pexels-tim-douglas-6567204.jpg') center/cover no-repeat;
-  }
-  .hero-content{ padding:60px 24px 56px; max-width:640px; color:var(--white); }
-  .hero-eyebrow{
-    display:inline-block;
-    background:rgba(255,253,249,0.15);
-    border:1px solid rgba(255,253,249,0.5);
-    padding:6px 14px;border-radius:999px;
-    font-size:0.78rem;letter-spacing:.06em;text-transform:uppercase;
-    margin-bottom:18px;
-    backdrop-filter:blur(4px);
-  }
-  .hero h1{
-    font-size:clamp(2.4rem, 6vw, 4rem);
-    line-height:1.05;
-    color:var(--white);
-    text-shadow:0 4px 20px rgba(0,0,0,0.25);
-  }
-  .hero p.sub{
-    margin-top:16px; font-size:1.05rem; max-width:460px;
-    color:rgba(255,253,249,0.92); font-weight:600;
-  }
-  .btn{
-    display:inline-flex;align-items:center;gap:8px;
-    padding:14px 28px; border-radius:999px;
-    font-weight:800;font-size:0.95rem;
-    transition:transform .18s ease, box-shadow .18s ease;
-  }
-  .btn-primary{
-    background:var(--rose); color:var(--white);
-    box-shadow:0 8px 20px rgba(201,123,132,0.45);
-  }
-  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(201,123,132,0.55);}
-  .btn-primary:disabled{opacity:.55;cursor:not-allowed;transform:none;}
-  .hero .btn{margin-top:28px;}
-
-  /* SECTIONS */
-  section{padding:64px 20px;max-width:1100px;margin:0 auto;}
-  .section-head{text-align:center;margin-bottom:40px;}
-  .section-head .eyebrow{
-    color:var(--sage);font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:0.78rem;
-  }
-  .section-head h2{font-size:clamp(1.8rem,4vw,2.6rem);margin-top:8px;}
-
-  /* CAROUSEL */
-  .carousel-wrap{position:relative;}
-  .carousel{
-    display:flex;gap:22px;
-    overflow-x:auto;
-    scroll-snap-type:x mandatory;
-    padding:10px 4px 26px;
-    -webkit-overflow-scrolling:touch;
-  }
-  .carousel::-webkit-scrollbar{height:8px;}
-  .carousel::-webkit-scrollbar-thumb{background:var(--rose);border-radius:8px;}
-  .carousel::-webkit-scrollbar-track{background:var(--cream-2);}
-
-  .card{
-    flex:0 0 78%; max-width:300px;
-    scroll-snap-align:start;
-    background:var(--white);
-    border-radius:var(--radius);
-    box-shadow:var(--shadow);
-    overflow:hidden;
-    display:flex;flex-direction:column;
-  }
-  @media(min-width:640px){ .card{flex:0 0 300px;} }
-  .card-img{ aspect-ratio:1/1; overflow:hidden; background:var(--cream-2); cursor:pointer; }
-  .card-img img{width:100%;height:100%;object-fit:cover;transition:transform .4s ease;}
-  .card:hover .card-img img{transform:scale(1.06);}
-  .card-body{padding:18px 18px 20px;display:flex;flex-direction:column;gap:8px;flex:1;}
-  .card-body h3{font-size:1.15rem;cursor:pointer;}
-  .card-body h3:hover{color:var(--rose-dark);}
-  .card-rating{display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#9a8a83;font-weight:700;}
-  .card-rating .stars{color:var(--gold);letter-spacing:1px;}
-  .price{
-    font-family:'Fraunces',serif; font-weight:700; font-size:1.15rem; color:var(--rose-dark);
-  }
-  .price::before{content:"₹";font-size:0.9em;margin-right:2px;}
-  .card-actions{display:flex;gap:8px;margin-top:auto;}
-  .view-btn{
-    background:var(--cream-2); color:var(--plum);
-    padding:11px 14px;border-radius:12px;font-weight:700;font-size:0.85rem;
-  }
-  .add-btn{
-    flex:1;
-    background:var(--plum); color:var(--white);
-    padding:11px 16px; border-radius:12px;
-    font-weight:700;font-size:0.9rem;
-    display:flex;align-items:center;justify-content:center;gap:8px;
-    transition:background .2s ease;
-  }
-  .add-btn:hover{background:var(--rose-dark);}
-  .add-btn.added{background:var(--sage);}
-
-  /* ABOUT strip */
-  .about{ background:var(--cream-2); border-radius:24px; padding:44px 30px; text-align:center; }
-  .about p{max-width:560px;margin:14px auto 0;line-height:1.7;font-weight:600;color:#5c4c46;}
-
-  /* FOOTER */
-  footer{ background:var(--plum); color:var(--cream); padding:40px 20px 30px; text-align:center; }
-  footer .logo2{font-family:'Fraunces',serif;font-size:1.3rem;font-weight:700;color:var(--white);}
-  footer p{opacity:.75;font-size:0.85rem;margin-top:10px;}
-  footer .email{color:var(--gold);}
-
-  /* FLOATING BUTTONS */
-  .floating{
-    position:fixed; right:20px; z-index:80;
-    width:58px;height:58px;border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
-    box-shadow:0 10px 24px rgba(0,0,0,0.25);
-  }
-  .fab-cart{ bottom:96px; background:var(--rose); color:var(--white); }
-  .fab-cart .count{
-    position:absolute;top:-4px;right:-4px;
-    background:var(--gold); color:var(--plum);
-    font-weight:800;font-size:0.72rem;
-    min-width:22px;height:22px;border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
-    border:2px solid var(--white);
-  }
-  .fab-wa{ bottom:24px; background:#25D366; color:var(--white); }
-  .fab-wa svg,.fab-cart svg{width:26px;height:26px;}
-
-  /* Generic overlay used by cart / detail / order modal */
-  .overlay{
-    position:fixed;inset:0;background:rgba(46,36,32,0.5);
-    opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:90;
-  }
-  .overlay.open{opacity:1;pointer-events:auto;}
-
-  /* CART DRAWER */
-  .drawer{
-    position:fixed;top:0;right:0;height:100%;
-    width:min(400px,92vw);
-    background:var(--white);
-    z-index:95;
-    transform:translateX(100%);
-    transition:transform .3s ease;
-    display:flex;flex-direction:column;
-    box-shadow:-10px 0 30px rgba(0,0,0,0.15);
-  }
-  .drawer.open{transform:translateX(0);}
-  .drawer-head{
-    padding:20px;display:flex;align-items:center;justify-content:space-between;
-    border-bottom:1px solid var(--cream-2);
-  }
-  .drawer-head h3{font-size:1.3rem;}
-  .close-btn{
-    width:34px;height:34px;border-radius:50%;
-    background:var(--cream-2);
-    display:flex;align-items:center;justify-content:center;
-    font-size:1.1rem;color:var(--plum);font-weight:700;
-  }
-  .cart-items{flex:1;overflow-y:auto;padding:12px 20px;}
-  .cart-empty{text-align:center;color:#9a8a83;padding:40px 10px;font-weight:600;}
-  .cart-row{ display:flex;gap:12px;align-items:center; padding:12px 0;border-bottom:1px solid var(--cream-2); }
-  .cart-row img{width:56px;height:56px;object-fit:cover;border-radius:10px;}
-  .cart-row .info{flex:1;}
-  .cart-row .info h4{font-size:0.95rem;margin:0;color:var(--plum);}
-  .cart-row .info span{font-size:0.85rem;color:var(--rose-dark);font-weight:700;}
-  .qty-controls{display:flex;align-items:center;gap:8px;}
-  .qty-controls button{
-    width:26px;height:26px;border-radius:50%;
-    background:var(--cream-2);color:var(--plum);font-weight:800;
-  }
-  .remove-btn{color:#b5616c;font-size:0.78rem;font-weight:700;margin-left:8px;}
-  .drawer-foot{ padding:18px 20px 22px;border-top:1px solid var(--cream-2); }
-  .total-row{
-    display:flex;justify-content:space-between;font-weight:800;font-size:1.1rem;
-    color:var(--plum);margin-bottom:14px;
-  }
-  .btn-full{width:100%;justify-content:center;}
-
-  /* MODAL base (order form) */
-  .modal-overlay{
-    position:fixed;inset:0;background:rgba(46,36,32,0.55);
-    display:none;align-items:center;justify-content:center;
-    z-index:120;padding:20px;
-  }
-  .modal-overlay.open{display:flex;}
-  .modal{
-    background:var(--white); border-radius:20px;
-    max-width:440px;width:100%;
-    max-height:90vh;overflow-y:auto;
-    padding:26px 24px 24px;
-  }
-  .modal h3{font-size:1.4rem;margin-bottom:4px;}
-  .modal p.hint{color:#8a7a73;font-size:0.85rem;margin-bottom:18px;font-weight:600;}
-  .field{margin-bottom:14px;}
-  .field label{ display:block;font-size:0.82rem;font-weight:800;color:var(--plum);margin-bottom:6px; }
-  .field input,.field textarea{
-    width:100%;padding:11px 13px;
-    border:1.5px solid var(--cream-2); border-radius:10px;
-    font-family:inherit;font-size:0.95rem;
-    background:var(--cream); color:var(--ink);
-  }
-  .field input:focus,.field textarea:focus{
-    outline:2px solid var(--rose);outline-offset:1px;border-color:var(--rose);
-  }
-  .field textarea{resize:vertical;min-height:70px;}
-  .modal-actions{display:flex;gap:10px;margin-top:8px;}
-  .btn-secondary{
-    background:var(--cream-2);color:var(--plum);flex:1;justify-content:center;
-    font-weight:800;padding:13px 20px;border-radius:999px;display:inline-flex;align-items:center;
-  }
-  .status-msg{ margin-top:12px;font-size:0.88rem;font-weight:700;text-align:center; }
-  .status-msg.success{color:var(--sage);}
-  .status-msg.error{color:#c0555f;}
-
-  /* PRODUCT DETAIL MODAL */
-  .detail-overlay{
-    position:fixed;inset:0;background:rgba(46,36,32,0.6);
-    display:none;align-items:flex-start;justify-content:center;
-    z-index:110; padding:24px 16px; overflow-y:auto;
-  }
-  .detail-overlay.open{display:flex;}
-  .detail-modal{
-    background:var(--white); border-radius:22px;
-    max-width:640px;width:100%;
-    margin:20px auto 40px;
-    overflow:hidden;
-    position:relative;
-  }
-  .detail-close{
-    position:absolute;top:14px;right:14px;z-index:5;
-    width:36px;height:36px;border-radius:50%;
-    background:rgba(255,253,249,0.9);
-    display:flex;align-items:center;justify-content:center;
-    font-weight:800;color:var(--plum);box-shadow:0 4px 10px rgba(0,0,0,0.15);
-  }
-  .detail-img{ width:100%; aspect-ratio:1/1; background:var(--cream-2); overflow:hidden; }
-  .detail-img img{width:100%;height:100%;object-fit:cover;}
-  .detail-body{padding:22px 22px 6px;}
-  .detail-body h2{font-size:1.5rem;}
-  .detail-rating{display:flex;align-items:center;gap:8px;margin-top:8px;}
-  .detail-rating .stars{color:var(--gold);font-size:1rem;letter-spacing:2px;}
-  .detail-rating .rcount{font-size:0.85rem;color:#9a8a83;font-weight:700;}
-  .detail-price{font-family:'Fraunces',serif;font-weight:700;font-size:1.6rem;color:var(--rose-dark);margin-top:12px;}
-  .detail-price::before{content:"₹";font-size:0.8em;margin-right:2px;}
-  .detail-desc{margin-top:14px;color:#5c4c46;font-weight:600;line-height:1.6;font-size:0.95rem;}
-  .detail-qty{display:flex;align-items:center;gap:14px;margin-top:20px;}
-  .detail-qty span.lbl{font-weight:800;color:var(--plum);font-size:0.85rem;}
-  .qty-controls.lg button{width:32px;height:32px;font-size:1.1rem;}
-  .detail-actions{display:flex;gap:10px;margin-top:20px;}
-
-  .reviews-section{ padding:26px 22px 30px; border-top:1px solid var(--cream-2); margin-top:22px; }
-  .reviews-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-  .reviews-head h3{font-size:1.2rem;}
-  .write-review-btn{
-    background:var(--cream-2);color:var(--plum);font-weight:800;font-size:0.82rem;
-    padding:9px 16px;border-radius:999px;
-  }
-  .review-list{display:flex;flex-direction:column;gap:16px;}
-  .review-empty{color:#9a8a83;font-weight:600;font-size:0.9rem;padding:10px 0;}
-  .review-card{ background:var(--cream); border-radius:14px; padding:14px 16px; }
-  .review-top{display:flex;align-items:center;justify-content:space-between;}
-  .review-name{font-weight:800;color:var(--plum);font-size:0.92rem;}
-  .review-date{font-size:0.75rem;color:#9a8a83;font-weight:600;}
-  .review-stars{color:var(--gold);font-size:0.9rem;margin-top:4px;letter-spacing:1px;}
-  .review-text{margin-top:8px;font-size:0.9rem;color:#5c4c46;line-height:1.55;font-weight:600;}
-  .review-photo{margin-top:10px;}
-  .review-photo img{width:84px;height:84px;object-fit:cover;border-radius:10px;cursor:pointer;}
-
-  .review-form{ background:var(--cream); border-radius:14px; padding:16px; margin-bottom:18px; display:none; }
-  .review-form.open{display:block;}
-  .star-picker{display:flex;gap:6px;font-size:1.6rem;color:#d8cdc3;margin-bottom:12px;}
-  .star-picker span{cursor:pointer;transition:color .15s ease;}
-  .star-picker span.active{color:var(--gold);}
-  .photo-upload{
-    display:flex;align-items:center;gap:12px;margin-top:4px;margin-bottom:10px;
-  }
-  .photo-upload label.upload-btn{
-    background:var(--cream-2);color:var(--plum);font-weight:700;font-size:0.82rem;
-    padding:9px 14px;border-radius:10px;cursor:pointer;
-  }
-  .photo-upload input[type=file]{display:none;}
-  .photo-preview{width:52px;height:52px;border-radius:10px;object-fit:cover;display:none;}
-
-  @media(prefers-reduced-motion:reduce){
-    *{transition:none !important;scroll-behavior:auto !important;}
-  }
-  @media(max-width:520px){
-    .hero{min-height:80vh;}
-    section{padding:48px 16px;}
-  }
-</style>
-</head>
-<body>
-
-<header>
-  <div class="nav-inner">
-    <div>
-      <div class="logo">little_loopcrochet</div>
-      <div class="tagline-small">Handcrafted with Love</div>
-    </div>
-  </div>
-</header>
-
-<div class="hero">
-  <div class="hero-content">
-    <span class="hero-eyebrow">Made stitch by stitch, by hand</span>
-    <h1>Little loops.<br>Big love.</h1>
-    <p class="sub">Soft, one-of-a-kind crochet pieces made slowly, with care — for the people (and rooms) you adore.</p>
-    <a href="#products" class="btn btn-primary">Shop Now ↓</a>
-  </div>
-</div>
-
-<div class="thread">
-  <svg viewBox="0 0 400 20" preserveAspectRatio="none"><path d="M0 10 Q 25 0, 50 10 T 100 10 T 150 10 T 200 10 T 250 10 T 300 10 T 350 10 T 400 10" fill="none" stroke="#C97B84" stroke-width="2" stroke-dasharray="1 9" stroke-linecap="round"/></svg>
-</div>
-
-<section id="products">
-  <div class="section-head">
-    <div class="eyebrow">The Shop</div>
-    <h2>Fresh off the hook</h2>
-  </div>
-  <div class="carousel-wrap">
-    <div class="carousel" id="carousel"></div>
-  </div>
-</section>
-
-<div class="thread">
-  <svg viewBox="0 0 400 20" preserveAspectRatio="none"><path d="M0 10 Q 25 20, 50 10 T 100 10 T 150 10 T 200 10 T 250 10 T 300 10 T 350 10 T 400 10" fill="none" stroke="#8A9B6E" stroke-width="2" stroke-dasharray="1 9" stroke-linecap="round"/></svg>
-</div>
-
-<section>
-  <div class="about">
-    <div class="eyebrow" style="color:var(--sage);font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:0.78rem;">Our Story</div>
-    <h2 style="margin-top:10px;">Every piece starts as a single loop</h2>
-    <p>little_loopcrochet is a tiny, one-woman studio turning skeins of yarn into cozy, huggable things. No factories, no rush — just a hook, good yarn, and a lot of patience. Order what you love, and we'll make it just for you.</p>
-  </div>
-</section>
-
-<footer>
-  <div class="logo2">little_loopcrochet</div>
-  <p>Handcrafted with Love · <a class="email" href="mailto:littleloopcrochet01@gmail.com">littleloopcrochet01@gmail.com</a></p>
-  <p>© 2026 little_loopcrochet. All loops reserved.</p>
-</footer>
-
-<!-- Floating buttons -->
-<button class="floating fab-cart" id="cartFab" aria-label="Open cart">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-  <span class="count" id="cartCount">0</span>
-</button>
-
-<a class="floating fab-wa" href="https://wa.me/917002284440" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
-  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 6.32A8.8 8.8 0 0 0 12.02 3.5c-4.86 0-8.8 3.94-8.8 8.8 0 1.55.4 3.06 1.17 4.4L3.5 21.5l4.93-1.29a8.8 8.8 0 0 0 3.6.76h.01c4.86 0 8.8-3.94 8.8-8.8 0-2.35-.92-4.56-2.24-6.85zM12.03 19.4h-.01a7.3 7.3 0 0 1-3.72-1.02l-.27-.16-2.77.73.74-2.7-.18-.28a7.3 7.3 0 0 1-1.12-3.89c0-4.04 3.29-7.33 7.34-7.33a7.29 7.29 0 0 1 7.32 7.34c0 4.04-3.29 7.31-7.33 7.31zm4.02-5.48c-.22-.11-1.3-.64-1.5-.71-.2-.07-.35-.11-.5.11-.15.22-.57.71-.7.85-.13.15-.26.16-.48.05-.22-.11-.93-.34-1.77-1.09-.65-.58-1.09-1.3-1.22-1.52-.13-.22-.01-.34.1-.45.1-.1.22-.26.33-.39.11-.13.15-.22.22-.37.07-.15.04-.28-.02-.39-.06-.11-.5-1.21-.69-1.66-.18-.43-.36-.37-.5-.38h-.43c-.15 0-.39.06-.59.28-.2.22-.78.76-.78 1.85 0 1.09.8 2.14.91 2.29.11.15 1.57 2.4 3.81 3.36.53.23.95.37 1.27.47.53.17 1.02.15 1.4.09.43-.06 1.3-.53 1.48-1.04.18-.51.18-.95.13-1.04-.05-.1-.2-.15-.42-.26z"/></svg>
-</a>
-
-<!-- Cart drawer -->
-<div class="overlay" id="overlay"></div>
-<div class="drawer" id="drawer">
-  <div class="drawer-head">
-    <h3>Your Cart</h3>
-    <button class="close-btn" id="closeDrawer">✕</button>
-  </div>
-  <div class="cart-items" id="cartItems"></div>
-  <div class="drawer-foot">
-    <div class="total-row"><span>Total</span><span id="cartTotal">₹0</span></div>
-    <button class="btn btn-primary btn-full" id="checkoutBtn">Send Order</button>
-  </div>
-</div>
-
-<!-- PRODUCT DETAIL MODAL -->
-<div class="detail-overlay" id="detailOverlay">
-  <div class="detail-modal" id="detailModal"></div>
-</div>
-
-<!-- Order form modal -->
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal">
-    <h3>Complete your order</h3>
-    <p class="hint">We'll email your order straight to the shop.</p>
-    <form id="orderForm">
-      <div class="field">
-        <label for="custName">Full name</label>
-        <input type="text" id="custName" required placeholder="Your name">
-      </div>
-      <div class="field">
-        <label for="custPhone">Phone number</label>
-        <input type="tel" id="custPhone" required placeholder="e.g. 9876543210">
-      </div>
-      <div class="field">
-        <label for="custAddress">Delivery address</label>
-        <textarea id="custAddress" required placeholder="House no, street, city, pincode"></textarea>
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="btn btn-secondary" id="cancelOrder">Cancel</button>
-        <button type="submit" class="btn btn-primary" id="submitOrder" style="flex:1;">Submit Order</button>
-      </div>
-      <div class="status-msg" id="orderStatus"></div>
-    </form>
-  </div>
-</div>
-
-<script>
-/* ---------- CONFIG ---------- */
-// Create a free form at https://formspree.io that delivers to littleloopcrochet01@gmail.com
-// and paste the resulting endpoint below. Until then, orders fall back to opening
-// the customer's email app with the order pre-filled to the shop's address.
-const FORMSPREE_ENDPOINT = "https://formspree.io/f/YOUR_FORM_ID";
-const SHOP_EMAIL = "littleloopcrochet01@gmail.com";
-
-const PRODUCTS = [
-  { id: "p1",  name: "Peach Bow & Pearl Keychain", price: 50,
-    img: "https://i.ibb.co/ZppsB39k/little-loopcrochet-20260809-0002.jpg",
-    desc: "A dainty crochet bow finished with a pearl accent, hand-stitched onto a sturdy keyring. Soft peach yarn, ready to clip onto keys or a bag." },
-  { id: "p2",  name: "Cozy Sunflower Keychain", price: 60,
-    img: "https://i.ibb.co/C3qjXWtC/little-loopcrochet-20260809-0001.jpg",
-    desc: "A cheerful little sunflower crocheted in warm yellow and brown, mounted on a keyring. A pop of sunshine for your keys or bag." },
-  { id: "p3",  name: "Cozy Rose Keychain", price: 50,
-    img: "https://i.ibb.co/HLDdwLc2/little-loopcrochet-20260809-0004.jpg",
-    desc: "A tiny hand-crocheted rose in soft rounds of yarn, finished as a keychain charm. A sweet, everyday accessory." },
-  { id: "p4",  name: "Sweet Cherry Keychain", price: 50,
-    img: "https://i.ibb.co/vCyjgQRn/little-loopcrochet-20260809-0003.jpg",
-    desc: "A playful pair of crochet cherries in deep red with a stitched green stem, made into a keychain charm." },
-  { id: "p5",  name: "Blue Floral Hair Clips (Pair)", price: 50,
-    img: "https://i.ibb.co/7dBv8b2s/little-loopcrochet-20260809-0007.jpg",
-    desc: "A pair of small crochet flower hair clips in soft blue, hand-stitched onto snap clips. Sold as a set of two." },
-  { id: "p6",  name: "Yellow Pearl Blossom Hair Clips (Pair)", price: 40,
-    img: "https://i.ibb.co/nqwwc0kZ/little-loopcrochet-20260809-0006.jpg",
-    desc: "Delicate yellow crochet blossoms with a pearl centre, set on a pair of hair clips." },
-  { id: "p7",  name: "Baby Blue Bow & Pearl Keychain", price: 50,
-    img: "https://i.ibb.co/nqYWLQpp/little-loopcrochet-20260809-0005.jpg",
-    desc: "A soft baby-blue crochet bow with a pearl detail, finished as a keychain charm." },
-  { id: "p8",  name: "Red Rose Hair Scrunchie / Elastic", price: 50,
-    img: "https://i.ibb.co/DH9WcVkM/little-loopcrochet-20260809-0009.jpg",
-    desc: "A hair elastic topped with a hand-crocheted red rose — pretty enough for everyday wear or a special occasion." },
-  { id: "p9",  name: "Pink Pearl Blossom Hair Clips", price: 50,
-    img: "https://i.ibb.co/GfPsTkRp/little-loopcrochet-20260809-0008.jpg",
-    desc: "Soft pink crochet blossoms with a pearl centre, mounted on hair clips for an everyday sweet touch." },
-  { id: "p10", name: "Single Sunflower Bouquet", price: 149,
-    img: "https://i.ibb.co/kn797xd/little-loopcrochet-20260809-0012.jpg",
-    desc: "A single hand-crocheted sunflower on a wrapped stem — a keepsake bloom that never wilts." },
-  { id: "p11", name: "Mini Red Rose Bouquet", price: 299,
-    img: "https://i.ibb.co/Bd0CC4f/little-loopcrochet-20260809-0011.jpg",
-    desc: "A small bouquet of hand-crocheted red roses on wrapped stems, gathered together — a lasting gift for someone you love." },
-  { id: "p12", name: "Single Yellow Lily Stick Bouquet", price: 149,
-    img: "https://i.ibb.co/6C1LqH6/little-loopcrochet-20260809-0014.jpg",
-    desc: "A single crochet lily in sunny yellow on a wrapped stem, perfect on its own or added to a bigger bunch." },
-  { id: "p13", name: "Single Blue Lily Stick Bouquet", price: 149,
-    img: "https://i.ibb.co/QvZG2jtt/little-loopcrochet-20260809-0013.jpg",
-    desc: "A single crochet lily in soft blue on a wrapped stem, perfect on its own or added to a bigger bunch." },
-  { id: "p14", name: "Pearl Crochet Bow", price: 120,
-    img: "https://i.ibb.co/6cSPfx1t/little-loopcrochet-20260809-0016.jpg",
-    desc: "A statement crochet bow finished with pearl detailing — a versatile accessory for hair, bags, or gifting." },
-  { id: "p15", name: "Ribbon Crochet Bow", price: 100,
-    img: "https://i.ibb.co/Z1gptChS/little-loopcrochet-20260809-0017.jpg",
-    desc: "A ribbon-style crochet bow, neatly finished for use as a hair accessory or decorative accent." },
-  { id: "p16", name: "Crochet Paranda", price: 100,
-    img: "https://i.ibb.co/Dd32GXc/little-loopcrochet-20260809-0018.jpg",
-    desc: "A traditional-style crochet paranda for braids, hand-made with care and a soft finish." },
-  { id: "p17", name: "Sunflower Sticks (₹250 per stick)", price: 250,
-    img: "https://i.ibb.co/Nd3S3nyR/little-loopcrochet-20260809-0019.jpg",
-    desc: "Hand-crocheted sunflower stems, priced per stick — add as many as you like to build your own bouquet." },
-  { id: "p18", name: "Sunflower Bouquet (₹250 per stick)", price: 250,
-    img: "https://i.ibb.co/5hXQs22N/little-loopcrochet-20260809-0020.jpg",
-    desc: "A gathered bouquet of hand-crocheted sunflowers, priced per stick — a lasting, sunny gift." }
-];
-
-/* ---------- STATE ---------- */
-let cart = {}; // id -> qty
-let reviews = {}; // id -> [ {name, rating, text, photo, date} ]
-try { reviews = JSON.parse(localStorage.getItem('llc_reviews') || '{}'); } catch(e){ reviews = {}; }
-let currentDetailId = null;
-let pickedStars = 0;
-let pickedPhoto = null;
-
-function saveReviews(){
-  try { localStorage.setItem('llc_reviews', JSON.stringify(reviews)); } catch(e){}
-}
-function getReviews(id){ return reviews[id] || []; }
-function avgRating(id){
-  const list = getReviews(id);
-  if (!list.length) return 0;
-  return list.reduce((s,r) => s + r.rating, 0) / list.length;
-}
-function starString(n){
-  const full = Math.round(n);
-  return "★★★★★".slice(0,full) + "☆☆☆☆☆".slice(0, 5-full);
-}
-
-/* ---------- RENDER PRODUCT CARDS ---------- */
-const carousel = document.getElementById('carousel');
-PRODUCTS.forEach(p => {
-  const card = document.createElement('div');
-  card.className = 'card';
-  const rCount = getReviews(p.id).length;
-  const rAvg = avgRating(p.id);
-  card.innerHTML = `
-    <div class="card-img" data-id="${p.id}"><img src="${p.img}" alt="${p.name}" loading="lazy"></div>
-    <div class="card-body">
-      <h3 data-id="${p.id}">${p.name}</h3>
-      <div class="card-rating" data-rating-for="${p.id}">
-        ${rCount ? `<span class="stars">${starString(rAvg)}</span><span>(${rCount})</span>` : `<span>No reviews yet</span>`}
-      </div>
-      <div class="price">${p.price}</div>
-      <div class="card-actions">
-        <button class="view-btn" data-id="${p.id}">View</button>
-        <button class="add-btn" data-id="${p.id}">Add to Cart</button>
-      </div>
-    </div>
-  `;
-  carousel.appendChild(card);
-});
-
-carousel.addEventListener('click', e => {
-  const addBtn = e.target.closest('.add-btn');
-  const viewBtn = e.target.closest('.view-btn');
-  const img = e.target.closest('.card-img');
-  const title = e.target.closest('h3');
-
-  if (addBtn){
-    const id = addBtn.dataset.id;
-    cart[id] = (cart[id] || 0) + 1;
-    addBtn.textContent = "Added ✓";
-    addBtn.classList.add('added');
-    setTimeout(() => { addBtn.textContent = "Add to Cart"; addBtn.classList.remove('added'); }, 900);
-    renderCart();
-    return;
-  }
-  if (viewBtn){ openDetail(viewBtn.dataset.id); return; }
-  if (img){ openDetail(img.dataset.id); return; }
-  if (title){ openDetail(title.dataset.id); return; }
-});
-
-/* ---------- PRODUCT DETAIL MODAL ---------- */
-const detailOverlay = document.getElementById('detailOverlay');
-const detailModal = document.getElementById('detailModal');
-
-function openDetail(id){
-  currentDetailId = id;
-  pickedStars = 0;
-  pickedPhoto = null;
-  renderDetail(id);
-  detailOverlay.classList.add('open');
-}
-function closeDetail(){
-  detailOverlay.classList.remove('open');
-  currentDetailId = null;
-}
-detailOverlay.addEventListener('click', e => { if (e.target === detailOverlay) closeDetail(); });
-
-function renderDetail(id){
-  const p = PRODUCTS.find(x => x.id === id);
-  const list = getReviews(id);
-  const avg = avgRating(id);
-
-  detailModal.innerHTML = `
-    <button class="detail-close" id="detailCloseBtn">✕</button>
-    <div class="detail-img"><img src="${p.img}" alt="${p.name}"></div>
-    <div class="detail-body">
-      <h2>${p.name}</h2>
-      <div class="detail-rating">
-        ${list.length
-          ? `<span class="stars">${starString(avg)}</span><span class="rcount">${avg.toFixed(1)} · ${list.length} review${list.length>1?'s':''}</span>`
-          : `<span class="rcount">No reviews yet — be the first!</span>`}
-      </div>
-      <div class="detail-price">${p.price}</div>
-      <p class="detail-desc">${p.desc}</p>
-      <div class="detail-qty">
-        <span class="lbl">Quantity</span>
-        <div class="qty-controls lg">
-          <button id="detQtyMinus">−</button>
-          <span id="detQtyVal">1</span>
-          <button id="detQtyPlus">+</button>
-        </div>
-      </div>
-      <div class="detail-actions">
-        <button class="btn btn-primary" id="detailAddBtn" style="flex:1;justify-content:center;">Add to Cart</button>
-      </div>
-    </div>
-
-    <div class="reviews-section">
-      <div class="reviews-head">
-        <h3>Customer Reviews</h3>
-        <button class="write-review-btn" id="toggleReviewForm">Write a Review</button>
-      </div>
-
-      <div class="review-form" id="reviewForm">
-        <div class="star-picker" id="starPicker">
-          <span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span>
-        </div>
-        <div class="field" style="margin-bottom:10px;">
-          <input type="text" id="reviewerName" placeholder="Your name">
-        </div>
-        <div class="field" style="margin-bottom:0;">
-          <textarea id="reviewText" placeholder="How was it? Share your experience..." style="min-height:60px;"></textarea>
-        </div>
-        <div class="photo-upload">
-          <label class="upload-btn" for="reviewPhotoInput">📷 Add Photo</label>
-          <input type="file" id="reviewPhotoInput" accept="image/*">
-          <img class="photo-preview" id="photoPreview">
-        </div>
-        <div class="modal-actions" style="margin-top:6px;">
-          <button type="button" class="btn btn-secondary" id="cancelReview">Cancel</button>
-          <button type="button" class="btn btn-primary" id="submitReview" style="flex:1;">Submit Review</button>
-        </div>
-        <div class="status-msg" id="reviewStatus"></div>
-      </div>
-
-      <div class="review-list" id="reviewList">
-        ${list.length ? list.map(r => `
-          <div class="review-card">
-            <div class="review-top">
-              <span class="review-name">${escapeHtml(r.name)}</span>
-              <span class="review-date">${r.date}</span>
-            </div>
-            <div class="review-stars">${starString(r.rating)}</div>
-            ${r.text ? `<div class="review-text">${escapeHtml(r.text)}</div>` : ``}
-            ${r.photo ? `<div class="review-photo"><img src="${r.photo}" alt="Customer photo"></div>` : ``}
-          </div>
-        `).join('') : `<div class="review-empty">No reviews yet for this product.</div>`}
-      </div>
-    </div>
-  `;
-
-  document.getElementById('detailCloseBtn').addEventListener('click', closeDetail);
-
-  let qty = 1;
-  const qtyVal = document.getElementById('detQtyVal');
-  document.getElementById('detQtyPlus').addEventListener('click', () => { qty++; qtyVal.textContent = qty; });
-  document.getElementById('detQtyMinus').addEventListener('click', () => { qty = Math.max(1, qty-1); qtyVal.textContent = qty; });
-  document.getElementById('detailAddBtn').addEventListener('click', () => {
-    cart[id] = (cart[id] || 0) + qty;
-    renderCart();
-    const btn = document.getElementById('detailAddBtn');
-    btn.textContent = "Added ✓";
-    setTimeout(() => { btn.textContent = "Add to Cart"; }, 900);
-  });
-
-  const toggleBtn = document.getElementById('toggleReviewForm');
-  const reviewFormEl = document.getElementById('reviewForm');
-  toggleBtn.addEventListener('click', () => reviewFormEl.classList.toggle('open'));
-  document.getElementById('cancelReview').addEventListener('click', () => reviewFormEl.classList.remove('open'));
-
-  const starPicker = document.getElementById('starPicker');
-  starPicker.addEventListener('click', e => {
-    const s = e.target.closest('span');
-    if (!s) return;
-    pickedStars = parseInt(s.dataset.v, 10);
-    [...starPicker.children].forEach(el => {
-      el.classList.toggle('active', parseInt(el.dataset.v,10) <= pickedStars);
-    });
-  });
-
-  const photoInput = document.getElementById('reviewPhotoInput');
-  const photoPreview = document.getElementById('photoPreview');
-  photoInput.addEventListener('change', () => {
-    const file = photoInput.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      pickedPhoto = reader.result;
-      photoPreview.src = pickedPhoto;
-      photoPreview.style.display = 'block';
-    };
-    reader.readAsDataURL(file);
-  });
-
-  document.getElementById('submitReview').addEventListener('click', () => {
-    const name = document.getElementById('reviewerName').value.trim() || "Anonymous";
-    const text = document.getElementById('reviewText').value.trim();
-    const statusEl = document.getElementById('reviewStatus');
-    if (pickedStars === 0){
-      statusEl.textContent = "Please select a star rating.";
-      statusEl.className = "status-msg error";
-      return;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MD ABDULLA — Photography</title>
+    <meta
+      name="description"
+      content="MD ABDULLA — Photographer capturing landscapes, people, nature, travel and beautiful moments through photography."
+      />
+      <meta name="theme-color" content="#0a0a0a" />
+      <meta property="og:title" content="MD ABDULLA — Photography" />
+      <meta
+        property="og:description"
+        content="Capturing moments. Preserving emotions. Telling stories through photographs."
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="images/social-preview.jpg" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="MD Abdulla — Photography" />
+        <meta
+          name="twitter:description"
+          content="Capturing moments. Preserving emotions. Telling stories through photographs."
+          />
+          <meta name="twitter:image" content="images/social-preview.jpg" />
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+          <link
+            href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap"
+            rel="stylesheet"
+            />
+            <style>
+    :root {
+      --bg: #0a0a0a;
+      --surface: #141414;
+      --surface-2: #1c1c1c;
+      --text: #f5f5f5;
+      --muted: #858585;
+      --stroke: #252525;
+      --accent-1: #89aacc;
+      --accent-2: #4e85bf;
+      --green: #7cba89;
+      --serif: "Instrument Serif", Georgia, serif;
+      --sans: "Inter", Arial, sans-serif;
+      --ease: cubic-bezier(.22, .8, .25, 1);
     }
-    const newReview = {
-      name, rating: pickedStars, text, photo: pickedPhoto,
-      date: new Date().toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })
-    };
-    if (!reviews[id]) reviews[id] = [];
-    reviews[id].unshift(newReview);
-    saveReviews();
-    pickedStars = 0; pickedPhoto = null;
-    renderDetail(id);
-    refreshCardRating(id);
-  });
-}
 
-function refreshCardRating(id){
-  const el = document.querySelector(`[data-rating-for="${id}"]`);
-  if (!el) return;
-  const list = getReviews(id);
-  const avg = avgRating(id);
-  el.innerHTML = list.length
-    ? `<span class="stars">${starString(avg)}</span><span>(${list.length})</span>`
-    : `<span>No reviews yet</span>`;
-}
+    * {
+      box-sizing: border-box;
+    }
 
-function escapeHtml(str){
-  const d = document.createElement('div');
-  d.textContent = str;
-  return d.innerHTML;
-}
+    html {
+      scroll-behavior: smooth;
+      background: var(--bg);
+    }
 
-/* ---------- CART DRAWER ---------- */
-const drawer = document.getElementById('drawer');
-const overlay = document.getElementById('overlay');
-const cartFab = document.getElementById('cartFab');
-const closeDrawer = document.getElementById('closeDrawer');
-const cartItemsEl = document.getElementById('cartItems');
-const cartTotalEl = document.getElementById('cartTotal');
-const cartCountEl = document.getElementById('cartCount');
+    body {
+      margin: 0;
+      overflow-x: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-weight: 400;
+      opacity: 0;
+      transition: opacity 1s var(--ease);
+    }
 
-function openDrawer(){ drawer.classList.add('open'); overlay.classList.add('open'); }
-function closeDrawerFn(){ drawer.classList.remove('open'); overlay.classList.remove('open'); }
-cartFab.addEventListener('click', openDrawer);
-closeDrawer.addEventListener('click', closeDrawerFn);
-overlay.addEventListener('click', () => { closeDrawerFn(); closeModal(); });
+    body.page-ready {
+      opacity: 1;
+    }
 
-function renderCart(){
-  const ids = Object.keys(cart).filter(id => cart[id] > 0);
-  const totalCount = ids.reduce((sum,id) => sum + cart[id], 0);
-  cartCountEl.textContent = totalCount;
+    body.modal-open {
+      overflow: hidden;
+    }
 
-  if (ids.length === 0){
-    cartItemsEl.innerHTML = `<div class="cart-empty">Your cart is empty.<br>Add something handmade! 🧶</div>`;
-    cartTotalEl.textContent = "₹0";
-    return;
-  }
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
 
-  let total = 0;
-  cartItemsEl.innerHTML = ids.map(id => {
-    const p = PRODUCTS.find(x => x.id === id);
-    const qty = cart[id];
-    const lineTotal = p.price * qty;
-    total += lineTotal;
-    return `
-      <div class="cart-row" data-id="${id}">
-        <img src="${p.img}" alt="${p.name}">
-        <div class="info">
-          <h4>${p.name}</h4>
-          <span>₹${p.price} × ${qty}</span>
-        </div>
-        <div class="qty-controls">
-          <button class="qty-minus" data-id="${id}">−</button>
-          <span>${qty}</span>
-          <button class="qty-plus" data-id="${id}">+</button>
-        </div>
-        <span class="remove-btn" data-id="${id}">Remove</span>
-      </div>
-    `;
-  }).join('');
-  cartTotalEl.textContent = "₹" + total;
-}
+    button {
+      color: inherit;
+      font: inherit;
+      cursor: pointer;
+    }
 
-cartItemsEl.addEventListener('click', e => {
-  const id = e.target.dataset.id;
-  if (!id) return;
-  if (e.target.classList.contains('qty-plus')) cart[id]++;
-  if (e.target.classList.contains('qty-minus')) cart[id] = Math.max(0, cart[id]-1);
-  if (e.target.classList.contains('remove-btn')) delete cart[id];
-  renderCart();
-});
+    img,
+    video {
+      display: block;
+      max-width: 100%;
+    }
 
-/* ---------- ORDER MODAL ---------- */
-const modalOverlay = document.getElementById('modalOverlay');
-const orderForm = document.getElementById('orderForm');
-const orderStatus = document.getElementById('orderStatus');
-const checkoutBtn = document.getElementById('checkoutBtn');
-const cancelOrder = document.getElementById('cancelOrder');
+    .container {
+      width: min(1240px, calc(100% - 48px));
+      margin-inline: auto;
+    }
 
-checkoutBtn.addEventListener('click', () => {
-  const hasItems = Object.values(cart).some(q => q > 0);
-  if (!hasItems){
-    cartItemsEl.scrollIntoView({behavior:'smooth'});
-    return;
-  }
-  orderStatus.textContent = "";
-  modalOverlay.classList.add('open');
-});
-cancelOrder.addEventListener('click', closeModal);
-function closeModal(){ modalOverlay.classList.remove('open'); }
+    .section {
+      position: relative;
+      padding: 140px 0;
+    }
 
-function buildOrderSummary(){
-  const ids = Object.keys(cart).filter(id => cart[id] > 0);
-  let total = 0;
-  const lines = ids.map(id => {
-    const p = PRODUCTS.find(x => x.id === id);
-    const qty = cart[id];
-    total += p.price * qty;
-    return `${p.name} — Qty ${qty} — ₹${p.price * qty}`;
-  });
-  return { lines, total };
-}
+    .eyebrow {
+      color: var(--muted);
+      font-size: .68rem;
+      letter-spacing: .28em;
+      text-transform: uppercase;
+    }
 
-orderForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const name = document.getElementById('custName').value.trim();
-  const phone = document.getElementById('custPhone').value.trim();
-  const address = document.getElementById('custAddress').value.trim();
-  const { lines, total } = buildOrderSummary();
+    .serif {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+    }
 
-  const itemsText = lines.join('\n');
-  const payload = {
-    _subject: `New order from ${name} — little_loopcrochet`,
-    customer_name: name,
-    phone: phone,
-    address: address,
-    items: itemsText,
-    order_total: "₹" + total,
-    email: SHOP_EMAIL
-  };
+    .section-title {
+      max-width: 850px;
+      margin: 20px 0 28px;
+      font-size: clamp(3.4rem, 8vw, 8rem);
+      font-weight: 400;
+      letter-spacing: -.06em;
+      line-height: .9;
+    }
 
-  const submitBtn = document.getElementById('submitOrder');
-  submitBtn.disabled = true;
-  submitBtn.textContent = "Sending…";
-  orderStatus.textContent = "";
-  orderStatus.className = "status-msg";
+    .section-copy {
+      max-width: 520px;
+      color: var(--muted);
+      font-size: .95rem;
+      line-height: 1.8;
+    }
 
-  const usingFormspree = FORMSPREE_ENDPOINT && !FORMSPREE_ENDPOINT.includes("YOUR_FORM_ID");
+    .accent-gradient {
+      background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+    }
 
-  if (usingFormspree){
-    try {
-      const res = await fetch(FORMSPREE_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Accept": "application/json" },
-        body: JSON.stringify(payload)
-      });
-      if (res.ok){
-        orderStatus.textContent = "Order sent! We'll be in touch on WhatsApp/phone shortly. 🧶";
-        orderStatus.classList.add('success');
-        cart = {};
-        renderCart();
-        setTimeout(() => { closeModal(); closeDrawerFn(); orderForm.reset(); }, 1800);
-      } else {
-        throw new Error("Formspree responded with an error");
+    .skip-link {
+      position: fixed;
+      z-index: 10000;
+      top: 15px;
+      left: 15px;
+      padding: 12px 16px;
+      border-radius: 999px;
+      background: var(--text);
+      color: #111;
+      transform: translateY(-150%);
+      transition: transform .3s ease;
+    }
+
+    .skip-link:focus {
+      transform: translateY(0);
+    }
+
+    /* Cursor effect */
+
+    .cursor-glow {
+      position: fixed;
+      z-index: 9998;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      pointer-events: none;
+      background: radial-gradient(
+        circle,
+        rgba(137, 170, 204, .14),
+        transparent 68%
+      );
+      transform: translate(-50%, -50%);
+      mix-blend-mode: screen;
+      opacity: 0;
+      transition: opacity .4s ease;
+    }
+
+    body.page-ready .cursor-glow {
+      opacity: 1;
+    }
+
+    /* Loader */
+
+    .loading-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 34px;
+      background: var(--bg);
+      transition: opacity .8s var(--ease), visibility .8s;
+    }
+
+    .loading-screen.is-hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .loading-word {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      font-family: var(--serif);
+      font-size: clamp(3rem, 8vw, 8rem);
+      font-style: italic;
+      transform: translate(-50%, -50%);
+    }
+
+    .loading-number {
+      align-self: flex-end;
+      font-family: var(--serif);
+      font-size: clamp(4rem, 12vw, 10rem);
+      line-height: .8;
+    }
+
+    .loading-bar {
+      height: 3px;
+      overflow: hidden;
+      background: var(--stroke);
+    }
+
+    .loading-progress {
+      width: 100%;
+      height: 100%;
+      transform: scaleX(0);
+      transform-origin: left;
+      box-shadow: 0 0 24px var(--accent-2);
+    }
+
+    /* Navigation */
+
+    .nav {
+      position: fixed;
+      z-index: 100;
+      top: 24px;
+      left: 50%;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      width: max-content;
+      max-width: calc(100% - 28px);
+      padding: 8px;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 999px;
+      background: rgba(18,18,18,.7);
+      backdrop-filter: blur(22px);
+      transform: translateX(-50%);
+      transition: background .4s ease, box-shadow .4s ease;
+    }
+
+    .nav.scrolled {
+      background: rgba(18,18,18,.92);
+      box-shadow: 0 12px 40px rgba(0,0,0,.3);
+    }
+
+    .logo {
+      display: grid;
+      width: 36px;
+      height: 36px;
+      margin-right: 7px;
+      place-items: center;
+      border: 1px solid transparent;
+      border-radius: 50%;
+      background:
+        linear-gradient(var(--surface), var(--surface)) padding-box,
+        linear-gradient(135deg, var(--accent-1), var(--accent-2)) border-box;
+      font-family: var(--serif);
+      font-size: 1.1rem;
+      font-style: italic;
+      transition: transform .3s ease;
+    }
+
+    .logo:hover {
+      transform: scale(1.1) rotate(8deg);
+    }
+
+    .nav-link,
+    .nav-instagram {
+      padding: 10px 13px;
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: .7rem;
+      transition: color .3s ease, background .3s ease;
+    }
+
+    .nav-link:hover,
+    .nav-link.active,
+    .nav-instagram:hover {
+      color: var(--text);
+      background: rgba(255,255,255,.08);
+    }
+
+    .nav-instagram {
+      margin-left: 4px;
+      border: 1px solid var(--stroke);
+      color: var(--text);
+    }
+
+    .menu-button {
+      display: none;
+      border: 0;
+      background: transparent;
+      font-size: 1.3rem;
+    }
+
+    /* Hero */
+
+    .hero {
+      position: relative;
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      position: absolute;
+      z-index: 1;
+      inset: 0;
+      content: "";
+      pointer-events: none;
+      background:
+        radial-gradient(
+          circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+          rgba(137,170,204,.15),
+          transparent 28%
+        );
+    }
+
+    .hero-video,
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .hero-video {
+      object-fit: cover;
+      filter: brightness(.65) saturate(.82);
+      transform: scale(1.08);
+      transition: transform 1.6s var(--ease);
+      will-change: transform;
+    }
+
+    body.page-ready .hero-video {
+      transform: scale(1);
+    }
+
+    .hero-overlay {
+      background:
+        linear-gradient(
+          180deg,
+          rgba(0,0,0,.22),
+          rgba(0,0,0,.35) 50%,
+          var(--bg) 100%
+        );
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      width: min(1000px, calc(100% - 48px));
+      padding-top: 80px;
+      perspective: 1000px;
+      text-align: center;
+    }
+
+    .hero-title {
+      margin: 22px 0;
+      font-family: var(--serif);
+      font-size: clamp(5rem, 15vw, 12rem);
+      font-style: italic;
+      font-weight: 400;
+      letter-spacing: -.08em;
+      line-height: .8;
+    }
+
+    .hero-tagline {
+      margin: 0 auto 16px;
+      font-family: var(--serif);
+      font-size: clamp(1.8rem, 4vw, 3.4rem);
+      font-style: italic;
+    }
+
+    .hero-description {
+      max-width: 430px;
+      margin: 0 auto 32px;
+      color: #c0c0c0;
+      line-height: 1.7;
+    }
+
+    .hero-animate {
+      will-change: transform, opacity, filter;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .button {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      overflow: hidden;
+      isolation: isolate;
+      padding: 0 22px;
+      border: 1px solid var(--stroke);
+      border-radius: 999px;
+      font-size: .75rem;
+      transition:
+        transform .3s ease,
+        background .3s ease,
+        border-color .3s ease,
+        box-shadow .3s ease;
+    }
+
+    .button::before {
+      position: absolute;
+      z-index: -1;
+      inset: 0;
+      content: "";
+      background: linear-gradient(
+        110deg,
+        transparent 20%,
+        rgba(255,255,255,.35) 50%,
+        transparent 80%
+      );
+      transform: translateX(-130%);
+      transition: transform .7s var(--ease);
+    }
+
+    .button:hover::before {
+      transform: translateX(130%);
+    }
+
+    .button:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent-1);
+    }
+
+    .button-primary {
+      color: #111;
+      background: var(--text);
+    }
+
+    .button-primary:hover {
+      box-shadow: 0 0 35px rgba(137,170,204,.3);
+    }
+
+    .button-secondary {
+      background: rgba(0,0,0,.2);
+    }
+
+    .scroll-indicator {
+      position: absolute;
+      z-index: 2;
+      bottom: 34px;
+      left: 50%;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      color: var(--muted);
+      font-size: .62rem;
+      letter-spacing: .22em;
+      transform: translateX(-50%);
+    }
+
+    .scroll-line {
+      position: relative;
+      width: 1px;
+      height: 55px;
+      overflow: hidden;
+      background: rgba(255,255,255,.25);
+    }
+
+    .scroll-line::after {
+      position: absolute;
+      inset: 0;
+      content: "";
+      background: var(--text);
+      animation: scroll-down 1.5s ease-in-out infinite;
+    }
+
+    @keyframes scroll-down {
+      from {
+        transform: translateY(-100%);
       }
-    } catch (err){
-      orderStatus.textContent = "Couldn't send automatically — opening your email app instead.";
-      orderStatus.classList.add('error');
-      sendViaMailto(payload, itemsText, total);
+
+      to {
+        transform: translateY(200%);
+      }
     }
-  } else {
-    sendViaMailto(payload, itemsText, total);
-    orderStatus.textContent = "Opening your email app to send this order…";
-    orderStatus.classList.add('success');
-  }
 
-  submitBtn.disabled = false;
-  submitBtn.textContent = "Submit Order";
-});
+    /* Gallery */
 
-function sendViaMailto(payload, itemsText, total){
-  const subject = encodeURIComponent(`New order from ${payload.customer_name} — little_loopcrochet`);
-  const body = encodeURIComponent(
-    `Customer name: ${payload.customer_name}\n` +
-    `Phone: ${payload.phone}\n` +
-    `Address: ${payload.address}\n\n` +
-    `Items:\n${itemsText}\n\n` +
-    `Total: ₹${total}`
-  );
-  window.location.href = `mailto:${SHOP_EMAIL}?subject=${subject}&body=${body}`;
-}
+    .gallery-header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 30px;
+      margin-bottom: 45px;
+    }
 
-renderCart();
-</script>
-</body>
-</html>
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-bottom: 38px;
+    }
+
+    .filter {
+      padding: 9px 14px;
+      border: 1px solid var(--stroke);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--muted);
+      font-size: .7rem;
+      transition: .3s ease;
+    }
+
+    .filter:hover,
+    .filter.active {
+      border-color: var(--text);
+      color: var(--text);
+      background: var(--surface);
+      transform: translateY(-3px);
+    }
+
+    .gallery-grid {
+      columns: 3 280px;
+      column-gap: 18px;
+    }
+
+    .photo-card {
+      position: relative;
+      isolation: isolate;
+      break-inside: avoid;
+      margin-bottom: 18px;
+      overflow: hidden;
+      border: 1px solid var(--stroke);
+      border-radius: 24px;
+      background: var(--surface);
+      cursor: pointer;
+      transform-style: preserve-3d;
+      transition:
+        transform .5s var(--ease),
+        border-color .4s ease,
+        box-shadow .4s ease;
+      will-change: transform;
+    }
+
+    .photo-card::after {
+      position: absolute;
+      z-index: 1;
+      inset: 0;
+      content: "";
+      pointer-events: none;
+      background:
+        linear-gradient(
+          115deg,
+          transparent 25%,
+          rgba(255,255,255,.18) 45%,
+          transparent 65%
+        );
+      transform: translateX(-130%);
+      transition: transform .8s var(--ease);
+    }
+
+    .photo-card:hover {
+      border-color: rgba(137,170,204,.65);
+      box-shadow: 0 20px 70px rgba(0,0,0,.4);
+    }
+
+    .photo-card:hover::after {
+      transform: translateX(130%);
+    }
+
+    .photo-card img {
+      width: 100%;
+      height: auto;
+      transition: transform .8s var(--ease), filter .8s ease;
+      will-change: transform;
+    }
+
+    .photo-card:hover img {
+      transform: scale(1.05);
+      filter: brightness(.68);
+    }
+
+    .photo-info {
+      position: absolute;
+      z-index: 2;
+      inset: auto 0 0;
+      padding: 25px 20px 20px;
+      background: linear-gradient(transparent, rgba(0,0,0,.9));
+      opacity: 0;
+      transform: translateY(10px);
+      transition: .4s var(--ease);
+    }
+
+    .photo-card:hover .photo-info,
+    .photo-card:focus-within .photo-info {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .photo-title {
+      margin: 0 0 8px;
+      font-family: var(--serif);
+      font-size: 1.8rem;
+      font-style: italic;
+    }
+
+    .photo-meta {
+      color: #bbb;
+      font-size: .65rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    /* Featured */
+
+    .featured {
+      min-height: 85svh;
+      display: grid;
+      align-items: end;
+      overflow: hidden;
+    }
+
+    .featured-image {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 115%;
+      object-fit: cover;
+      filter: brightness(.56);
+      transform: scale(1.08);
+      will-change: transform;
+    }
+
+    .featured-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,.1), var(--bg));
+    }
+
+    .featured-content {
+      position: relative;
+      z-index: 1;
+      padding-bottom: 70px;
+    }
+
+    .featured-title {
+      max-width: 750px;
+      margin: 20px 0;
+      font-family: var(--serif);
+      font-size: clamp(4rem, 9vw, 9rem);
+      font-style: italic;
+      font-weight: 400;
+      letter-spacing: -.06em;
+      line-height: .85;
+      text-shadow: 0 15px 45px rgba(0,0,0,.4);
+    }
+
+    /* Journal */
+
+    .journal-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 45px;
+    }
+
+    .journal-card {
+      position: relative;
+      display: grid;
+      grid-template-columns: 180px 1fr auto;
+      align-items: center;
+      gap: 25px;
+      padding: 12px;
+      border: 1px solid var(--stroke);
+      border-radius: 22px;
+      background: var(--surface);
+      transition:
+        background .35s ease,
+        transform .35s ease,
+        border-color .35s ease;
+      will-change: transform;
+    }
+
+    .journal-card::after {
+      position: absolute;
+      inset: 0;
+      content: "";
+      pointer-events: none;
+      border-radius: inherit;
+      box-shadow: inset 0 0 0 1px rgba(137,170,204,0);
+      transition: box-shadow .4s ease;
+    }
+
+    .journal-card:hover {
+      border-color: rgba(137,170,204,.35);
+      background: var(--surface-2);
+      transform: translateX(5px);
+    }
+
+    .journal-card:hover::after {
+      box-shadow: inset 0 0 0 1px rgba(137,170,204,.35);
+    }
+
+    .journal-card img {
+      width: 180px;
+      height: 110px;
+      border-radius: 15px;
+      object-fit: cover;
+    }
+
+    .journal-title {
+      margin: 0 0 8px;
+      font-family: var(--serif);
+      font-size: 2rem;
+      font-style: italic;
+      font-weight: 400;
+    }
+
+    .journal-details,
+    .journal-story {
+      color: var(--muted);
+      font-size: .75rem;
+    }
+
+    .journal-story {
+      max-width: 440px;
+      margin-top: 12px;
+      line-height: 1.6;
+    }
+
+    .arrow {
+      font-size: 1.5rem;
+      transition: transform .3s ease;
+    }
+
+    .journal-card:hover .arrow {
+      transform: translateX(7px);
+    }
+
+    /* Explorations */
+
+    .explorations {
+      min-height: 300vh;
+    }
+
+    .exploration-sticky {
+      position: sticky;
+      top: 0;
+      min-height: 100svh;
+      display: grid;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .exploration-heading {
+      position: absolute;
+      z-index: 2;
+      top: 12%;
+      left: 50%;
+      width: min(680px, calc(100% - 48px));
+      transform: translateX(-50%);
+      text-align: center;
+    }
+
+    .exploration-heading h2 {
+      margin: 17px 0;
+      font-size: clamp(3rem, 7vw, 7rem);
+      font-weight: 400;
+      letter-spacing: -.06em;
+      line-height: .86;
+    }
+
+    .exploration-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      align-items: center;
+      gap: 3vw;
+      width: min(1100px, 90%);
+      margin: 150px auto 0;
+    }
+
+    .exploration-column {
+      display: grid;
+      gap: 28px;
+    }
+
+    .exploration-column:nth-child(2) {
+      margin-top: 160px;
+    }
+
+    .exploration-column:nth-child(3) {
+      margin-top: -120px;
+    }
+
+    .exploration-image {
+      width: 100%;
+      border-radius: 20px;
+      cursor: pointer;
+      filter: brightness(.8);
+      transition:
+        filter .4s ease,
+        transform .6s var(--ease);
+      will-change: transform;
+    }
+
+    .exploration-image:hover {
+      filter: brightness(1);
+      transform: scale(1.035) rotate(1deg);
+    }
+
+    /* About */
+
+    .about-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: end;
+    }
+
+    .about-title {
+      margin: 20px 0;
+      font-size: clamp(3.4rem, 7vw, 7rem);
+      font-weight: 400;
+      letter-spacing: -.06em;
+      line-height: .88;
+    }
+
+    .about-title span {
+      font-family: var(--serif);
+      font-style: italic;
+    }
+
+    .about-copy {
+      max-width: 500px;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.9;
+    }
+
+    .instagram-link {
+      display: inline-block;
+      margin-top: 28px;
+      border-bottom: 1px solid var(--text);
+      padding-bottom: 7px;
+      font-size: .8rem;
+      transition: color .3s ease, border-color .3s ease;
+    }
+
+    .instagram-link:hover {
+      border-color: var(--accent-1);
+      color: var(--accent-1);
+    }
+
+    /* Stats */
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border-top: 1px solid var(--stroke);
+      border-bottom: 1px solid var(--stroke);
+    }
+
+    .stat {
+      padding: 55px 25px;
+      border-right: 1px solid var(--stroke);
+      text-align: center;
+    }
+
+    .stat:last-child {
+      border-right: 0;
+    }
+
+    .stat-number {
+      display: block;
+      margin-bottom: 12px;
+      font-family: var(--serif);
+      font-size: clamp(4rem, 8vw, 8rem);
+      font-style: italic;
+      line-height: .8;
+      will-change: transform;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: .7rem;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    /* CTA and footer */
+
+    .cta {
+      text-align: center;
+    }
+
+    .cta h2 {
+      max-width: 900px;
+      margin: 0 auto 30px;
+      font-family: var(--serif);
+      font-size: clamp(4rem, 10vw, 10rem);
+      font-style: italic;
+      font-weight: 400;
+      letter-spacing: -.07em;
+      line-height: .82;
+      text-shadow: 0 20px 60px rgba(78,133,191,.16);
+    }
+
+    .cta p {
+      max-width: 430px;
+      margin: 0 auto 30px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .marquee {
+      overflow: hidden;
+      border-top: 1px solid var(--stroke);
+      border-bottom: 1px solid var(--stroke);
+      padding: 28px 0;
+    }
+
+    .marquee-track {
+      display: flex;
+      width: max-content;
+      animation: marquee 40s linear infinite;
+    }
+
+    .marquee span {
+      padding-right: 35px;
+      font-family: var(--serif);
+      font-size: clamp(3rem, 7vw, 7rem);
+      font-style: italic;
+      white-space: nowrap;
+    }
+
+    @keyframes marquee {
+      to {
+        transform: translateX(-50%);
+      }
+    }
+
+    footer {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      align-items: center;
+      gap: 20px;
+      padding: 28px 0;
+      color: var(--muted);
+      font-size: .7rem;
+    }
+
+    footer > :nth-child(2) {
+      text-align: center;
+    }
+
+    footer > :last-child {
+      text-align: right;
+    }
+
+    .availability {
+      grid-column: 1 / -1;
+      color: var(--muted);
+    }
+
+    .dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      margin-right: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 0 rgba(124,186,137,.7);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      70% {
+        box-shadow: 0 0 0 8px rgba(124,186,137,0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(124,186,137,0);
+      }
+    }
+
+    /* Lightbox */
+
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      display: grid;
+      place-items: center;
+      padding: 30px;
+      background: rgba(0,0,0,.96);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity .35s ease, visibility .35s ease;
+    }
+
+    .lightbox.open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .lightbox-image {
+      max-width: min(94vw, 1400px);
+      max-height: 82vh;
+      object-fit: contain;
+      transform: scale(.96);
+      transition: transform .4s var(--ease);
+    }
+
+    .lightbox.open .lightbox-image {
+      transform: scale(1);
+    }
+
+    .lightbox-close,
+    .lightbox-prev,
+    .lightbox-next {
+      position: absolute;
+      z-index: 2;
+      display: grid;
+      width: 45px;
+      height: 45px;
+      place-items: center;
+      border: 1px solid var(--stroke);
+      border-radius: 50%;
+      background: rgba(20,20,20,.8);
+      font-size: 1.2rem;
+      transition:
+        background .3s ease,
+        border-color .3s ease,
+        transform .3s ease;
+    }
+
+    .lightbox-close:hover,
+    .lightbox-prev:hover,
+    .lightbox-next:hover {
+      border-color: var(--accent-1);
+      background: var(--surface-2);
+    }
+
+    .lightbox-close {
+      top: 25px;
+      right: 25px;
+    }
+
+    .lightbox-prev {
+      top: 50%;
+      left: 25px;
+      transform: translateY(-50%);
+    }
+
+    .lightbox-next {
+      top: 50%;
+      right: 25px;
+      transform: translateY(-50%);
+    }
+
+    .lightbox-prev:hover,
+    .lightbox-next:hover {
+      transform: translateY(-50%) scale(1.08);
+    }
+
+    .lightbox-caption {
+      position: absolute;
+      bottom: 25px;
+      left: 50%;
+      color: var(--muted);
+      font-size: .7rem;
+      letter-spacing: .15em;
+      text-align: center;
+      text-transform: uppercase;
+      transform: translateX(-50%);
+    }
+
+    .lightbox.open .lightbox-caption {
+      animation: caption-in .5s var(--ease) both;
+    }
+
+    @keyframes caption-in {
+      from {
+        opacity: 0;
+        transform: translate(-50%, 15px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+    }
+
+    /* Focus and reduced motion */
+
+    button:focus-visible,
+    a:focus-visible,
+    [tabindex="0"]:focus-visible {
+      outline: 2px solid var(--accent-1);
+      outline-offset: 4px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      body {
+        opacity: 1;
+      }
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+      }
+
+      .hero-video,
+      .featured-image,
+      .photo-card,
+      .exploration-image,
+      .lightbox-image {
+        transform: none !important;
+      }
+
+      .cursor-glow {
+        display: none;
+      }
+    }
+
+    /* Mobile */
+
+    @media (max-width: 760px) {
+      .container {
+        width: min(100% - 30px, 600px);
+      }
+
+      .section {
+        padding: 90px 0;
+      }
+
+      .nav {
+        top: 14px;
+      }
+
+      .nav-link,
+      .nav-instagram {
+        display: none;
+      }
+
+      .menu-button {
+        display: block;
+      }
+
+      .nav.mobile-open {
+        flex-wrap: wrap;
+        justify-content: center;
+        border-radius: 22px;
+      }
+
+      .nav.mobile-open .nav-link,
+      .nav.mobile-open .nav-instagram {
+        display: block;
+      }
+
+      .gallery-header,
+      .about-layout {
+        display: block;
+      }
+
+      .gallery-header .section-copy {
+        margin-top: 25px;
+      }
+
+      .gallery-grid {
+        columns: 1;
+      }
+
+      .journal-card {
+        grid-template-columns: 95px 1fr auto;
+        gap: 13px;
+      }
+
+      .journal-card img {
+        width: 95px;
+        height: 95px;
+      }
+
+      .journal-title {
+        font-size: 1.4rem;
+      }
+
+      .journal-story {
+        display: none;
+      }
+
+      .journal-details {
+        line-height: 1.5;
+      }
+
+      .exploration-grid {
+        width: 130%;
+        margin-left: -15%;
+        gap: 14px;
+      }
+
+      .exploration-column {
+        gap: 14px;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .stat {
+        border-right: 0;
+        border-bottom: 1px solid var(--stroke);
+      }
+
+      .stat:last-child {
+        border-bottom: 0;
+      }
+
+      footer {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+
+      footer > :nth-child(2),
+      footer > :last-child {
+        text-align: center;
+      }
+
+      .availability {
+        grid-column: auto;
+      }
+
+      .lightbox-prev {
+        left: 12px;
+      }
+
+      .lightbox-next {
+        right: 12px;
+      }
+    }
+  </style>
+          </head>
+          <body>
+            <a class="skip-link" href="#main-content">
+              Skip to content
+            </a>
+            <div
+              class="cursor-glow"
+              id="cursorGlow"
+              aria-hidden="true"
+              >
+            </div>
+            <div
+              class="loading-screen"
+              id="loadingScreen"
+              aria-label="Loading portfolio"
+              >
+              <div class="eyebrow">Photography</div>
+              <div class="loading-word" id="loadingWord">
+                Observe
+              </div>
+              <div>
+                <div class="loading-number" id="loadingNumber">
+                  000
+                </div>
+                <div class="loading-bar">
+                  <div
+                    class="loading-progress accent-gradient"
+                    id="loadingProgress"
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+            <header>
+              <nav
+                class="nav"
+                id="nav"
+                aria-label="Primary navigation"
+                >
+                <a
+                  href="#home"
+                  class="logo"
+                  aria-label="MD Abdulla home"
+                  >
+                  MA
+                </a>
+                <button
+                  class="menu-button"
+                  id="menuButton"
+                  type="button"
+                  aria-label="Toggle navigation"
+                  aria-expanded="false"
+                  >
+                  ☰
+                </button>
+                <a class="nav-link active" href="#home">
+                  Home
+                </a>
+                <a class="nav-link" href="#gallery">
+                  Gallery
+                </a>
+                <a class="nav-link" href="#journal">
+                  Journal
+                </a>
+                <a class="nav-link" href="#explorations">
+                  Explorations
+                </a>
+                <a class="nav-link" href="#about">
+                  About
+                </a>
+                <a
+                  class="nav-instagram"
+                  href="https://instagram.com/axr.md"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >
+                  Instagram ↗
+                </a>
+              </nav>
+            </header>
+            <main id="main-content">
+              <section
+                class="hero"
+                id="home"
+                aria-labelledby="hero-title"
+                >
+                <video
+                  class="hero-video"
+                  id="heroVideo"
+                  autoplay
+                  muted
+                  loop
+                  playsinline
+                  preload="metadata"
+                  poster="images/hero-poster.jpg"
+                  aria-label="Cinematic moving background"
+                  >
+                  <source src="videos/hero.mp4" type="video/mp4" />
+                </video>
+                <div class="hero-overlay">
+                </div>
+                <div class="hero-content">
+                  <div class="eyebrow hero-animate">
+                    Live Photography • MD Abdulla
+                  </div>
+                  <h1 class="hero-title hero-animate" id="hero-title">
+                    MD Abdulla
+                  </h1>
+                  <p class="hero-tagline hero-animate">
+                    Capturing the beauty of real moments.
+                  </p>
+                  <p class="hero-description hero-animate">
+                    Photography is the art of noticing what others might pass by.
+                  </p>
+                  <div class="actions hero-animate">
+                    <a href="#gallery" class="button button-primary">
+                      Explore Gallery
+                    </a>
+                    <a
+                      href="https://instagram.com/axr.md"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="button button-secondary"
+                      >
+                      Instagram ↗
+                    </a>
+                  </div>
+                </div>
+                <a
+                  href="#gallery"
+                  class="scroll-indicator"
+                  aria-label="Scroll to gallery"
+                  >
+                  <span>Scroll to explore</span>
+                  <span class="scroll-line">
+                  </span>
+                </a>
+              </section>
+              <section
+                class="section"
+                id="gallery"
+                aria-labelledby="gallery-title"
+                >
+                <div class="container">
+                  <div class="gallery-header">
+                    <div>
+                      <div class="eyebrow">
+                        01 — Live Gallery
+                      </div>
+                      <h2 class="section-title" id="gallery-title">
+                        Moments I <span class="serif">capture</span>
+                      </h2>
+                    </div>
+                    <p class="section-copy">
+                      A collection of photographs captured in real moments, from quiet
+                      landscapes to fleeting human experiences.
+                    </p>
+                  </div>
+                  <div
+                    class="filters"
+                    id="filters"
+                    aria-label="Filter photographs"
+                    >
+                  </div>
+                  <div
+                    class="gallery-grid"
+                    id="galleryGrid"
+                    >
+                  </div>
+                </div>
+              </section>
+              <section
+                class="section featured"
+                aria-labelledby="featured-title"
+                >
+                <img
+                  class="featured-image"
+                  id="featuredImage"
+                  src="images/photo-07.jpg"
+                  alt="Featured photograph from MD Abdulla"
+                  loading="lazy"
+                  decoding="async"
+                  />
+                  <div class="featured-overlay">
+                  </div>
+                  <div class="container featured-content">
+                    <div class="eyebrow">
+                      01 / Moment / MD Abdulla / 2026
+                    </div>
+                    <h2 class="featured-title" id="featured-title">
+                      A moment worth remembering.
+                    </h2>
+                  </div>
+                </section>
+                <section
+                  class="section"
+                  id="journal"
+                  aria-labelledby="journal-title"
+                  >
+                  <div class="container">
+                    <div class="eyebrow">
+                      02 — Journal
+                    </div>
+                    <h2 class="section-title" id="journal-title">
+                      Recent <span class="serif">Frames</span>
+                    </h2>
+                    <p class="section-copy">
+                      Small stories behind the photographs.
+                    </p>
+                    <div
+                      class="journal-list"
+                      id="journalList"
+                      >
+                    </div>
+                  </div>
+                </section>
+                <section
+                  class="explorations"
+                  id="explorations"
+                  aria-labelledby="explorations-title"
+                  >
+                  <div class="exploration-sticky">
+                    <div class="exploration-heading">
+                      <div class="eyebrow">
+                        03 — Visual Exhibition
+                      </div>
+                      <h2 id="explorations-title">
+                        Visual <span class="serif">Explorations</span>
+                      </h2>
+                      <p
+                        class="section-copy"
+                        style="margin-inline:auto"
+                        >
+                        A collection of places, textures, people and moments that caught
+                        my eye.
+                      </p>
+                    </div>
+                    <div
+                      class="exploration-grid"
+                      id="explorationGrid"
+                      >
+                    </div>
+                  </div>
+                </section>
+                <section
+                  class="section"
+                  id="about"
+                  aria-labelledby="about-title"
+                  >
+                  <div class="container about-layout">
+                    <div>
+                      <div class="eyebrow">
+                        04 — Behind the Lens
+                      </div>
+                      <h2 class="about-title" id="about-title">
+                        Behind the <span>Lens</span>
+                      </h2>
+                    </div>
+                    <div>
+                      <p class="about-copy">
+                        I'm MD Abdulla — a photographer drawn to the beauty hidden in
+                        ordinary moments.
+                      </p>
+                      <p class="about-copy">
+                        From landscapes and quiet streets to people, light and fleeting
+                        expressions, I photograph the moments that make a place feel alive.
+                      </p>
+                      <a
+                        class="instagram-link"
+                        href="https://instagram.com/axr.md"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >
+                        Instagram @axr.md ↗
+                      </a>
+                    </div>
+                  </div>
+                </section>
+                <section
+                  class="section"
+                  aria-label="Photography statistics"
+                  >
+                  <div class="container stats">
+                    <div class="stat">
+                      <span class="stat-number">100+</span>
+                      <span class="stat-label">
+                        Moments Captured
+                      </span>
+                    </div>
+                    <div class="stat">
+                      <span class="stat-number">50+</span>
+                      <span class="stat-label">
+                        Places Explored
+                      </span>
+                    </div>
+                    <div class="stat">
+                      <span class="stat-number">∞</span>
+                      <span class="stat-label">
+                        Stories to Tell
+                      </span>
+                    </div>
+                  </div>
+                </section>
+                <section
+                  class="section cta"
+                  id="contact"
+                  aria-labelledby="cta-title"
+                  >
+                  <div class="container">
+                    <div class="eyebrow">
+                      05 — Stay in the frame
+                    </div>
+                    <h2 id="cta-title">
+                      Let's capture something beautiful.
+                    </h2>
+                    <p>
+                      For photography collaborations, creative projects, or simply to
+                      connect.
+                    </p>
+                    <a
+                      href="https://instagram.com/axr.md"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="button button-primary"
+                      >
+                      Instagram ↗
+                    </a>
+                  </div>
+                </section>
+                <div
+                  class="marquee"
+                  aria-hidden="true"
+                  >
+                  <div class="marquee-track">
+                    <span>Capture the moment •</span>
+                    <span>Capture the moment •</span>
+                    <span>Capture the moment •</span>
+                    <span>Capture the moment •</span>
+                    <span>Capture the moment •</span>
+                    <span>Capture the moment •</span>
+                    <span>Capture the moment •</span>
+                    <span>Capture the moment •</span>
+                  </div>
+                </div>
+              </main>
+              <footer class="container">
+                <div>
+                  MD Abdulla
+                </div>
+                <div id="copyright">
+                  © 2026 MD Abdulla
+                </div>
+                <a
+                  href="https://instagram.com/axr.md"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >
+                  Instagram ↗
+                </a>
+                <div class="availability">
+                  <span class="dot">
+                  </span>
+                  Available for photography & creative collaborations
+                </div>
+              </footer>
+              <div
+                class="lightbox"
+                id="lightbox"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="lightboxCaption"
+                >
+                <button
+                  class="lightbox-close"
+                  id="lightboxClose"
+                  type="button"
+                  aria-label="Close photograph"
+                  >
+                  ×
+                </button>
+                <button
+                  class="lightbox-prev"
+                  id="lightboxPrev"
+                  type="button"
+                  aria-label="Previous photograph"
+                  >
+                  ←
+                </button>
+                <img
+                  class="lightbox-image"
+                  id="lightboxImage"
+                  src=""
+                  alt=""
+                  />
+                  <button
+                    class="lightbox-next"
+                    id="lightboxNext"
+                    type="button"
+                    aria-label="Next photograph"
+                    >
+                    →
+                  </button>
+                  <div
+                    class="lightbox-caption"
+                    id="lightboxCaption"
+                    aria-live="polite"
+                    >
+                  </div>
+                </div>
+                <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+                <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+                <script>
+    const photos = [
+              {
+            id: 1,
+            src: "https://i.ibb.co/d41W9LPV/file-00000000e4a48211bb199564a8cb4b55.png",
+            title: "Amber Horizon",
+            category: "Nature",
+            date: "2026",
+            location: "Bilasipara",
+            description: "A brilliant orange sky sets the clouds ablaze, casting dark silhouettes of the treeline over a quiet green field."
+        },
+              {
+            id: 2,
+            src: "https://i.supaimg.com/8e0923ed-9bb9-4654-8b98-67c158f6c70c/9caa8cc4-ef8c-4124-8a45-4e86d7ad4f5d.png",
+            title: "Veiled Moon",
+            category: "Night",
+            date: "2026",
+            location: "Bilasipara",
+            description: "A bright moon pierces through a thick veil of textured midnight clouds, casting a soft glow in the dark sky."
+        },
+              {
+            id: 3,
+            src: "https://i.ibb.co/G3HHJGSF/file-00000000fde48230b299d7ba3e0f675d.png",
+            title: "River Silhouette",
+            category: "Landscape",
+            date: "2026",
+            location: "Random",
+            description: "A vibrant orange sunset reflects across the calm river, contrasting with the dark silhouette of a docked boat, a distant treeline, and a faint crescent moon."
+        },
+        {
+            id: 17,
+            src: "https://i.supaimg.com/8e0923ed-9bb9-4654-8b98-67c158f6c70c/36384100-950a-490b-8ce7-dc9749f8be2e.jpg",
+            title: "On Display",
+            category: "Interior",
+            date: "2026",
+            location: "Bilasipara",
+            description: "A warmly lit retail display featuring rows of eyeglasses and frames neatly arranged in wooden trays on modern shelving."
+        },
+        {
+            id: 19,
+            src: "https://i.supaimg.com/8e0923ed-9bb9-4654-8b98-67c158f6c70c/d736cb21-b1b0-4e04-af0b-2ef28df22cf7.jpg",
+            title: "Festive Ride",
+            category: "Street",
+            date: "2026",
+            location: "Bilasipara",
+            description: "A vehicle heavily adorned with bright lights and floral garlands illuminates a paved street during a vibrant nighttime celebration."
+        },
+
+         {
+            id: 4,
+            src: "https://i.ibb.co/xqG3HfWC/file-00000000823882118660d11783cc2613.png",
+            title: "Harvest Moon",
+            category: "Night",
+            date: "2026",
+            location: "Bilasipara",
+            description: "A bright, solitary full moon hangs isolated in a pitch-black sky, its surface details visible in a warm, subtle glow."
+        },
+              {
+            id: 20,
+            src: "https://i.supaimg.com/8e0923ed-9bb9-4654-8b98-67c158f6c70c/82d850d0-477c-4985-b267-972deb1b4785.jpg",
+            title: "Canopy Glow",
+            category: "Night",
+            date: "2026",
+            location: "Bilasipara",
+            description: "Warm string lights and colorful prayer flags line the edge of a metal roof, sheltering a casual roadside seating area in the evening."
+        },
+              {
+            id: 6,
+            src: "https://i.ibb.co/v6t7CPfW/1000137048.avif",
+            title: "Twilight Highway",
+            category: "Landscape",
+            date: "2026",
+            location: "Bilasipara",
+            description: "A wide, empty highway with striking painted chevrons leads toward distant industrial silhouettes, set against a twilight sky transitioning from warm orange to deep blue."
+        },
+              {
+            id: 15,
+            src: "https://i.supaimg.com/8e0923ed-9bb9-4654-8b98-67c158f6c70c/823e5aab-c516-40f3-8ff5-d1ab400a0ec5.jpg",
+            title: "Rustic Wheels",
+            category: "Interior",
+            date: "2026",
+            location: "Bilasipara",
+            description: "A cozy cafe setting featuring a unique backlit wall installation of overlapping bicycle wheels, accented by hanging rope lights and artificial vines overhead."
+        },
+              {
+            id: 8,
+            src: "https://i.ibb.co/prd4qTgB/IMG-20260923-144548530.jpg",
+            title: "Framed Stillness",
+            category: "Monochrome",
+            date: "2026",
+            location: "Bilasipara",
+            description: "A quiet glimpse of the world outside, captured through the strict geometry of a window frame."
+      },
+              {
+            id: 9,
+            src: "https://i.ibb.co/JSWtK4W/file-0000000055108211b8928fcd9fdfdf52.jpg",
+            title: "Neon Watch",
+            category: "Night",
+            date: "2026",
+            location: "Bilasipara",
+            description: "The bright glow of the market sign anchors the street as e-rickshaws rest below in the night air."
+        },
+        
+        {
+            id: 10,
+            src: "https://i.supaimg.com/8e0923ed-9bb9-4654-8b98-67c158f6c70c/dc142bbc-0565-4f77-b455-1eb9b1e19127.jpg",
+            title: "Serene Corner",
+            category: "Interior",
+            date: "2026",
+            location: "Bilasipara",
+            description: "A detailed wall painting of Buddha brings a calm artistic touch to a casual setting, juxtaposed against everyday service and no-smoking signs."
+        },
+        
+        
+        {
+            id: 18,
+            src: "https://i.supaimg.com/8e0923ed-9bb9-4654-8b98-67c158f6c70c/859811f0-a92e-41f0-9f19-5c189346f0f9.jpg",
+            title: "Illuminated Canopy",
+            category: "Night",
+            date: "2026",
+            location: "Bilasipara",
+            description: "Bright green leaves are illuminated against a deep blue evening sky, framed by soft, dynamic light streaks sweeping across the lower edge."
+        }
+
+        
+
+
+    ];
+
+    const heroVideoUrl =
+      "https://stream.mux.com/Aa02T7oM1wH5Mk5EEVDYhbZ1ChcdhRsS2m1NYyx4Ua1g.m3u8";
+
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+    const loadingScreen =
+      document.getElementById("loadingScreen");
+
+    const loadingNumber =
+      document.getElementById("loadingNumber");
+
+    const loadingProgress =
+      document.getElementById("loadingProgress");
+
+    const loadingWord =
+      document.getElementById("loadingWord");
+
+    const words = [
+      "Observe",
+      "Capture",
+      "Remember"
+    ];
+
+    let wordIndex = 0;
+    let loadingStart = performance.now();
+
+    const wordTimer = reduceMotion
+      ? null
+      : setInterval(() => {
+          wordIndex =
+            (wordIndex + 1) % words.length;
+
+          loadingWord.textContent =
+            words[wordIndex];
+        }, 900);
+
+    function loadingFrame(now) {
+      const duration =
+        reduceMotion ? 350 : 1700;
+
+      const progress = Math.min(
+        (now - loadingStart) / duration,
+        1
+      );
+
+      loadingNumber.textContent =
+        String(Math.round(progress * 100))
+          .padStart(3, "0");
+
+      loadingProgress.style.transform =
+        `scaleX(${progress})`;
+
+      if (progress < 1) {
+        requestAnimationFrame(loadingFrame);
+      } else {
+        if (wordTimer) {
+          clearInterval(wordTimer);
+        }
+
+        setTimeout(() => {
+          loadingScreen.classList.add("is-hidden");
+          initAnimations();
+        }, reduceMotion ? 0 : 300);
+      }
+    }
+
+    requestAnimationFrame(loadingFrame);
+
+    /* Hero video */
+
+    const heroVideo =
+      document.getElementById("heroVideo");
+
+    if (!reduceMotion) {
+      if (window.Hls && Hls.isSupported()) {
+        const hls = new Hls({
+          enableWorker: true,
+          lowLatencyMode: true
+        });
+
+        hls.loadSource(heroVideoUrl);
+        hls.attachMedia(heroVideo);
+
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          heroVideo.play().catch(() => {});
+        });
+
+        hls.on(Hls.Events.ERROR, (_, data) => {
+          if (data.fatal) {
+            hls.destroy();
+            heroVideo.load();
+            heroVideo.play().catch(() => {});
+          }
+        });
+
+        window.addEventListener("beforeunload", () => {
+          hls.destroy();
+        });
+      } else if (
+        heroVideo.canPlayType(
+          "application/vnd.apple.mpegurl"
+        )
+      ) {
+        heroVideo.src = heroVideoUrl;
+      }
+    }
+
+    /* Gallery rendering */
+
+    const galleryGrid =
+      document.getElementById("galleryGrid");
+
+    const filters =
+      document.getElementById("filters");
+
+    const categories = [
+      "All",
+      ...new Set(
+        photos.map(photo => photo.category)
+      )
+    ];
+
+    let activeCategory = "All";
+
+    categories.forEach(category => {
+      const button =
+        document.createElement("button");
+
+      button.className =
+        `filter ${category === "All" ? "active" : ""}`;
+
+      button.type = "button";
+      button.textContent = category;
+
+      button.addEventListener("click", () => {
+        activeCategory = category;
+
+        document
+          .querySelectorAll(".filter")
+          .forEach(item => {
+            item.classList.toggle(
+              "active",
+              item === button
+            );
+          });
+
+        renderGallery();
+      });
+
+      filters.appendChild(button);
+    });
+
+    function renderGallery() {
+      galleryGrid.innerHTML = "";
+
+      const visiblePhotos =
+        activeCategory === "All"
+          ? photos
+          : photos.filter(
+              photo =>
+                photo.category === activeCategory
+            );
+
+      visiblePhotos.forEach(photo => {
+        const article =
+          document.createElement("article");
+
+        article.className = "photo-card";
+        article.tabIndex = 0;
+        article.setAttribute(
+          "aria-label",
+          `Open photograph: ${photo.title}`
+        );
+
+        const image =
+          document.createElement("img");
+
+        image.src = photo.src;
+        image.alt =
+          `${photo.title}, ${photo.category}, ${photo.location}`;
+        image.loading = "lazy";
+        image.decoding = "async";
+
+        const info =
+          document.createElement("div");
+
+        info.className = "photo-info";
+
+        const title =
+          document.createElement("h3");
+
+        title.className = "photo-title";
+        title.textContent = photo.title;
+
+        const meta =
+          document.createElement("div");
+
+        meta.className = "photo-meta";
+        meta.textContent =
+          `${photo.category} / ${photo.date} / ${photo.location}`;
+
+        info.append(title, meta);
+        article.append(image, info);
+
+        article.addEventListener("click", () => {
+          openLightbox(photo.id);
+        });
+
+        article.addEventListener("keydown", event => {
+          if (
+            event.key === "Enter" ||
+            event.key === " "
+          ) {
+            event.preventDefault();
+            openLightbox(photo.id);
+          }
+        });
+
+        galleryGrid.appendChild(article);
+      });
+
+      if (!reduceMotion && window.gsap) {
+        gsap.fromTo(
+          ".photo-card",
+          {
+            opacity: 0,
+            y: 35,
+            scale: .94
+          },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: .65,
+            stagger: .07,
+            ease: "power3.out"
+          }
+        );
+      }
+
+      attachCardTilt();
+    }
+
+    renderGallery();
+
+    /* Journal rendering */
+
+    const journalList =
+      document.getElementById("journalList");
+
+    photos.slice(0, 6).forEach(photo => {
+      const article =
+        document.createElement("article");
+
+      article.className = "journal-card";
+      article.tabIndex = 0;
+      article.setAttribute("role", "button");
+      article.setAttribute(
+        "aria-label",
+        `Open journal entry: ${photo.title}`
+      );
+
+      const image =
+        document.createElement("img");
+
+      image.src = photo.src;
+      image.alt = photo.title;
+      image.loading = "lazy";
+      image.decoding = "async";
+
+      const content =
+        document.createElement("div");
+
+      const title =
+        document.createElement("h3");
+
+      title.className = "journal-title";
+      title.textContent = photo.title;
+
+      const details =
+        document.createElement("div");
+
+      details.className = "journal-details";
+      details.textContent =
+        `${photo.date} · ${photo.location} · ${photo.category}`;
+
+      const story =
+        document.createElement("p");
+
+      story.className = "journal-story";
+      story.textContent =
+        `${photo.description} A small story held inside a larger landscape.`;
+
+      content.append(title, details, story);
+
+      const arrow =
+        document.createElement("span");
+
+      arrow.className = "arrow";
+      arrow.setAttribute("aria-hidden", "true");
+      arrow.textContent = "↗";
+
+      article.append(image, content, arrow);
+
+      article.addEventListener("click", () => {
+        openLightbox(photo.id);
+      });
+
+      article.addEventListener("keydown", event => {
+        if (
+          event.key === "Enter" ||
+          event.key === " "
+        ) {
+          event.preventDefault();
+          openLightbox(photo.id);
+        }
+      });
+
+      journalList.appendChild(article);
+    });
+
+    /* Exploration rendering */
+
+    const explorationGrid =
+      document.getElementById("explorationGrid");
+
+    const explorationColumns = [
+      photos.slice(0, 3),
+      photos.slice(3, 6),
+      photos.slice(6, 9)
+    ];
+
+    explorationColumns.forEach(columnPhotos => {
+      const column =
+        document.createElement("div");
+
+      column.className = "exploration-column";
+
+      columnPhotos.forEach(photo => {
+        const image =
+          document.createElement("img");
+
+        image.className =
+          "exploration-image";
+
+        image.src = photo.src;
+        image.alt = photo.title;
+        image.loading = "lazy";
+        image.decoding = "async";
+        image.tabIndex = 0;
+
+        image.addEventListener("click", () => {
+          openLightbox(photo.id);
+        });
+
+        image.addEventListener("keydown", event => {
+          if (
+            event.key === "Enter" ||
+            event.key === " "
+          ) {
+            event.preventDefault();
+            openLightbox(photo.id);
+          }
+        });
+
+        column.appendChild(image);
+      });
+
+      explorationGrid.appendChild(column);
+    });
+
+    /* Lightbox */
+
+    const lightbox =
+      document.getElementById("lightbox");
+
+    const lightboxImage =
+      document.getElementById("lightboxImage");
+
+    const lightboxCaption =
+      document.getElementById("lightboxCaption");
+
+    const lightboxClose =
+      document.getElementById("lightboxClose");
+
+    const lightboxPrev =
+      document.getElementById("lightboxPrev");
+
+    const lightboxNext =
+      document.getElementById("lightboxNext");
+
+    let currentPhotoIndex = 0;
+    let previouslyFocusedElement = null;
+
+    function openLightbox(id) {
+      previouslyFocusedElement =
+        document.activeElement;
+
+      currentPhotoIndex =
+        photos.findIndex(photo => photo.id === id);
+
+      updateLightbox();
+
+      lightbox.classList.add("open");
+      document.body.classList.add("modal-open");
+      lightboxClose.focus();
+    }
+
+    function setLightboxContent(photo) {
+      lightboxImage.src = photo.src;
+
+      lightboxImage.alt =
+        `${photo.title}, ${photo.category}, ${photo.location}`;
+
+      lightboxCaption.textContent =
+        `${String(currentPhotoIndex + 1).padStart(2, "0")} / ` +
+        `${String(photos.length).padStart(2, "0")} · ` +
+        `${photo.title} · ${photo.category} · ${photo.location}`;
+
+      if (!reduceMotion && window.gsap) {
+        gsap.to(lightboxImage, {
+          opacity: 1,
+          scale: 1,
+          duration: .45,
+          ease: "power3.out"
+        });
+      }
+    }
+
+    function updateLightbox() {
+      const photo =
+        photos[currentPhotoIndex];
+
+      if (!reduceMotion && window.gsap) {
+        gsap.to(lightboxImage, {
+          opacity: 0,
+          scale: .96,
+          duration: .16,
+          onComplete: () => {
+            setLightboxContent(photo);
+          }
+        });
+      } else {
+        setLightboxContent(photo);
+      }
+    }
+
+    function closeLightbox() {
+      lightbox.classList.remove("open");
+      document.body.classList.remove("modal-open");
+
+      if (
+        previouslyFocusedElement &&
+        typeof previouslyFocusedElement.focus === "function"
+      ) {
+        previouslyFocusedElement.focus();
+      }
+    }
+
+    function showPrevious() {
+      currentPhotoIndex =
+        (currentPhotoIndex - 1 + photos.length) %
+        photos.length;
+
+      updateLightbox();
+    }
+
+    function showNext() {
+      currentPhotoIndex =
+        (currentPhotoIndex + 1) % photos.length;
+
+      updateLightbox();
+    }
+
+    lightboxClose.addEventListener(
+      "click",
+      closeLightbox
+    );
+
+    lightboxPrev.addEventListener(
+      "click",
+      showPrevious
+    );
+
+    lightboxNext.addEventListener(
+      "click",
+      showNext
+    );
+
+    lightbox.addEventListener("click", event => {
+      if (event.target === lightbox) {
+        closeLightbox();
+      }
+    });
+
+    document.addEventListener("keydown", event => {
+      if (!lightbox.classList.contains("open")) {
+        return;
+      }
+
+      if (event.key === "Escape") {
+        closeLightbox();
+      }
+
+      if (event.key === "ArrowLeft") {
+        showPrevious();
+      }
+
+      if (event.key === "ArrowRight") {
+        showNext();
+      }
+
+      if (event.key === "Tab") {
+        const focusable = [
+          lightboxClose,
+          lightboxPrev,
+          lightboxNext
+        ];
+
+        const first = focusable[0];
+        const last =
+          focusable[focusable.length - 1];
+
+        if (
+          event.shiftKey &&
+          document.activeElement === first
+        ) {
+          event.preventDefault();
+          last.focus();
+        } else if (
+          !event.shiftKey &&
+          document.activeElement === last
+        ) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    });
+
+    /* Mobile navigation */
+
+    const menuButton =
+      document.getElementById("menuButton");
+
+    const nav =
+      document.getElementById("nav");
+
+    menuButton.addEventListener("click", () => {
+      const isOpen =
+        nav.classList.toggle("mobile-open");
+
+      menuButton.setAttribute(
+        "aria-expanded",
+        String(isOpen)
+      );
+    });
+
+    document.querySelectorAll(".nav-link")
+      .forEach(link => {
+        link.addEventListener("click", () => {
+          nav.classList.remove("mobile-open");
+          menuButton.setAttribute(
+            "aria-expanded",
+            "false"
+          );
+        });
+      });
+
+    document.addEventListener("click", event => {
+      if (
+        nav.classList.contains("mobile-open") &&
+        !nav.contains(event.target)
+      ) {
+        nav.classList.remove("mobile-open");
+        menuButton.setAttribute(
+          "aria-expanded",
+          "false"
+        );
+      }
+    });
+
+    /* Cursor glow */
+
+    const cursorGlow =
+      document.getElementById("cursorGlow");
+
+    const hero =
+      document.querySelector(".hero");
+
+    if (!reduceMotion) {
+      let cursorX = window.innerWidth / 2;
+      let cursorY = window.innerHeight / 2;
+      let glowX = cursorX;
+      let glowY = cursorY;
+
+      window.addEventListener("pointermove", event => {
+        cursorX = event.clientX;
+        cursorY = event.clientY;
+
+        if (!hero) return;
+
+        const rect =
+          hero.getBoundingClientRect();
+
+        hero.style.setProperty(
+          "--mouse-x",
+          `${((cursorX - rect.left) / rect.width) * 100}%`
+        );
+
+        hero.style.setProperty(
+          "--mouse-y",
+          `${((cursorY - rect.top) / rect.height) * 100}%`
+        );
+      });
+
+      function animateCursor() {
+        glowX += (cursorX - glowX) * .12;
+        glowY += (cursorY - glowY) * .12;
+
+        cursorGlow.style.left = `${glowX}px`;
+        cursorGlow.style.top = `${glowY}px`;
+
+        requestAnimationFrame(animateCursor);
+      }
+
+      animateCursor();
+    }
+
+    /* Magnetic controls */
+
+    if (!reduceMotion && window.gsap) {
+      document
+        .querySelectorAll(
+          ".button, .logo, .nav-instagram"
+        )
+        .forEach(element => {
+          element.addEventListener(
+            "pointermove",
+            event => {
+              const rect =
+                element.getBoundingClientRect();
+
+              const x =
+                event.clientX -
+                rect.left -
+                rect.width / 2;
+
+              const y =
+                event.clientY -
+                rect.top -
+                rect.height / 2;
+
+              gsap.to(element, {
+                x: x * .16,
+                y: y * .16,
+                duration: .35,
+                ease: "power3.out"
+              });
+            }
+          );
+
+          element.addEventListener(
+            "pointerleave",
+            () => {
+              gsap.to(element, {
+                x: 0,
+                y: 0,
+                duration: .6,
+                ease: "elastic.out(1, .4)"
+              });
+            }
+          );
+        });
+    }
+
+    /* Gallery card tilt */
+
+    function attachCardTilt() {
+      if (
+        reduceMotion ||
+        !window.gsap
+      ) {
+        return;
+      }
+
+      document
+        .querySelectorAll(".photo-card")
+        .forEach(card => {
+          card.addEventListener(
+            "pointermove",
+            event => {
+              const rect =
+                card.getBoundingClientRect();
+
+              const x =
+                event.clientX - rect.left;
+
+              const y =
+                event.clientY - rect.top;
+
+              const rotateY =
+                ((x / rect.width) - .5) * 8;
+
+              const rotateX =
+                ((y / rect.height) - .5) * -8;
+
+              gsap.to(card, {
+                rotateX,
+                rotateY,
+                transformPerspective: 900,
+                duration: .35,
+                ease: "power2.out"
+              });
+            }
+          );
+
+          card.addEventListener(
+            "pointerleave",
+            () => {
+              gsap.to(card, {
+                rotateX: 0,
+                rotateY: 0,
+                duration: .7,
+                ease: "elastic.out(1, .4)"
+              });
+            }
+          );
+        });
+    }
+
+    /* GSAP scroll animations */
+
+    let animationsInitialized = false;
+
+    function initAnimations() {
+      document.body.classList.add("page-ready");
+
+      if (
+        animationsInitialized ||
+        reduceMotion ||
+        !window.gsap ||
+        !window.ScrollTrigger
+      ) {
+        return;
+      }
+
+      animationsInitialized = true;
+
+      gsap.registerPlugin(ScrollTrigger);
+
+      const intro =
+        gsap.timeline({
+          defaults: {
+            ease: "power3.out"
+          }
+        });
+
+      intro
+        .from(".hero-animate", {
+          opacity: 0,
+          y: 45,
+          filter: "blur(14px)",
+          duration: 1.2,
+          stagger: .12
+        })
+        .from(
+          ".scroll-indicator",
+          {
+            opacity: 0,
+            y: 20,
+            duration: .7
+          },
+          "-=.45"
+        );
+
+      gsap.utils
+        .toArray(
+          ".section-title, .about-title, .featured-title, .cta h2"
+        )
+        .forEach(element => {
+          gsap.from(element, {
+            opacity: 0,
+            y: 70,
+            filter: "blur(12px)",
+            duration: 1.1,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: element,
+              start: "top 82%",
+              toggleActions: "play none none reverse"
+            }
+          });
+        });
+
+      gsap.utils
+        .toArray(
+          ".section-copy, .about-copy, .eyebrow"
+        )
+        .forEach(element => {
+          gsap.from(element, {
+            opacity: 0,
+            y: 25,
+            duration: .8,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: element,
+              start: "top 88%",
+              toggleActions: "play none none reverse"
+            }
+          });
+        });
+
+      gsap.utils
+        .toArray(".photo-card")
+        .forEach((card, index) => {
+          gsap.from(card, {
+            opacity: 0,
+            y: 55,
+            scale: .96,
+            duration: .8,
+            delay: (index % 3) * .08,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: card,
+              start: "top 90%",
+              toggleActions: "play none none reverse"
+            }
+          });
+        });
+
+      gsap.utils
+        .toArray(".journal-card")
+        .forEach((card, index) => {
+          gsap.from(card, {
+            opacity: 0,
+            x: index % 2 === 0 ? -55 : 55,
+            duration: .9,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: card,
+              start: "top 88%",
+              toggleActions: "play none none reverse"
+            }
+          });
+        });
+
+      gsap.utils
+        .toArray(".exploration-image")
+        .forEach((image, index) => {
+          gsap.from(image, {
+            opacity: 0,
+            scale: .8,
+            rotate: index % 2 === 0 ? -3 : 3,
+            duration: 1,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: image,
+              start: "top 90%",
+              toggleActions: "play none none reverse"
+            }
+          });
+        });
+
+      gsap.utils
+        .toArray(".stat-number")
+        .forEach(number => {
+          gsap.from(number, {
+            opacity: 0,
+            scale: .5,
+            y: 30,
+            duration: 1,
+            ease: "back.out(1.7)",
+            scrollTrigger: {
+              trigger: number,
+              start: "top 85%",
+              toggleActions: "play none none reverse"
+            }
+          });
+        });
+
+      gsap.to(".hero-video", {
+        yPercent: 8,
+        scale: 1.12,
+        ease: "none",
+        scrollTrigger: {
+          trigger: ".hero",
+          start: "top top",
+          end: "bottom top",
+          scrub: true
+        }
+      });
+
+      gsap.to("#featuredImage", {
+        yPercent: -12,
+        scale: 1.14,
+        ease: "none",
+        scrollTrigger: {
+          trigger: ".featured",
+          start: "top bottom",
+          end: "bottom top",
+          scrub: true
+        }
+      });
+
+      gsap.utils
+        .toArray(".exploration-column")
+        .forEach((column, index) => {
+          gsap.to(column, {
+            y:
+              index === 1
+                ? -180
+                : index === 2
+                  ? 130
+                  : -80,
+            rotation: index === 1 ? 1 : -1,
+            ease: "none",
+            scrollTrigger: {
+              trigger: ".explorations",
+              start: "top bottom",
+              end: "bottom top",
+              scrub: true
+            }
+          });
+        });
+
+      const sections =
+        document.querySelectorAll("main section[id]");
+
+      const navLinks =
+        document.querySelectorAll(".nav-link");
+
+      sections.forEach(section => {
+        ScrollTrigger.create({
+          trigger: section,
+          start: "top center",
+          end: "bottom center",
+          onToggle: self => {
+            if (!self.isActive) return;
+
+            navLinks.forEach(link => {
+              link.classList.toggle(
+                "active",
+                link.getAttribute("href") ===
+                  `#${section.id}`
+              );
+            });
+          }
+        });
+      });
+
+      ScrollTrigger.refresh();
+    }
+
+    window.addEventListener("scroll", () => {
+      document
+        .getElementById("nav")
+        .classList.toggle(
+          "scrolled",
+          window.scrollY > 30
+        );
+    });
+
+    document.getElementById("copyright").textContent =
+      `© ${new Date().getFullYear()} MD Abdulla`;
+
+    window.addEventListener("load", () => {
+      if (window.ScrollTrigger) {
+        ScrollTrigger.refresh();
+      }
+    });
+  </script>
+              </body>
+            </html>
