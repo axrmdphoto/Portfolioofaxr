@@ -412,6 +412,7 @@
     }
 
     .hero-video,
+    .hero-image,
     .hero-overlay {
       position: absolute;
       inset: 0;
@@ -419,7 +420,15 @@
       height: 100%;
     }
 
+    .hero-image {
+      z-index: 0;
+      object-fit: cover;
+      filter: brightness(.62) saturate(.86);
+      transform: scale(1.04);
+    }
+
     .hero-video {
+      z-index: 1;
       object-fit: cover;
       filter: brightness(.65) saturate(.82);
       transform: scale(1.08);
@@ -1165,6 +1174,11 @@
       from { transform: translate3d(0, 0, 0) scale(1); }
       50% { transform: translate3d(-1.5%, 1%, 0) scale(1.025); }
       to { transform: translate3d(0, 2%, 0) scale(1); }
+    }
+
+    @keyframes exploration-phone-float {
+      0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+      50% { transform: translate3d(0, -7px, 0) scale(1.012); }
     }
 
     .exploration-sticky {
@@ -2548,6 +2562,19 @@
       .exploration-item {
         min-width: 0;
       }
+
+      .exploration-item.is-in {
+        animation: exploration-phone-float 7s ease-in-out infinite;
+        transform-origin: center;
+      }
+
+      .exploration-item:nth-child(2n).is-in {
+        animation-delay: -2.4s;
+      }
+
+      .exploration-item:nth-child(3n).is-in {
+        animation-delay: -4.8s;
+      }
     }
   </style>
 <noscript><style>body{opacity:1}.loading-screen{display:none}</style></noscript>
@@ -2645,6 +2672,14 @@
                 id="home"
                 aria-labelledby="hero-title"
                 >
+                <img
+                  class="hero-image"
+                  src="https://i.supaimg.com/8e0923ed-9bb9-4654-8b98-67c158f6c70c/61c9fbee-786a-4a2a-b5f1-78ffd3ecf1db.png"
+                  alt=""
+                  aria-hidden="true"
+                  fetchpriority="high"
+                  decoding="async"
+                />
                 <video
                   class="hero-video"
                   id="heroVideo"
