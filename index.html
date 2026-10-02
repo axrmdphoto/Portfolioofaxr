@@ -1146,6 +1146,135 @@
     .cert-info p { margin: 0; color: var(--muted); font-size: .8rem; }
     @media (max-width: 760px) { .cert-grid { grid-template-columns: 1fr; } }
 
+    /* ===== FULL-GYRO DEPTH SYSTEM — buttery, tactile, real ===== */
+    :root {
+      --gx: 0;
+      --gy: 0;
+      --rx: 0deg;
+      --ry: 0deg;
+      --vel: 0;
+      --press: 0;
+    }
+    html { scrollbar-width: thin; scrollbar-color: #2a2a2a #0a0a0a; }
+    ::-webkit-scrollbar { width: 9px; }
+    ::-webkit-scrollbar-track { background: #0a0a0a; }
+    ::-webkit-scrollbar-thumb { background: linear-gradient(#89aacc,#4e85bf); border-radius: 99px; }
+    body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+    main, .hero, .section, .photo-card, .journal-card, .role-card, .cert-card {
+      transform-style: preserve-3d;
+      backface-visibility: hidden;
+    }
+    /* cinematic grain + vignette for real depth */
+    .grain {
+      position: fixed; inset: -50%; z-index: 200; pointer-events: none; opacity: .055;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      animation: grain 8s steps(10) infinite;
+    }
+    @keyframes grain {
+      0%,100% { transform: translate(0,0); } 10% { transform: translate(-2%,-4%); }
+      30% { transform: translate(3%,-2%); } 50% { transform: translate(-3%,3%); }
+      70% { transform: translate(4%,2%); } 90% { transform: translate(-1%,4%); }
+    }
+    .vignette {
+      position: fixed; inset: 0; z-index: 199; pointer-events: none;
+      background: radial-gradient(ellipse at calc(50% + var(--gx) * 40px) calc(50% + var(--gy) * 40px), transparent 55%, rgba(0,0,0,.42) 100%);
+    }
+    .scroll-progress {
+      position: fixed; top: 0; left: 0; z-index: 1000; height: 2px; width: 100%;
+      transform-origin: left; transform: scaleX(0);
+      background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+      box-shadow: 0 0 16px rgba(137,170,204,.6);
+    }
+    /* tactile cursor */
+    .cursor-dot {
+      position: fixed; z-index: 9999; width: 8px; height: 8px; border-radius: 50%;
+      background: #fff; pointer-events: none; transform: translate(-50%,-50%);
+      mix-blend-mode: difference; opacity: 0; transition: opacity .3s ease, width .25s ease, height .25s ease;
+    }
+    body.page-ready .cursor-dot { opacity: 1; }
+    .cursor-dot.is-hover { width: 44px; height: 44px; opacity: .9; }
+    .cursor-dot.is-press { width: 22px; height: 22px; }
+    @media (hover: none) { .cursor-dot { display: none; } }
+    /* gyro pill */
+    .gyro-pill {
+      position: fixed; z-index: 300; bottom: 18px; left: 50%; transform: translateX(-50%);
+      display: none; align-items: center; gap: 10px; padding: 10px 18px;
+      border: 1px solid rgba(137,170,204,.4); border-radius: 999px;
+      background: rgba(14,14,14,.82); backdrop-filter: blur(18px);
+      font-size: .72rem; letter-spacing: .06em; white-space: nowrap;
+      box-shadow: 0 12px 40px rgba(0,0,0,.5);
+    }
+    .gyro-pill.show { display: inline-flex; }
+    .gyro-pill b { color: var(--accent-1); }
+    /* gyro hero layers — every layer feels */
+    .hero { perspective: 1200px; }
+    .hero-video {
+      transform: scale(1.06) translate3d(calc(var(--gx) * -26px), calc(var(--gy) * -18px), 0) rotateX(calc(var(--gy) * -1.2deg)) rotateY(calc(var(--gx) * 1.2deg));
+    }
+    .hero-overlay {
+      background:
+        linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.35) 50%, var(--bg) 100%),
+        radial-gradient(circle at calc(50% + var(--gx) * 120px) calc(42% + var(--gy) * 120px), rgba(137,170,204,.14), transparent 42%);
+    }
+    .hero-content {
+      transform: rotateX(var(--rx)) rotateY(var(--ry)) translate3d(calc(var(--gx) * 14px), calc(var(--gy) * 12px), 0);
+      transform-style: preserve-3d; will-change: transform;
+    }
+    .hero-title { transform: translateZ(70px); text-shadow: 0 30px 80px rgba(0,0,0,.55), 0 0 80px rgba(137,170,204,.15); }
+    .hero-tagline { transform: translateZ(44px); }
+    .hero-description, .hero .actions { transform: translateZ(26px); }
+    .scroll-indicator { transform: translateX(-50%) translateZ(30px); }
+    /* floating orbs for depth */
+    .orb { position: absolute; border-radius: 50%; filter: blur(70px); pointer-events: none; z-index: 1; opacity: .5; will-change: transform; }
+    .orb-a { width: 420px; height: 420px; left: -120px; top: 10%; background: radial-gradient(circle, rgba(78,133,191,.35), transparent 70%); }
+    .orb-b { width: 380px; height: 380px; right: -120px; top: 55%; background: radial-gradient(circle, rgba(137,170,204,.28), transparent 70%); }
+    /* cards — real tactile depth */
+    .photo-card {
+      transform: perspective(1000px) rotateX(var(--crx, 0deg)) rotateY(var(--cry, 0deg)) translateZ(0);
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+    .photo-card.is-press, .photo-card:active { scale: .975; }
+    .photo-card .glare {
+      position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: 0; transition: opacity .4s ease;
+      background: radial-gradient(circle at var(--px,50%) var(--py,50%), rgba(255,255,255,.28), transparent 55%);
+      mix-blend-mode: overlay;
+    }
+    .photo-card:hover .glare { opacity: 1; }
+    .photo-info { transform: translateZ(30px); }
+    .journal-card, .role-card, .cert-card {
+      box-shadow: 0 8px 28px rgba(0,0,0,.28);
+      transform: perspective(900px) rotateX(var(--crx,0deg)) rotateY(var(--cry,0deg));
+    }
+    .journal-card:active, .role-card:active, .cert-card:active, .button:active { scale: .97; }
+    .button { -webkit-tap-highlight-color: transparent; user-select: none; }
+    .button:active { filter: brightness(1.15); }
+    /* tactile touch ripple */
+    .ripple {
+      position: absolute; border-radius: 50%; pointer-events: none; z-index: 5;
+      background: radial-gradient(circle, rgba(255,255,255,.45) 0%, transparent 65%);
+      transform: translate(-50%,-50%) scale(0); animation: ripple .65s ease-out forwards;
+    }
+    @keyframes ripple { to { transform: translate(-50%,-50%) scale(2.6); opacity: 0; } }
+    /* gyro-reactive titles — lean into motion */
+    .section-title, .featured-title, .about-title, .cta h2 {
+      transform: perspective(900px) rotateY(calc(var(--gx) * 3deg)) rotateX(calc(var(--gy) * -3deg)) translateZ(0);
+      will-change: transform;
+    }
+    /* scroll-velocity lean: whole page breathes */
+    main { transform: skewY(calc(var(--vel) * -1.2deg)) translateZ(0); will-change: transform; transition: transform .1s linear; }
+    .marquee-track { will-change: transform; }
+    /* featured depth */
+    .featured-image {
+      transform: scale(1.08) translate3d(calc(var(--gx) * -18px), calc(var(--gy) * -12px), 0);
+    }
+    .exploration-image { box-shadow: 0 18px 50px rgba(0,0,0,.45); }
+    /* buttery image fade */
+    img { background: #161616; }
+    img.loaded { animation: img-in .9s var(--ease) both; }
+    @keyframes img-in { from { opacity: 0; filter: blur(8px); } to { opacity: 1; filter: blur(0); } }
+    /* nav gyro float */
+    .nav { transform: translateX(-50%) translate3d(calc(var(--gx) * 8px), calc(var(--gy) * 6px), 0); }
+
     /* Focus and reduced motion */
 
     button:focus-visible,
@@ -1308,6 +1437,11 @@
             <a class="skip-link" href="#main-content">
               Skip to content
             </a>
+            <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+            <div class="vignette" aria-hidden="true"></div>
+            <div class="grain" aria-hidden="true"></div>
+            <div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
+            <button class="gyro-pill" id="gyroPill" type="button">📱 Tap to enable <b>&nbsp;Full Gyro 3D</b></button>
             <div
               class="cursor-glow"
               id="cursorGlow"
@@ -1404,6 +1538,8 @@
                 </video>
                 <div class="hero-overlay">
                 </div>
+                <div class="orb orb-a" data-depth="0.6" aria-hidden="true"></div>
+                <div class="orb orb-b" data-depth="0.9" aria-hidden="true"></div>
                 <div class="hero-content">
                   <div class="eyebrow hero-animate">
                     Creative Director • Cinematographer • Photographer
@@ -1648,13 +1784,13 @@
                   >
                   <div class="marquee-track">
                     <span>Capture the moment •</span>
+                    <span>Real stories •</span>
                     <span>Capture the moment •</span>
+                    <span>Real stories •</span>
                     <span>Capture the moment •</span>
+                    <span>Real stories •</span>
                     <span>Capture the moment •</span>
-                    <span>Capture the moment •</span>
-                    <span>Capture the moment •</span>
-                    <span>Capture the moment •</span>
-                    <span>Capture the moment •</span>
+                    <span>Real stories •</span>
                   </div>
                 </div>
               </main>
@@ -2548,153 +2684,221 @@
       }
     });
 
-    /* Cursor glow */
+    /* ===== FULL-GYRO ENGINE — one buttery loop for everything ===== */
+    const cursorGlow = document.getElementById("cursorGlow");
+    const cursorDot = document.getElementById("cursorDot");
+    const gyroPill = document.getElementById("gyroPill");
+    const hero = document.querySelector(".hero");
+    const scrollProgress = document.getElementById("scrollProgress");
+    const isHoverable = matchMedia("(hover: hover)").matches;
+    const isTouch = matchMedia("(pointer: coarse)").matches;
 
-    const cursorGlow =
-      document.getElementById("cursorGlow");
+    const gyro = {
+      tx: 0, ty: 0, x: 0, y: 0,           // pointer -0.5..0.5
+      gtx: 0, gty: 0, gx: 0, gy: 0,       // device gyro
+      vel: 0, lastY: window.scrollY,      // scroll velocity
+      rx: 0, ry: 0, press: 0, pressT: 0
+    };
 
-    const hero =
-      document.querySelector(".hero");
+    // pointer → global tilt target (smooth, full-page)
+    window.addEventListener("pointermove", e => {
+      gyro.tx = (e.clientX / window.innerWidth - 0.5) * 2;
+      gyro.ty = (e.clientY / window.innerHeight - 0.5) * 2;
+      if (hero) {
+        const r = hero.getBoundingClientRect();
+        hero.style.setProperty("--mouse-x", `${((e.clientX - r.left) / r.width) * 100}%`);
+        hero.style.setProperty("--mouse-y", `${((e.clientY - r.top) / r.height) * 100}%`);
+      }
+    }, { passive: true });
 
-    if (!reduceMotion && matchMedia("(hover: hover)").matches) {
-      let cursorX = window.innerWidth / 2;
-      let cursorY = window.innerHeight / 2;
-      let glowX = cursorX;
-      let glowY = cursorY;
+    // touch drag → temporary gyro push so every touch is felt
+    let touchStart = null;
+    window.addEventListener("touchstart", e => {
+      if (e.touches[0]) touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      gyro.pressT = 1;
+      if (cursorDot) cursorDot.classList.add("is-press");
+    }, { passive: true });
+    window.addEventListener("touchmove", e => {
+      if (touchStart && e.touches[0]) {
+        const dx = (e.touches[0].clientX - touchStart.x) / window.innerWidth;
+        const dy = (e.touches[0].clientY - touchStart.y) / window.innerHeight;
+        gyro.tx = Math.max(-1, Math.min(1, gyro.tx + dx * 1.6));
+        gyro.ty = Math.max(-1, Math.min(1, gyro.ty + dy * 1.6));
+        touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      }
+    }, { passive: true });
+    window.addEventListener("touchend", () => { gyro.pressT = 0; touchStart = null; if (cursorDot) cursorDot.classList.remove("is-press"); }, { passive: true });
 
-      window.addEventListener("pointermove", event => {
-        cursorX = event.clientX;
-        cursorY = event.clientY;
+    // real device gyroscope (Android + iOS with permission)
+    function enableGyro() {
+      try {
+        const DOE = window.DeviceOrientationEvent;
+        if (DOE && typeof DOE.requestPermission === "function") {
+          DOE.requestPermission().then(res => {
+            if (res === "granted") { window.addEventListener("deviceorientation", onTilt); if (gyroPill) gyroPill.classList.remove("show"); }
+          }).catch(() => {});
+        } else if ("DeviceOrientationEvent" in window) {
+          window.addEventListener("deviceorientation", onTilt);
+          if (gyroPill) gyroPill.classList.remove("show");
+        }
+      } catch (err) {}
+    }
+    function onTilt(e) {
+      if (e.beta == null || e.gamma == null) return;
+      const nx = Math.max(-1, Math.min(1, e.gamma / 28));
+      const ny = Math.max(-1, Math.min(1, (e.beta - 42) / 28));
+      gyro.gtx = nx; gyro.gty = ny;
+    }
+    if (gyroPill) {
+      const needsBtn = (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function");
+      if (needsBtn && !reduceMotion) gyroPill.classList.add("show");
+      else if (isTouch && !reduceMotion && "DeviceOrientationEvent" in window) {
+        // Android: auto-listen, show hint briefly
+        window.addEventListener("deviceorientation", onTilt);
+        gyroPill.classList.add("show");
+        gyroPill.innerHTML = "📱 Tilt your phone — <b>&nbsp;Full Gyro 3D is live</b>";
+        setTimeout(() => gyroPill.classList.remove("show"), 3200);
+      }
+      gyroPill.addEventListener("click", enableGyro);
+    }
 
-        if (!hero) return;
+    // cursor dot + glow follow with inertia
+    let cx = innerWidth / 2, cy = innerHeight / 2, dx = cx, dy = cy, gx2 = cx, gy2 = cy;
+    window.addEventListener("pointermove", e => { cx = e.clientX; cy = e.clientY; }, { passive: true });
+    document.querySelectorAll("a, button, .photo-card, .journal-card, .exploration-image").forEach(el => {
+      el.addEventListener("pointerenter", () => cursorDot && cursorDot.classList.add("is-hover"));
+      el.addEventListener("pointerleave", () => cursorDot && cursorDot.classList.remove("is-hover"));
+    });
 
-        const rect =
-          hero.getBoundingClientRect();
+    // tactile press ripple on every touch/click
+    function spawnRipple(e) {
+      const t = e.target.closest(".button, .photo-card, .journal-card, .filter, .cert-card, .role-card");
+      if (!t) return;
+      const r = t.getBoundingClientRect();
+      const s = document.createElement("span");
+      s.className = "ripple";
+      const size = Math.max(r.width, r.height) * 0.9;
+      s.style.width = s.style.height = size + "px";
+      s.style.left = ((e.clientX || r.left + r.width / 2) - r.left) + "px";
+      s.style.top = ((e.clientY || r.top + r.height / 2) - r.top) + "px";
+      const cs = getComputedStyle(t);
+      if (cs.position === "static") t.style.position = "relative";
+      t.style.overflow = "hidden";
+      t.appendChild(s);
+      setTimeout(() => s.remove(), 700);
+    }
+    window.addEventListener("pointerdown", spawnRipple, { passive: true });
 
-        hero.style.setProperty(
-          "--mouse-x",
-          `${((cursorX - rect.left) / rect.width) * 100}%`
-        );
+    // THE loop — lerps everything for 60fps butter
+    const root = document.documentElement;
+    let lastT = performance.now();
+    function gyroLoop(now) {
+      const dt = Math.min(0.05, (now - lastT) / 1000);
+      lastT = now;
+      const k = reduceMotion ? 1 : 1 - Math.pow(0.0015, dt); // frame-rate independent lerp
+      gyro.x += (gyro.tx * 0.55 + gyro.gx * 0.45 - gyro.x) * k;
+      gyro.y += (gyro.ty * 0.55 + gyro.gy * 0.45 - gyro.y) * k;
+      gyro.gx += (gyro.gtx - gyro.gx) * k;
+      gyro.gy += (gyro.gty - gyro.gy) * k;
+      gyro.press += (gyro.pressT - gyro.press) * (1 - Math.pow(0.0005, dt));
+      // scroll velocity → lean
+      const sy = window.scrollY;
+      const inst = Math.max(-1, Math.min(1, (sy - gyro.lastY) / 60));
+      gyro.lastY = sy;
+      gyro.vel += (inst - gyro.vel) * (1 - Math.pow(0.005, dt));
+      gyro.rx += ((gyro.y * -5 + gyro.gy * -7 - gyro.rx) * k);
+      gyro.ry += ((gyro.x * 6 + gyro.gx * 8 - gyro.ry) * k);
 
-        hero.style.setProperty(
-          "--mouse-y",
-          `${((cursorY - rect.top) / rect.height) * 100}%`
-        );
+      if (!reduceMotion) {
+        root.style.setProperty("--gx", gyro.x.toFixed(4));
+        root.style.setProperty("--gy", gyro.y.toFixed(4));
+        root.style.setProperty("--rx", gyro.rx.toFixed(3) + "deg");
+        root.style.setProperty("--ry", gyro.ry.toFixed(3) + "deg");
+        root.style.setProperty("--vel", gyro.vel.toFixed(4));
+        root.style.setProperty("--press", gyro.press.toFixed(3));
+        // floating orbs drift with depth
+        document.querySelectorAll(".orb").forEach(o => {
+          const d = parseFloat(o.dataset.depth || "0.5");
+          o.style.transform = `translate3d(${(-gyro.x * 60 * d).toFixed(1)}px, ${(-gyro.y * 50 * d).toFixed(1)}px, 0)`;
+        });
+      }
+      // cursor
+      if (isHoverable && cursorGlow) {
+        dx += (cx - dx) * 0.22; dy += (cy - dy) * 0.22;
+        gx2 += (cx - gx2) * 0.09; gy2 += (cy - gy2) * 0.09;
+        cursorGlow.style.left = gx2 + "px"; cursorGlow.style.top = gy2 + "px";
+        if (cursorDot) { cursorDot.style.left = dx + "px"; cursorDot.style.top = dy + "px"; }
+      }
+      // scroll progress
+      if (scrollProgress) {
+        const h = document.documentElement.scrollHeight - innerHeight;
+        scrollProgress.style.transform = `scaleX(${h > 0 ? (sy / h).toFixed(4) : 0})`;
+      }
+      requestAnimationFrame(gyroLoop);
+    }
+    requestAnimationFrame(gyroLoop);
+
+    /* Magnetic + per-card gyro tilt — every touch can be felt */
+    if (!reduceMotion && window.gsap) {
+      document.querySelectorAll(".button, .logo, .nav-instagram").forEach(element => {
+        element.addEventListener("pointermove", event => {
+          const rect = element.getBoundingClientRect();
+          const x = event.clientX - rect.left - rect.width / 2;
+          const y = event.clientY - rect.top - rect.height / 2;
+          gsap.to(element, { x: x * .18, y: y * .18, duration: .35, ease: "power3.out", overwrite: "auto" });
+        });
+        element.addEventListener("pointerleave", () => {
+          gsap.to(element, { x: 0, y: 0, duration: .7, ease: "elastic.out(1, .4)", overwrite: "auto" });
+        });
+        // tactile press
+        element.addEventListener("pointerdown", () => gsap.to(element, { scale: .94, duration: .15, ease: "power2.out", overwrite: "auto" }));
+        element.addEventListener("pointerup", () => gsap.to(element, { scale: 1, duration: .5, ease: "elastic.out(1,.45)", overwrite: "auto" }));
       });
-
-      function animateCursor() {
-        glowX += (cursorX - glowX) * .12;
-        glowY += (cursorY - glowY) * .12;
-
-        cursorGlow.style.left = `${glowX}px`;
-        cursorGlow.style.top = `${glowY}px`;
-
-        requestAnimationFrame(animateCursor);
-      }
-
-      animateCursor();
     }
 
-    /* Magnetic controls */
-
-    if (!reduceMotion && window.gsap && matchMedia("(hover: hover)").matches) {
-      document
-        .querySelectorAll(
-          ".button, .logo, .nav-instagram"
-        )
-        .forEach(element => {
-          element.addEventListener(
-            "pointermove",
-            event => {
-              const rect =
-                element.getBoundingClientRect();
-
-              const x =
-                event.clientX -
-                rect.left -
-                rect.width / 2;
-
-              const y =
-                event.clientY -
-                rect.top -
-                rect.height / 2;
-
-              gsap.to(element, {
-                x: x * .16,
-                y: y * .16,
-                duration: .35,
-                ease: "power3.out"
-              });
-            }
-          );
-
-          element.addEventListener(
-            "pointerleave",
-            () => {
-              gsap.to(element, {
-                x: 0,
-                y: 0,
-                duration: .6,
-                ease: "elastic.out(1, .4)"
-              });
-            }
-          );
-        });
-    }
-
-    /* Gallery card tilt */
-
+    /* Gallery card tilt — real 3D + glare + idle gyro sway + touch press */
     function attachCardTilt() {
-      if (
-        reduceMotion ||
-        !window.gsap || !matchMedia("(hover: hover)").matches
-      ) {
-        return;
-      }
-
-      document
-        .querySelectorAll(".photo-card")
-        .forEach(card => {
-          card.addEventListener(
-            "pointermove",
-            event => {
-              const rect =
-                card.getBoundingClientRect();
-
-              const x =
-                event.clientX - rect.left;
-
-              const y =
-                event.clientY - rect.top;
-
-              const rotateY =
-                ((x / rect.width) - .5) * 8;
-
-              const rotateX =
-                ((y / rect.height) - .5) * -8;
-
-              gsap.to(card, {
-                rotateX,
-                rotateY,
-                transformPerspective: 900,
-                duration: .35,
-                ease: "power2.out"
-              });
-            }
-          );
-
-          card.addEventListener(
-            "pointerleave",
-            () => {
-              gsap.to(card, {
-                rotateX: 0,
-                rotateY: 0,
-                duration: .7,
-                ease: "elastic.out(1, .4)"
-              });
-            }
-          );
+      if (reduceMotion) return;
+      const cards = document.querySelectorAll(".photo-card, .journal-card, .role-card, .cert-card, .exploration-image");
+      cards.forEach(card => {
+        if (card.dataset.tiltBound) return;
+        card.dataset.tiltBound = "1";
+        if (card.classList.contains("photo-card") && !card.querySelector(".glare")) {
+          const g = document.createElement("span");
+          g.className = "glare";
+          g.setAttribute("aria-hidden", "true");
+          card.appendChild(g);
+        }
+        let raf = null, tRX = 0, tRY = 0, cRX = 0, cRY = 0;
+        function render() {
+          cRX += (tRX - cRX) * 0.16;
+          cRY += (tRY - cRY) * 0.16;
+          card.style.setProperty("--crx", cRX.toFixed(2) + "deg");
+          card.style.setProperty("--cry", cRY.toFixed(2) + "deg");
+          if (Math.abs(tRX - cRX) > 0.02 || Math.abs(tRY - cRY) > 0.02) raf = requestAnimationFrame(render);
+          else raf = null;
+        }
+        function kick(rx, ry) { tRX = rx; tRY = ry; if (!raf) raf = requestAnimationFrame(render); }
+        card.addEventListener("pointermove", event => {
+          const rect = card.getBoundingClientRect();
+          const px = (event.clientX - rect.left) / rect.width;
+          const py = (event.clientY - rect.top) / rect.height;
+          card.style.setProperty("--px", (px * 100).toFixed(1) + "%");
+          card.style.setProperty("--py", (py * 100).toFixed(1) + "%");
+          kick((py - 0.5) * -12, (px - 0.5) * 12);
         });
+        card.addEventListener("pointerleave", () => kick(0, 0));
+        card.addEventListener("pointerdown", () => { card.classList.add("is-press"); kick(tRX * 0.5, tRY * 0.5); });
+        card.addEventListener("pointerup", () => card.classList.remove("is-press"));
+        // idle sway synced to global gyro — cards breathe even without hover
+        if (!isTouch) {
+          setInterval(() => {
+            if (document.activeElement === card || card.matches(":hover")) return;
+            kick(gyro.gy * 3 + gyro.y * 1.5, gyro.gx * 3 + gyro.x * 1.5);
+            setTimeout(() => { if (!card.matches(":hover")) kick(0, 0); }, 900);
+          }, 4200 + Math.random() * 3800);
+        }
+      });
     }
 
     /* GSAP scroll animations */
@@ -2848,6 +3052,53 @@
           "scrolled",
           window.scrollY > 30
         );
+    }, { passive: true });
+
+    // bind tilt to journal + exploration (rendered once) + buttery img fade
+    attachCardTilt();
+    function bindImgFade(scope) {
+      scope.querySelectorAll("img").forEach(img => {
+        if (img.complete && img.naturalWidth) img.classList.add("loaded");
+        else img.addEventListener("load", () => img.classList.add("loaded"), { once: true });
+      });
+    }
+    bindImgFade(document);
+    const _origRender = renderGallery;
+    // wrap to re-bind after filter changes
+    renderGallery = function() { _origRender(); attachCardTilt(); bindImgFade(galleryGrid); };
+
+    // marquee reacts to scroll velocity — "Capture the moment" feels alive
+    const marqueeTrack = document.querySelector(".marquee-track");
+    let mqX = 0;
+    (function marqueeLoop() {
+      mqX -= 0.6 + Math.abs(gyro.vel) * 6;
+      if (mqX < -marqueeTrack.scrollWidth / 2) mqX = 0;
+      if (!reduceMotion) {
+        marqueeTrack.style.transform = `translate3d(${mqX.toFixed(1)}px,0,0) skewX(${(-gyro.vel * 8).toFixed(2)}deg)`;
+        marqueeTrack.style.animation = "none";
+      }
+      requestAnimationFrame(marqueeLoop);
+    })();
+
+    // lightbox gyro — tilt photo with device + pointer for real feel
+    if (lightboxImage) {
+      window.addEventListener("pointermove", e => {
+        if (!lightbox.classList.contains("open") || reduceMotion) return;
+        const nx = (e.clientX / innerWidth - 0.5), ny = (e.clientY / innerHeight - 0.5);
+        lightboxImage.style.transform = `perspective(1000px) rotateY(${(nx * 5 + gyro.gx * 6).toFixed(2)}deg) rotateX(${(-ny * 5 + gyro.gy * -6).toFixed(2)}deg) scale(1.02)`;
+      }, { passive: true });
+    }
+
+    // buttery anchor scroll (native smooth + offset for fixed nav)
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener("click", e => {
+        const id = a.getAttribute("href");
+        if (id.length < 2) return;
+        const el = document.querySelector(id);
+        if (!el) return;
+        e.preventDefault();
+        el.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+      });
     });
 
     document.getElementById("copyright").textContent =
