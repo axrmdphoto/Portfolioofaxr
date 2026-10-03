@@ -1,3 +1,11 @@
+@font-face {
+  font-family: "Montserrat";
+  src: url("../assets/fonts/Montserrat-Bold.otf") format("opentype");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
 :root {
       --bg: #0a0a0a;
       --surface: #141414;
@@ -375,12 +383,12 @@
 
     .hero-title {
       margin: 22px 0;
-      font-family: var(--serif);
-      font-size: clamp(5rem, 15vw, 12rem);
-      font-style: italic;
-      font-weight: 400;
-      letter-spacing: -.08em;
-      line-height: .8;
+      font-family: "Montserrat", var(--sans);
+      font-size: clamp(3.5rem, 12vw, 9rem);
+      font-style: normal;
+      font-weight: 700;
+      letter-spacing: -.045em;
+      line-height: 1;
       text-shadow: 0 0 42px rgba(78,133,191,.2);
     }
 
