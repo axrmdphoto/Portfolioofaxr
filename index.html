@@ -571,11 +571,95 @@
       margin-bottom: 45px;
     }
 
+    .gallery-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+      margin-bottom: 38px;
+    }
+
     .filters {
       display: flex;
       flex-wrap: wrap;
       gap: 7px;
-      margin-bottom: 38px;
+    }
+
+    .gallery-mode {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px;
+      border: 1px solid var(--stroke);
+      border-radius: 999px;
+      background: var(--surface);
+    }
+
+    .gallery-mode-label {
+      padding-inline: 12px 6px;
+      color: var(--muted);
+      font-size: .62rem;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+    }
+
+    .mode-button {
+      padding: 8px 16px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--muted);
+      font-size: .7rem;
+      transition: color .3s ease, background .3s ease, border-color .3s ease;
+    }
+
+    .mode-button:hover {
+      color: var(--text);
+    }
+
+    .mode-button.active {
+      border-color: var(--text);
+      background: var(--text);
+      color: #111;
+    }
+
+    .gallery-hint {
+      margin: 22px 0 0;
+      color: var(--muted);
+      font-size: .68rem;
+      letter-spacing: .12em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    /* Swipe mode: horizontal snap track */
+    .gallery-grid.swipe-mode {
+      display: flex;
+      gap: 14px;
+      margin-inline: calc(50% - 50vw);
+      padding-inline: max(24px, calc(50vw - 50%));
+      padding-bottom: 8px;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+    }
+
+    .gallery-grid.swipe-mode::-webkit-scrollbar {
+      display: none;
+    }
+
+    .gallery-grid.swipe-mode .photo-card {
+      flex: 0 0 auto;
+      width: min(72vw, 460px);
+      margin-bottom: 0;
+      scroll-snap-align: center;
+    }
+
+    .gallery-grid.swipe-mode .photo-card img {
+      height: min(66vh, 600px);
+      object-fit: cover;
     }
 
     .filter {
@@ -2261,17 +2345,48 @@
                       landscapes to fleeting human experiences.
                     </p>
                   </div>
-                  <div
-                    class="filters"
-                    id="filters"
-                    aria-label="Filter photographs"
-                    >
+                  <div class="gallery-toolbar">
+                    <div
+                      class="filters"
+                      id="filters"
+                      aria-label="Filter photographs"
+                      >
+                    </div>
+                    <div
+                      class="gallery-mode"
+                      role="group"
+                      aria-label="Choose how to browse photographs"
+                      >
+                      <span class="gallery-mode-label">View</span>
+                      <button
+                        class="mode-button active"
+                        type="button"
+                        data-gallery-mode="scroll"
+                        aria-pressed="true"
+                        >
+                        Scroll
+                      </button>
+                      <button
+                        class="mode-button"
+                        type="button"
+                        data-gallery-mode="swipe"
+                        aria-pressed="false"
+                        >
+                        Swipe
+                      </button>
+                    </div>
                   </div>
                   <div
                     class="gallery-grid"
                     id="galleryGrid"
                     >
                   </div>
+                  <p
+                    class="gallery-hint"
+                    id="galleryHint"
+                    aria-live="polite"
+                    >
+                  </p>
                 </div>
               </section>
               <section
@@ -3159,6 +3274,84 @@ const photos = [
     }
 
     renderGallery();
+
+    /* Gallery browse mode: vertical scroll or horizontal swipe */
+
+    const galleryHint =
+      document.getElementById("galleryHint");
+
+    const modeButtons =
+      document.querySelectorAll(
+        "[data-gallery-mode]"
+      );
+
+    function setGalleryMode(mode) {
+      const isSwipe = mode === "swipe";
+
+      galleryGrid.classList.toggle(
+        "swipe-mode",
+        isSwipe
+      );
+
+      galleryGrid.scrollLeft = 0;
+
+      modeButtons.forEach(button => {
+        const active =
+          button.dataset.galleryMode === mode;
+
+        button.classList.toggle("active", active);
+        button.setAttribute(
+          "aria-pressed",
+          String(active)
+        );
+      });
+
+      if (galleryHint) {
+        galleryHint.textContent = isSwipe
+          ? "Swipe sideways to browse · tap a photo to open it"
+          : "Scroll down to browse · tap a photo to open it";
+      }
+
+      attachCardTilt();
+
+      if (window.ScrollTrigger) {
+        ScrollTrigger.refresh();
+      }
+    }
+
+    modeButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        setGalleryMode(button.dataset.galleryMode);
+      });
+    });
+
+    galleryGrid.addEventListener("keydown", event => {
+      if (!galleryGrid.classList.contains("swipe-mode")) {
+        return;
+      }
+
+      const step =
+        galleryGrid.querySelector(".photo-card")
+          ?.getBoundingClientRect().width || 320;
+
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        galleryGrid.scrollBy({
+          left: step + 14,
+          behavior: "smooth"
+        });
+      }
+
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        galleryGrid.scrollBy({
+          left: -(step + 14),
+          behavior: "smooth"
+        });
+      }
+    });
+
+    setGalleryMode("scroll");
 
     /* Journal rendering */
 

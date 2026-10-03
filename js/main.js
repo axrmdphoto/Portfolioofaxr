@@ -504,6 +504,84 @@ const photos = [
 
     renderGallery();
 
+    /* Gallery browse mode: vertical scroll or horizontal swipe */
+
+    const galleryHint =
+      document.getElementById("galleryHint");
+
+    const modeButtons =
+      document.querySelectorAll(
+        "[data-gallery-mode]"
+      );
+
+    function setGalleryMode(mode) {
+      const isSwipe = mode === "swipe";
+
+      galleryGrid.classList.toggle(
+        "swipe-mode",
+        isSwipe
+      );
+
+      galleryGrid.scrollLeft = 0;
+
+      modeButtons.forEach(button => {
+        const active =
+          button.dataset.galleryMode === mode;
+
+        button.classList.toggle("active", active);
+        button.setAttribute(
+          "aria-pressed",
+          String(active)
+        );
+      });
+
+      if (galleryHint) {
+        galleryHint.textContent = isSwipe
+          ? "Swipe sideways to browse · tap a photo to open it"
+          : "Scroll down to browse · tap a photo to open it";
+      }
+
+      attachCardTilt();
+
+      if (window.ScrollTrigger) {
+        ScrollTrigger.refresh();
+      }
+    }
+
+    modeButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        setGalleryMode(button.dataset.galleryMode);
+      });
+    });
+
+    galleryGrid.addEventListener("keydown", event => {
+      if (!galleryGrid.classList.contains("swipe-mode")) {
+        return;
+      }
+
+      const step =
+        galleryGrid.querySelector(".photo-card")
+          ?.getBoundingClientRect().width || 320;
+
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        galleryGrid.scrollBy({
+          left: step + 14,
+          behavior: "smooth"
+        });
+      }
+
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        galleryGrid.scrollBy({
+          left: -(step + 14),
+          behavior: "smooth"
+        });
+      }
+    });
+
+    setGalleryMode("scroll");
+
     /* Journal rendering */
 
     const journalList =
