@@ -3990,6 +3990,29 @@ const photos = [
     document.getElementById("statPhotoCount").textContent = galleryStats.photos;
     document.getElementById("statLocationCount").textContent = galleryStats.locations;
 
+    const dailyFeaturedMoments = [
+      "A moment worth remembering.",
+      "Light finds its way home.",
+      "Somewhere, the day slows down.",
+      "The world, caught between heartbeats.",
+      "A little wonder in the everyday.",
+      "Here, time leaves a beautiful trace.",
+      "Look closer. The moment is waiting."
+    ];
+    const today = new Date();
+    const localDayNumber = Math.floor(
+      Date.UTC(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate()
+      ) / 86400000
+    );
+    document.getElementById("featured-title").textContent =
+      dailyFeaturedMoments[
+        ((localDayNumber % dailyFeaturedMoments.length) + dailyFeaturedMoments.length) %
+        dailyFeaturedMoments.length
+      ];
+
     const heroVideoUrl =
       "https://stream.mux.com/Aa02T7oM1wH5Mk5EEVDYhbZ1ChcdhRsS2m1NYyx4Ua1g.m3u8";
 
