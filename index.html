@@ -1143,6 +1143,8 @@
     .about-layout > div {
       position: relative;
       z-index: 1;
+      min-width: 0;
+      max-width: 100%;
     }
 
     .about-title {
@@ -1164,12 +1166,15 @@
       font-size: 1rem;
       font-weight: 400;
       line-height: 1.85;
+      overflow-wrap: anywhere;
     }
 
     .profile-titles {
       display: flex;
       flex-wrap: wrap;
       gap: 9px;
+      width: 100%;
+      max-width: 100%;
       margin: 0 0 26px;
       color: var(--muted);
       font-size: .7rem;
@@ -1183,12 +1188,15 @@
     .profile-titles span {
       display: inline-flex;
       align-items: center;
+      flex: 0 0 auto;
+      max-width: 100%;
       min-height: 34px;
       padding: 8px 12px;
       border: 1px solid var(--stroke);
       border-radius: 999px;
       background: linear-gradient(135deg, rgba(255,255,255,.055), rgba(255,255,255,.015));
       box-shadow: inset 0 1px rgba(255,255,255,.04);
+      white-space: nowrap;
       transition: transform .35s var(--ease), border-color .35s ease, color .35s ease;
     }
 
@@ -1574,6 +1582,33 @@
     .reel-open-link:hover {
       border-color: var(--text);
       color: var(--text);
+    }
+
+    .reel-fallback {
+      padding: 18px 14px;
+      color: var(--muted);
+      font-size: .74rem;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    .reel-fallback strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--text);
+      font-size: .76rem;
+    }
+
+    .reel-card.is-broken .reel-video {
+      display: none;
+    }
+
+    .reel-insta-embed {
+      width: 100%;
+      min-height: 480px;
+      border: 0;
+      border-radius: 14px;
+      background: #000;
     }
 
     .role-grid {
@@ -2137,13 +2172,18 @@
 
       .profile-titles {
         gap: 7px;
+        width: 100%;
+        max-width: 100%;
         margin-bottom: 22px;
       }
 
       .profile-titles span {
+        flex: 0 0 auto;
+        max-width: 100%;
         min-height: 32px;
         padding: 7px 10px;
         font-size: .68rem;
+        white-space: nowrap;
       }
 
       .skills-grid,
@@ -2159,8 +2199,16 @@
         padding: 22px;
       }
 
-      .profile-titles {
-        font-size: 1.6rem;
+      @media (max-width: 380px) {
+        .profile-titles {
+          gap: 6px;
+        }
+
+        .profile-titles span {
+          min-height: 30px;
+          padding: 6px 9px;
+          font-size: .62rem;
+        }
       }
 
       .role-card h3 {
@@ -4228,6 +4276,16 @@ const photos = [
             addedAt: "2026-06-08",
             location: "Bilasipara",
             description: "Warm pendant lights, sculptural details and an aquarium glow create a richly layered interior moment."
+        },
+        {
+            id: 34,
+            src: "https://i.supaimg.com/8e0923ed-9bb9-4654-8b98-67c158f6c70c/0bb7dada-1a16-48ab-9b49-8b4cd40bd2f2.jpg",
+            title: "Timeless Silence",
+            category: "Monochrome",
+            date: "2026",
+            addedAt: "2026-10-03",
+            location: "Bilasipara",
+            description: "A vintage wall clock suspended by a chain, its Roman numerals and carved wooden frame rendered in stark black and white."
         }
 
 
@@ -6501,6 +6559,97 @@ const photos = [
 
 const reelCards = document.querySelectorAll(".reel-card");
 const reelVideos = document.querySelectorAll(".reel-video");
+
+function markReelBroken(card) {
+  if (!card || card.classList.contains("is-broken")) return;
+  card.classList.add("is-broken");
+  const wrap = card.querySelector(".reels-embed-wrap");
+  const link = card.querySelector(".reel-open-link");
+  const href = link ? link.getAttribute("href") : "";
+  if (href && href.includes("instagram.com/reel/")) {
+    injectInstagramEmbed(card, href);
+  }
+  if (wrap) addBrokenNote(wrap);
+}
+
+function clearReelBroken(card) {
+  if (!card) return;
+  card.classList.remove("is-broken");
+  const staleNote = card.querySelector(".reel-fallback");
+  if (staleNote) staleNote.remove();
+  const staleEmbed = card.querySelector(".reel-insta-embed");
+  if (staleEmbed) staleEmbed.remove();
+}
+
+/* Known-corrupt local files (verified: ftyp+mdat only, no moov box,
+   so no browser can decode them). Swap these to the Instagram embed
+   immediately instead of waiting for a <video> error event. */
+const BROKEN_REEL_FILES = new Set([
+  "awesomebilasipara-20261003-0009.mp4",
+  "awesomebilasipara-20261003-0010.mp4",
+  "awesomebilasipara-20261003-0011.mp4"
+]);
+
+const FORCE_EMBED_REELS = new Set([
+  "awesomebilasipara-20261003-0007.mp4",
+  "awesomebilasipara-20261003-0008.mp4",
+  "awesomebilasipara-20261003-0009.mp4",
+  "awesomebilasipara-20261003-0010.mp4",
+  "awesomebilasipara-20261003-0011.mp4"
+]);
+
+function reelSourceFile(video) {
+  const source = video.querySelector("source");
+  const src = (source && source.getAttribute("src")) || video.getAttribute("src") || "";
+  return src.split("/").pop().split("?")[0];
+}
+
+function reelSourceIsKnownBroken(video) {
+  return BROKEN_REEL_FILES.has(reelSourceFile(video));
+}
+
+function reelSourceForceEmbed(video) {
+  return FORCE_EMBED_REELS.has(reelSourceFile(video));
+}
+
+reelVideos.forEach(video => {
+  const card = video.closest(".reel-card");
+  if (reelSourceForceEmbed(video)) {
+    try { video.removeAttribute("autoplay"); video.pause(); } catch (e) {}
+    try { video.muted = true; } catch (e) {}
+    markReelBroken(card);
+    return;
+  }
+  if (reelSourceIsKnownBroken(video)) {
+    try { video.removeAttribute("autoplay"); video.preload = "none"; } catch (e) {}
+    markReelBroken(card);
+    return;
+  }
+  try {
+    if (video.error || video.networkState === 3) {
+      markReelBroken(card);
+      return;
+    }
+  } catch (e) {}
+  video.addEventListener("error", () => markReelBroken(card), true);
+  const source = video.querySelector("source");
+  if (source) source.addEventListener("error", () => markReelBroken(card));
+  video.addEventListener("loadeddata", () => clearReelBroken(card));
+});
+
+/* Safety sweep: catch players that failed before listeners attached,
+   or that never fire an error event (readyState stuck at 0). */
+setTimeout(() => {
+  reelVideos.forEach(video => {
+    const card = video.closest(".reel-card");
+    if (!card || card.classList.contains("is-broken")) return;
+    let failed = false;
+    try {
+      failed = !!video.error || video.networkState === 3;
+    } catch (e) {}
+    if (failed && video.readyState === 0) markReelBroken(card);
+  });
+}, 4000);
 
 function playReel(card) {
   const currentVideo = card.querySelector(".reel-video");

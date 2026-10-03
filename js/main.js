@@ -228,6 +228,16 @@ const photos = [
             date: "2026",
             location: "Kokrajhar",
             description: "A wooden boardwalk lined with colorful flags stretches across a calm body of water, leading to a small, red-roofed pavilion under a bright blue sky."
+        },
+        {
+            id: 34,
+            src: "https://i.supaimg.com/8e0923ed-9bb9-4654-8b98-67c158f6c70c/0bb7dada-1a16-48ab-9b49-8b4cd40bd2f2.jpg",
+            title: "Timeless Silence",
+            category: "Monochrome",
+            date: "2026",
+            addedAt: "2026-10-03",
+            location: "Bilasipara",
+            description: "A vintage wall clock suspended by a chain, its Roman numerals and carved wooden frame rendered in stark black and white."
         }
 
 
