@@ -1234,3 +1234,157 @@ const photos = [
         ScrollTrigger.refresh();
       }
     });
+
+/* Capture studio — private on-device camera. Nothing is uploaded. */
+(() => {
+  const studio = document.getElementById("captureStudio");
+  if (!studio) return;
+
+  const openButton = document.getElementById("captureMoment");
+  const closeButton = document.getElementById("captureClose");
+  const video = document.getElementById("captureVideo");
+  const preview = document.getElementById("capturePhotoPreview");
+  const status = document.getElementById("captureStatus");
+  const badge = document.getElementById("captureLiveBadge");
+  const frameButton = document.getElementById("captureFrame");
+  const retakeButton = document.getElementById("captureRetake");
+  const chooseButton = document.getElementById("captureChoosePhoto");
+  const fileInput = document.getElementById("captureFile");
+  const downloadButton = document.getElementById("captureDownload");
+  const options = document.getElementById("captureOptions");
+
+  let stream = null;
+  let lastFocus = null;
+
+  function setStatus(message) {
+    if (status) status.textContent = message;
+  }
+
+  function setBadge(message) {
+    if (badge) badge.textContent = message;
+  }
+
+  function stopCamera() {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      stream = null;
+    }
+    if (video) video.srcObject = null;
+  }
+
+  async function startCamera() {
+    stopCamera();
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setStatus("This browser cannot access the camera. You can use an existing photo instead.");
+      return;
+    }
+    try {
+      setStatus("Starting camera…");
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" },
+        audio: false
+      });
+      video.srcObject = stream;
+      await video.play().catch(() => {});
+      video.hidden = false;
+      preview.hidden = true;
+      frameButton.disabled = false;
+      setBadge("LIVE VIEW / CAMERA ON");
+      setStatus("Your camera stays in this browser. Nothing is uploaded.");
+    } catch (error) {
+      setBadge("LIVE VIEW / WAITING");
+      setStatus("Camera permission was blocked. You can use an existing photo instead.");
+    }
+  }
+
+  function openStudio() {
+    lastFocus = document.activeElement;
+    studio.classList.add("open");
+    studio.setAttribute("aria-hidden", "false");
+    studio.removeAttribute("inert");
+    document.body.classList.add("modal-open");
+    if (options) options.hidden = false;
+    if (preview) preview.hidden = true;
+    if (retakeButton) retakeButton.hidden = true;
+    if (downloadButton) downloadButton.hidden = true;
+    startCamera();
+    if (closeButton) closeButton.focus();
+  }
+
+  function closeStudio() {
+    studio.classList.remove("open");
+    studio.setAttribute("aria-hidden", "true");
+    studio.setAttribute("inert", "");
+    document.body.classList.remove("modal-open");
+    stopCamera();
+    if (lastFocus && typeof lastFocus.focus === "function") lastFocus.focus();
+  }
+
+  function showPhoto(url) {
+    stopCamera();
+    preview.src = url;
+    preview.hidden = false;
+    video.hidden = true;
+    frameButton.disabled = true;
+    if (retakeButton) retakeButton.hidden = false;
+    if (downloadButton) downloadButton.hidden = false;
+    setBadge("PREVIEW / PRIVATE");
+    setStatus("Frame ready. Download it or retake the shot.");
+  }
+
+  function captureFrame() {
+    if (!video || !video.videoWidth) {
+      setStatus("Camera is not ready yet. Try again in a moment.");
+      return;
+    }
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const context = canvas.getContext("2d");
+    context.filter = "saturate(.85) contrast(1.05) sepia(.18)";
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    showPhoto(canvas.toDataURL("image/jpeg", .92));
+  }
+
+  if (openButton) openButton.addEventListener("click", openStudio);
+  if (closeButton) closeButton.addEventListener("click", closeStudio);
+  if (frameButton) frameButton.addEventListener("click", captureFrame);
+
+  if (retakeButton) retakeButton.addEventListener("click", () => {
+    preview.removeAttribute("src");
+    preview.hidden = true;
+    retakeButton.hidden = true;
+    if (downloadButton) downloadButton.hidden = true;
+    startCamera();
+  });
+
+  if (chooseButton && fileInput) {
+    chooseButton.addEventListener("click", () => fileInput.click());
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files && fileInput.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => showPhoto(reader.result);
+      reader.readAsDataURL(file);
+      fileInput.value = "";
+    });
+  }
+
+  if (downloadButton) downloadButton.addEventListener("click", () => {
+    if (!preview.getAttribute("src")) return;
+    const link = document.createElement("a");
+    link.href = preview.src;
+    link.download = "md-abdulla-moment.jpg";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  });
+
+  studio.addEventListener("click", event => {
+    if (event.target === studio) closeStudio();
+  });
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && studio.classList.contains("open")) closeStudio();
+  });
+})();
