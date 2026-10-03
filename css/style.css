@@ -1346,6 +1346,7 @@
     }
 
     .lightbox-image {
+      margin: auto;
       max-width: min(94vw, 1400px);
       max-height: 82vh;
       object-fit: contain;
@@ -1632,12 +1633,37 @@
         grid-column: auto;
       }
 
+      .lightbox {
+        padding: 76px 20px 112px;
+      }
+
+      .lightbox-image {
+        max-width: calc(100vw - 40px);
+        max-height: 100%;
+      }
+
       .lightbox-prev {
-        left: 12px;
+        top: auto;
+        bottom: 22px;
+        left: 20px;
+        transform: none;
       }
 
       .lightbox-next {
-        right: 12px;
+        top: auto;
+        right: 20px;
+        bottom: 22px;
+        transform: none;
+      }
+
+      .lightbox-prev:hover,
+      .lightbox-next:hover {
+        transform: scale(1.08);
+      }
+
+      .lightbox-caption {
+        bottom: 32px;
+        max-width: calc(100vw - 150px);
       }
     }
     /* Mobile safety: keep the exhibition flowing instead of leaving a tall
