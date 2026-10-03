@@ -31,13 +31,13 @@
             href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap"
             rel="stylesheet"
             />
-          <link rel="preload" href="assets/fonts/Montserrat-Bold.otf" as="font" type="font/otf" crossorigin />
+          <link rel="preload" href="assets/fonts/Montserrat-SemiBold.otf" as="font" type="font/otf" crossorigin />
 <style>
 @font-face {
   font-family: "Montserrat";
-  src: url("assets/fonts/Montserrat-Bold.otf") format("opentype");
+  src: url("assets/fonts/Montserrat-SemiBold.otf") format("opentype");
   font-style: normal;
-  font-weight: 700;
+  font-weight: 600;
   font-display: swap;
 }
 
@@ -419,12 +419,12 @@
     .hero-title {
       margin: 22px 0;
       font-family: "Montserrat", var(--sans);
-      font-size: clamp(3.5rem, 12vw, 9rem);
+      font-size: clamp(3rem, 10vw, 7rem);
       font-style: normal;
-      font-weight: 700;
-      letter-spacing: -.045em;
-      line-height: 1;
-      text-shadow: 0 0 42px rgba(78,133,191,.2);
+      font-weight: 600;
+      letter-spacing: .005em;
+      line-height: 1.05;
+      text-shadow: 0 0 28px rgba(78,133,191,.16);
     }
 
     .hero-title::after {
@@ -1282,6 +1282,167 @@
 
     /* Roles */
 
+    .reels-section {
+      padding: clamp(56px, 8vw, 104px) 0;
+    }
+
+    .reels-section .section-title {
+      margin: 14px 0 0;
+      font-size: clamp(2.8rem, 6vw, 5.4rem);
+      line-height: .96;
+    }
+
+    .reels-header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, .7fr);
+      gap: 24px;
+      align-items: end;
+      margin-bottom: 18px;
+    }
+
+    .reels-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+      align-items: start;
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .reel-card {
+      position: relative;
+      overflow: hidden;
+      padding: 16px;
+      border: 1px solid var(--stroke);
+      border-radius: 20px;
+      background: linear-gradient(145deg, rgba(22,30,39,.76), rgba(10,12,15,.7));
+      box-shadow: 0 20px 60px rgba(0,0,0,.2);
+      opacity: .84;
+      transform: translateY(8px) scale(.995);
+      transition: opacity .45s var(--ease), transform .45s var(--ease), translate .35s var(--ease), border-color .35s ease, box-shadow .35s ease;
+    }
+
+    .reel-card.is-active {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      border-color: rgba(137,170,204,.56);
+      box-shadow: 0 28px 80px rgba(0,0,0,.38), 0 0 34px rgba(78,133,191,.14);
+    }
+
+    .reel-card:hover {
+      translate: 0 -5px;
+      border-color: rgba(137,170,204,.58);
+      box-shadow: 0 26px 70px rgba(0,0,0,.32), 0 0 28px rgba(78,133,191,.12);
+    }
+
+    .reel-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+
+    .reel-number {
+      color: var(--accent-1);
+      font-size: .62rem;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+
+    .reels-account {
+      color: var(--muted);
+      font-size: .76rem;
+    }
+
+    .reel-title {
+      margin: 0 0 6px;
+      font-size: clamp(1.15rem, 1.7vw, 1.45rem);
+      font-weight: 500;
+      letter-spacing: -.04em;
+    }
+
+    .reel-description {
+      position: relative;
+      z-index: 1;
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: .76rem;
+      line-height: 1.55;
+    }
+
+    .reels-toolbar {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 14px;
+    }
+
+    .reels-hint {
+      margin: 9px 0 0;
+      color: var(--muted);
+      font-size: .62rem;
+      letter-spacing: .1em;
+      text-align: right;
+      text-transform: uppercase;
+    }
+
+    .reels-grid.swipe-mode {
+      display: flex;
+      gap: 14px;
+      margin-inline: calc(50% - 50vw);
+      padding: 0 max(24px, calc((100vw - min(82vw, 420px)) / 2)) 8px;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      touch-action: pan-x pan-y;
+    }
+
+    .reels-grid.swipe-mode::-webkit-scrollbar {
+      display: none;
+    }
+
+    .reels-grid.swipe-mode .reel-card {
+      flex: 0 0 min(82vw, 420px);
+      width: min(82vw, 420px);
+      scroll-snap-align: center;
+    }
+
+    .reels-embed-wrap {
+      display: flex;
+      justify-content: center;
+      min-width: 0;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 14px;
+      background: #101114;
+      min-height: min(58svh, 560px);
+    }
+
+    .reels-embed-wrap .instagram-media {
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 360px !important;
+      margin: 0 auto !important;
+    }
+
+    .reel-open-link {
+      position: relative;
+      z-index: 1;
+      display: inline-block;
+      margin-top: 18px;
+      border-bottom: 1px solid rgba(137,170,204,.4);
+      color: var(--accent-1);
+      font-size: .72rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      transition: color .25s ease, border-color .25s ease;
+    }
+
+    .reel-open-link:hover {
+      border-color: var(--text);
+      color: var(--text);
+    }
+
     .role-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1756,6 +1917,37 @@
 
       .gallery-header .section-copy {
         margin-top: 25px;
+      }
+
+      .reels-header {
+        grid-template-columns: 1fr;
+      }
+
+      .reels-header {
+        gap: 0;
+        margin-bottom: 14px;
+      }
+
+      .reels-header .section-copy {
+        margin-top: 0;
+      }
+
+      .reels-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-top: 12px;
+      }
+
+      .reel-card {
+        padding: 14px;
+      }
+
+      .reels-embed-wrap {
+        min-height: min(58svh, 520px);
+      }
+
+      .reels-embed-wrap .instagram-media {
+        min-width: 0 !important;
       }
 
       .gallery-grid {
@@ -3015,9 +3207,188 @@
                     </div>
                   </div>
                 </section>
+                <section class="section reels-section" id="reels" aria-labelledby="reels-title">
+                  <div class="container">
+                    <div class="reels-header">
+                      <div>
+                        <div class="eyebrow">06 — My Films</div>
+                        <h2 class="section-title" id="reels-title">
+                          Cinematic <span class="serif">Reels</span>
+                        </h2>
+                      </div>
+                      <p class="section-copy">
+                        Original films for @awesomebilasipara, captured and edited by MD Abdulla.
+                        Swipe through the work or switch to Scroll.
+                      </p>
+                    </div>
+                    <div class="reels-toolbar">
+                      <div class="gallery-mode" role="group" aria-label="Choose how to browse Reels">
+                        <span class="gallery-mode-label">View</span>
+                        <button class="mode-button" type="button" data-reels-mode="scroll" aria-pressed="false">Scroll</button>
+                        <button class="mode-button active" type="button" data-reels-mode="swipe" aria-pressed="true">Swipe</button>
+                      </div>
+                    </div>
+                    <p class="reels-hint" id="reelsHint" aria-live="polite">Swipe to explore · choose Scroll anytime</p>
+                    <div class="reels-grid swipe-mode" id="reelsGrid" aria-label="Individual Instagram Reels">
+                      <article class="reel-card">
+                        <div class="reel-card-header">
+                          <span class="reel-number">01 — Instagram Reel</span>
+                          <span class="reels-account">@awesomebilasipara</span>
+                        </div>
+                        <p class="reel-description">Original footage captured and edited by MD Abdulla.</p>
+                        <div class="reels-embed-wrap">
+                          <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/DXBo8uAkcvG/" data-instgrm-version="14" data-instgrm-theme="dark">
+                            <a href="https://www.instagram.com/reel/DXBo8uAkcvG/" target="_blank" rel="noopener noreferrer">Watch Instagram Reel 01</a>
+                          </blockquote>
+                        </div>
+                        <a class="reel-open-link" href="https://www.instagram.com/reel/DXBo8uAkcvG/" target="_blank" rel="noopener noreferrer">Open this Reel on Instagram ↗</a>
+                      </article>
+                      <article class="reel-card">
+                        <div class="reel-card-header">
+                          <span class="reel-number">02 — Instagram Reel</span>
+                          <span class="reels-account">@awesomebilasipara</span>
+                        </div>
+                        <h3 class="reel-title">Moments Worth Keeping</h3>
+                        <p class="reel-description">Original footage captured and edited by MD Abdulla.</p>
+                        <div class="reels-embed-wrap">
+                          <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/DW-1mymkYbL/" data-instgrm-version="14" data-instgrm-theme="dark">
+                            <a href="https://www.instagram.com/reel/DW-1mymkYbL/" target="_blank" rel="noopener noreferrer">Watch Instagram Reel 02</a>
+                          </blockquote>
+                        </div>
+                        <a class="reel-open-link" href="https://www.instagram.com/reel/DW-1mymkYbL/" target="_blank" rel="noopener noreferrer">Open this Reel on Instagram ↗</a>
+                      </article>
+                      <article class="reel-card">
+                        <div class="reel-card-header">
+                          <span class="reel-number">03 — Instagram Reel</span>
+                          <span class="reels-account">@awesomebilasipara</span>
+                        </div>
+                        <h3 class="reel-title">Through My Lens</h3>
+                        <p class="reel-description">Original footage captured and edited by MD Abdulla.</p>
+                        <div class="reels-embed-wrap">
+                          <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/DWF9sQ9Ecr2/" data-instgrm-version="14" data-instgrm-theme="dark">
+                            <a href="https://www.instagram.com/reel/DWF9sQ9Ecr2/" target="_blank" rel="noopener noreferrer">Watch Instagram Reel 03</a>
+                          </blockquote>
+                        </div>
+                        <a class="reel-open-link" href="https://www.instagram.com/reel/DWF9sQ9Ecr2/" target="_blank" rel="noopener noreferrer">Open this Reel on Instagram ↗</a>
+                      </article>
+                      <article class="reel-card">
+                        <div class="reel-card-header">
+                          <span class="reel-number">04 — Instagram Reel</span>
+                          <span class="reels-account">@awesomebilasipara</span>
+                        </div>
+                        <h3 class="reel-title">Frames with Feeling</h3>
+                        <p class="reel-description">Original footage captured and edited by MD Abdulla.</p>
+                        <div class="reels-embed-wrap">
+                          <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/DWv0irgEWIX/" data-instgrm-version="14" data-instgrm-theme="dark">
+                            <a href="https://www.instagram.com/reel/DWv0irgEWIX/" target="_blank" rel="noopener noreferrer">Watch Instagram Reel 04</a>
+                          </blockquote>
+                        </div>
+                        <a class="reel-open-link" href="https://www.instagram.com/reel/DWv0irgEWIX/" target="_blank" rel="noopener noreferrer">Open this Reel on Instagram ↗</a>
+                      </article>
+                      <article class="reel-card">
+                        <div class="reel-card-header">
+                          <span class="reel-number">05 — Instagram Reel</span>
+                          <span class="reels-account">@awesomebilasipara</span>
+                        </div>
+                        <h3 class="reel-title">The Scene, Captured</h3>
+                        <p class="reel-description">Original footage captured and edited by MD Abdulla.</p>
+                        <div class="reels-embed-wrap">
+                          <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/DWEEzB6kXjP/" data-instgrm-version="14" data-instgrm-theme="dark">
+                            <a href="https://www.instagram.com/reel/DWEEzB6kXjP/" target="_blank" rel="noopener noreferrer">Watch Instagram Reel 05</a>
+                          </blockquote>
+                        </div>
+                        <a class="reel-open-link" href="https://www.instagram.com/reel/DWEEzB6kXjP/" target="_blank" rel="noopener noreferrer">Open this Reel on Instagram ↗</a>
+                      </article>
+                      <article class="reel-card">
+                        <div class="reel-card-header">
+                          <span class="reel-number">06 — Instagram Reel</span>
+                          <span class="reels-account">@awesomebilasipara</span>
+                        </div>
+                        <h3 class="reel-title">From Capture to Cut</h3>
+                        <p class="reel-description">Original footage captured and edited by MD Abdulla.</p>
+                        <div class="reels-embed-wrap">
+                          <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/DWoFJc4kR2Z/" data-instgrm-version="14" data-instgrm-theme="dark">
+                            <a href="https://www.instagram.com/reel/DWoFJc4kR2Z/" target="_blank" rel="noopener noreferrer">Watch Instagram Reel 06</a>
+                          </blockquote>
+                        </div>
+                        <a class="reel-open-link" href="https://www.instagram.com/reel/DWoFJc4kR2Z/" target="_blank" rel="noopener noreferrer">Open this Reel on Instagram ↗</a>
+                      </article>
+                      <article class="reel-card">
+                        <div class="reel-card-header">
+                          <span class="reel-number">07 — Instagram Reel</span>
+                          <span class="reels-account">@awesomebilasipara</span>
+                        </div>
+                        <h3 class="reel-title">Everyday Cinema</h3>
+                        <p class="reel-description">Original footage captured and edited by MD Abdulla.</p>
+                        <div class="reels-embed-wrap">
+                          <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/DWjFOH8DX2y/" data-instgrm-version="14" data-instgrm-theme="dark">
+                            <a href="https://www.instagram.com/reel/DWjFOH8DX2y/" target="_blank" rel="noopener noreferrer">Watch Instagram Reel 07</a>
+                          </blockquote>
+                        </div>
+                        <a class="reel-open-link" href="https://www.instagram.com/reel/DWjFOH8DX2y/" target="_blank" rel="noopener noreferrer">Open this Reel on Instagram ↗</a>
+                      </article>
+                      <article class="reel-card">
+                        <div class="reel-card-header">
+                          <span class="reel-number">08 — Instagram Reel</span>
+                          <span class="reels-account">@awesomebilasipara</span>
+                        </div>
+                        <h3 class="reel-title">Light &amp; Atmosphere</h3>
+                        <p class="reel-description">Original footage captured and edited by MD Abdulla.</p>
+                        <div class="reels-embed-wrap">
+                          <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/DV8sEJsCCII/" data-instgrm-version="14" data-instgrm-theme="dark">
+                            <a href="https://www.instagram.com/reel/DV8sEJsCCII/" target="_blank" rel="noopener noreferrer">Watch Instagram Reel 08</a>
+                          </blockquote>
+                        </div>
+                        <a class="reel-open-link" href="https://www.instagram.com/reel/DV8sEJsCCII/" target="_blank" rel="noopener noreferrer">Open this Reel on Instagram ↗</a>
+                      </article>
+                      <article class="reel-card">
+                        <div class="reel-card-header">
+                          <span class="reel-number">09 — Instagram Reel</span>
+                          <span class="reels-account">@awesomebilasipara</span>
+                        </div>
+                        <h3 class="reel-title">The Art of the Edit</h3>
+                        <p class="reel-description">Original footage captured and edited by MD Abdulla.</p>
+                        <div class="reels-embed-wrap">
+                          <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/DWa2gIUERpD/" data-instgrm-version="14" data-instgrm-theme="dark">
+                            <a href="https://www.instagram.com/reel/DWa2gIUERpD/" target="_blank" rel="noopener noreferrer">Watch Instagram Reel 09</a>
+                          </blockquote>
+                        </div>
+                        <a class="reel-open-link" href="https://www.instagram.com/reel/DWa2gIUERpD/" target="_blank" rel="noopener noreferrer">Open this Reel on Instagram ↗</a>
+                      </article>
+                      <article class="reel-card">
+                        <div class="reel-card-header">
+                          <span class="reel-number">10 — Instagram Reel</span>
+                          <span class="reels-account">@awesomebilasipara</span>
+                        </div>
+                        <h3 class="reel-title">A Moment Reframed</h3>
+                        <p class="reel-description">Original footage captured and edited by MD Abdulla.</p>
+                        <div class="reels-embed-wrap">
+                          <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/DWV5jy8EaYz/" data-instgrm-version="14" data-instgrm-theme="dark">
+                            <a href="https://www.instagram.com/reel/DWV5jy8EaYz/" target="_blank" rel="noopener noreferrer">Watch Instagram Reel 10</a>
+                          </blockquote>
+                        </div>
+                        <a class="reel-open-link" href="https://www.instagram.com/reel/DWV5jy8EaYz/" target="_blank" rel="noopener noreferrer">Open this Reel on Instagram ↗</a>
+                      </article>
+                      <article class="reel-card">
+                        <div class="reel-card-header">
+                          <span class="reel-number">11 — Instagram Reel</span>
+                          <span class="reels-account">@awesomebilasipara</span>
+                        </div>
+                        <h3 class="reel-title">Visual Stories</h3>
+                        <p class="reel-description">Original footage captured and edited by MD Abdulla.</p>
+                        <div class="reels-embed-wrap">
+                          <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/DWHIaSOCPa6/" data-instgrm-version="14" data-instgrm-theme="dark">
+                            <a href="https://www.instagram.com/reel/DWHIaSOCPa6/" target="_blank" rel="noopener noreferrer">Watch Instagram Reel 11</a>
+                          </blockquote>
+                        </div>
+                        <a class="reel-open-link" href="https://www.instagram.com/reel/DWHIaSOCPa6/" target="_blank" rel="noopener noreferrer">Open this Reel on Instagram ↗</a>
+                      </article>
+                    </div>
+                  </div>
+                </section>
                 <section class="section" id="skills" aria-labelledby="skills-title">
                   <div class="container">
-                    <div class="eyebrow">06 — Skills</div>
+                    <div class="eyebrow">07 — Skills</div>
                     <h2 class="section-title" id="skills-title">
                       What I <span class="serif">shape</span>
                     </h2>
@@ -3042,7 +3413,7 @@
                 </section>
                 <section class="section certificates" id="certificates" aria-labelledby="certificates-title">
                   <div class="container">
-                    <div class="eyebrow">07 — Certifications</div>
+                    <div class="eyebrow">08 — Certifications</div>
                     <h2 class="section-title" id="certificates-title">
                       Proof of <span class="serif">practice</span>
                     </h2>
@@ -3100,7 +3471,7 @@
                   >
                   <div class="container">
                     <div class="eyebrow">
-                      08 — Stay in the frame
+                      09 — Stay in the frame
                     </div>
                     <h2 id="cta-title">
                       Let's capture something beautiful.
@@ -5711,6 +6082,40 @@ const photos = [
   applyLiveLook();
 })();
 
+const reelCards = document.querySelectorAll(".reel-card");
+if (reelCards.length) {
+  const reelObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => entry.target.classList.toggle("is-active", entry.isIntersecting));
+  }, { threshold: 0.45 });
+  reelCards.forEach(card => reelObserver.observe(card));
+}
+
+const reelsGrid = document.getElementById("reelsGrid");
+const reelsHint = document.getElementById("reelsHint");
+const reelsModeButtons = document.querySelectorAll("[data-reels-mode]");
+function setReelsMode(mode) {
+  const swipeMode = mode === "swipe";
+  if (reelsGrid) {
+    reelsGrid.classList.toggle("swipe-mode", swipeMode);
+    reelsGrid.scrollLeft = 0;
+  }
+  reelsModeButtons.forEach(button => {
+    const active = button.dataset.reelsMode === mode;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+  if (reelsHint) {
+    reelsHint.textContent = swipeMode
+      ? "Swipe sideways to browse the Reels"
+      : "Scroll down to browse the Reels";
+  }
+}
+reelsModeButtons.forEach(button => {
+  button.addEventListener("click", () => setReelsMode(button.dataset.reelsMode));
+});
+setReelsMode("swipe");
+
 </script>
+<script async src="https://www.instagram.com/embed.js"></script>
 </body>
             </html>
