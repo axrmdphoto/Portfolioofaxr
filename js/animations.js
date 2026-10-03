@@ -13,9 +13,9 @@
     });
   }, { threshold: .15, rootMargin: "0px 0px -8% 0px" });
 
-  grid.querySelectorAll(".exploration-image").forEach((image, index) => {
-    image.classList.add("phone-reveal-ready");
-    image.style.setProperty("--phone-delay", (index % 4) * 70 + "ms");
-    observer.observe(image);
+  grid.querySelectorAll(".exploration-frame").forEach((frame, index) => {
+    frame.classList.add("phone-reveal-ready");
+    frame.style.setProperty("--phone-delay", (index % 4) * 70 + "ms");
+    observer.observe(frame);
   });
 })();

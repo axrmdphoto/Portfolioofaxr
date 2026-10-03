@@ -1,23 +1,3 @@
-/* Keep the layout aligned with the visible phone viewport, even when the
-   browser's layout viewport is narrower because of zoom or embedded preview. */
-const visualViewportRoot = document.documentElement;
-
-function syncVisualViewport() {
-  const viewport = window.visualViewport;
-  visualViewportRoot.style.setProperty(
-    "--visual-viewport-width",
-    `${viewport?.width || visualViewportRoot.clientWidth}px`
-  );
-  visualViewportRoot.style.setProperty(
-    "--visual-viewport-height",
-    `${viewport?.height || window.innerHeight}px`
-  );
-}
-
-syncVisualViewport();
-window.addEventListener("resize", syncVisualViewport, { passive: true });
-window.visualViewport?.addEventListener("resize", syncVisualViewport, { passive: true });
-
 const photos = [
               
           {
@@ -67,7 +47,7 @@ const photos = [
             description: "A serene sunset paints the cloudy sky in pastel hues, reflecting beautifully in a roadside waterway beside a quiet stretch of green fields."
         },
 
-              {
+        {
             id: 3,
             src: "https://i.supaimg.com/8e0923ed-9bb9-4654-8b98-67c158f6c70c/271b2bc1-8642-43eb-a167-2669f7ea2c05.png",
             title: "River Silhouette",
@@ -75,6 +55,15 @@ const photos = [
             date: "2026",
             location: "Random",
             description: "A vibrant orange sunset reflects across the calm river, contrasting with the dark silhouette of a docked boat, a distant treeline, and a faint crescent moon."
+        },
+        {
+            id: 6,
+            src: "https://i.ibb.co/v6t7CPfW/1000137048.avif",
+            title: "Twilight Highway",
+            category: "Landscape",
+            date: "2026",
+            location: "Bilasipara",
+            description: "A wide, empty highway with painted chevrons leads toward distant silhouettes beneath a twilight sky shifting from warm orange to deep blue."
         },
         {
             id: 26,
@@ -669,13 +658,35 @@ const photos = [
       photos.slice(6, 9)
     ];
 
-    explorationColumns.forEach(columnPhotos => {
+    explorationColumns.forEach((columnPhotos, columnIndex) => {
       const column =
         document.createElement("div");
 
       column.className = "exploration-column";
 
-      columnPhotos.forEach(photo => {
+      columnPhotos.forEach((photo, photoIndex) => {
+        const frame = document.createElement("div");
+        frame.className = "exploration-frame";
+        frame.style.setProperty("--float-delay", `${(columnIndex * 3 + photoIndex) * -720}ms`);
+
+        frame.addEventListener("pointermove", event => {
+          if (event.pointerType === "touch" || reduceMotion) return;
+          const bounds = frame.getBoundingClientRect();
+          const x = (event.clientX - bounds.left) / bounds.width;
+          const y = (event.clientY - bounds.top) / bounds.height;
+          frame.style.setProperty("--tilt-x", `${((x - .5) * 7).toFixed(2)}deg`);
+          frame.style.setProperty("--tilt-y", `${((.5 - y) * 7).toFixed(2)}deg`);
+          frame.style.setProperty("--spot-x", `${(x * 100).toFixed(1)}%`);
+          frame.style.setProperty("--spot-y", `${(y * 100).toFixed(1)}%`);
+        });
+
+        frame.addEventListener("pointerleave", () => {
+          frame.style.setProperty("--tilt-x", "0deg");
+          frame.style.setProperty("--tilt-y", "0deg");
+          frame.style.setProperty("--spot-x", "50%");
+          frame.style.setProperty("--spot-y", "50%");
+        });
+
         const image =
           document.createElement("img");
 
@@ -702,7 +713,8 @@ const photos = [
           }
         });
 
-        column.appendChild(image);
+        frame.appendChild(image);
+        column.appendChild(frame);
       });
 
       explorationGrid.appendChild(column);
@@ -1184,14 +1196,44 @@ const photos = [
           });
         });
 
+      gsap.utils
+        .toArray(".skill-card, .role-card, .certificate-card, .stat")
+        .forEach((card, index) => {
+          gsap.from(card, {
+            opacity: 0,
+            y: 42,
+            rotateX: mobilePerformanceMode ? 0 : (index % 2 ? 2 : -2),
+            transformPerspective: 900,
+            duration: .85,
+            delay: (index % 4) * .06,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: card,
+              start: "top 90%",
+              toggleActions: "play none none reverse"
+            }
+          });
+        });
+
+      gsap.from(".contact-actions", {
+        opacity: 0,
+        y: 24,
+        duration: .7,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: ".contact-actions",
+          start: "top 92%",
+          toggleActions: "play none none reverse"
+        }
+      });
+
       if (!mobilePerformanceMode) {
         gsap.utils
-          .toArray(".exploration-image")
-          .forEach((image, index) => {
+          .toArray(".exploration-frame")
+          .forEach(image => {
             gsap.from(image, {
               opacity: 0,
-              scale: .8,
-              rotate: index % 2 === 0 ? -3 : 3,
+              clipPath: "inset(8% round 20px)",
               duration: 1,
               ease: "power3.out",
               scrollTrigger: {
@@ -1339,6 +1381,7 @@ const photos = [
   const ratioSelect = el("captureRatio");
   const filterList = el("captureFilters");
   const filterCount = el("captureFilterCount");
+  const flipButton = el("captureFlip");
   const markList = el("captureWatermarks");
   const markCount = el("captureWatermarkCount");
   const sticker = el("captureSticker");
@@ -1362,6 +1405,14 @@ const photos = [
     { id: "bleach", label: "Bleach Bypass", filter: "contrast(1.38) saturate(.52)", swatch: "#9aa39a" },
     { id: "dreamy", label: "Dreamy Soft", filter: "brightness(1.09) saturate(.86) blur(.5px)", swatch: "#c3bcd0" },
     { id: "infrared", label: "Infrared", filter: "grayscale(.72) contrast(1.34) hue-rotate(150deg) saturate(1.5)", swatch: "#d59ec2" },
+    { id: "portra", label: "Portra 400", filter: "sepia(.12) saturate(1.12) contrast(.94) brightness(1.04)", swatch: "#d29d79" },
+    { id: "chrome", label: "Chrome", filter: "saturate(1.34) contrast(1.12) hue-rotate(-5deg)", swatch: "#7fa2a0" },
+    { id: "fuji", label: "Fuji 400", filter: "saturate(.96) contrast(1.04) hue-rotate(5deg)", swatch: "#7da38d" },
+    { id: "cinema", label: "Cinema", filter: "contrast(1.16) saturate(.82) sepia(.10) brightness(.98)", swatch: "#8c7769" },
+    { id: "matte", label: "Soft Matte", filter: "contrast(.84) saturate(.82) brightness(1.08)", swatch: "#b4a99b" },
+    { id: "polaroid", label: "Instant", filter: "sepia(.16) saturate(.84) brightness(1.11) contrast(.94)", swatch: "#d6c6a5" },
+    { id: "copper", label: "Copper", filter: "sepia(.38) hue-rotate(-12deg) saturate(1.2) contrast(1.08)", swatch: "#b76e50" },
+    { id: "arctic", label: "Arctic Fade", filter: "saturate(.78) hue-rotate(18deg) brightness(1.08) contrast(.92)", swatch: "#99b7c6" },
     { id: "original", label: "Original", filter: "none", swatch: "#7f8c99" }
   ];
 
@@ -1403,16 +1454,19 @@ const photos = [
   /* Watermark designs. Each has a canvas renderer and a matching viewfinder
      overlay so the visitor sees the style before shooting. */
   const WATERMARKS = [
-    { id: "corner", label: "Corner mark", mark: "created by @axr.md", meta: "" },
-    { id: "signature", label: "Signature", mark: "@axr.md", meta: "recipe" },
-    { id: "plate", label: "Studio plate", mark: "✦ @axr.md", meta: "recipe" },
-    { id: "film", label: "Film edge", mark: "✦ @axr.md", meta: "recipe" },
-    { id: "brackets", label: "Corner brackets", mark: "@axr.md", meta: "" },
-    { id: "none", label: "No watermark", mark: "", meta: "" }
+    { id: "corner", label: "Quiet credit", mark: "created by @axr.md", meta: "", preview: "✦" },
+    { id: "signature", label: "Signature", mark: "@axr.md", meta: "recipe", preview: "Aa" },
+    { id: "plate", label: "Studio plate", mark: "✦ @axr.md", meta: "recipe", preview: "▱" },
+    { id: "film", label: "Film edge", mark: "✦ @axr.md", meta: "recipe", preview: "▤" },
+    { id: "brackets", label: "Focus frame", mark: "@axr.md", meta: "", preview: "⌗" },
+    { id: "editorial", label: "Editorial", mark: "MD ABDULLA", meta: "recipe", preview: "M" },
+    { id: "seal", label: "AXR seal", mark: "AXR", meta: "MD ABDULLA", preview: "◉" },
+    { id: "none", label: "No watermark", mark: "", meta: "", preview: "—" }
   ];
 
   let activeFilterId = "vintage";
   let activeWatermarkId = "corner";
+  let facingMode = "environment";
   let stream = null;
   let lastFocus = null;
   let grainPattern = null;
@@ -1674,6 +1728,55 @@ const photos = [
       context.restore();
     },
 
+    editorial(context, width, height, look) {
+      const unit = Math.min(width, height);
+      const margin = Math.max(18, Math.round(unit * .05));
+      const brandSize = Math.max(10, unit * .016);
+      const metaSize = Math.max(8, unit * .012);
+
+      context.save();
+      context.textBaseline = "alphabetic";
+      context.shadowColor = "rgba(0,0,0,.85)";
+      context.shadowBlur = Math.max(5, unit * .012);
+      context.fillStyle = "rgba(255,255,255,.94)";
+      context.fillRect(margin, height - margin - brandSize * 2.7, Math.max(28, unit * .12), Math.max(1, unit * .002));
+      context.font = fontMeta(brandSize);
+      fillTracked(context, "MD ABDULLA", margin, height - margin - brandSize * 1.1, brandSize * .2);
+      context.fillStyle = "rgba(255,255,255,.74)";
+      context.font = fontMeta(metaSize);
+      fillTracked(context, look.caption.toUpperCase(), margin, height - margin, metaSize * .18);
+      context.restore();
+    },
+
+    seal(context, width, height) {
+      const unit = Math.min(width, height);
+      const margin = Math.max(18, Math.round(unit * .05));
+      const radius = Math.max(30, unit * .065);
+      const x = width - margin - radius;
+      const y = height - margin - radius;
+
+      context.save();
+      context.strokeStyle = "rgba(255,255,255,.88)";
+      context.fillStyle = "rgba(12,12,12,.30)";
+      context.lineWidth = Math.max(1.2, unit * .002);
+      context.shadowColor = "rgba(0,0,0,.7)";
+      context.shadowBlur = Math.max(5, unit * .012);
+      context.beginPath();
+      context.arc(x, y, radius, 0, Math.PI * 2);
+      context.fill();
+      context.stroke();
+      context.shadowBlur = 0;
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.font = fontBrand(Math.max(14, unit * .027));
+      context.fillStyle = "rgba(255,255,255,.97)";
+      context.fillText("AXR", x, y - radius * .08);
+      context.font = fontMeta(Math.max(6, unit * .008));
+      context.textAlign = "left";
+      fillTracked(context, "MD ABDULLA", x, y + radius * .38, Math.max(.3, unit * .0007), "center");
+      context.restore();
+    },
+
     none() {}
   };
 
@@ -1700,7 +1803,10 @@ const photos = [
       stage.style.aspectRatio = "4 / 3";
     }
 
-    if (video && !video.hidden) setBadge(`LIVE VIEW / ${ratioName()}`);
+    if (video && !video.hidden) {
+      const cameraSide = facingMode === "user" ? "FRONT" : "REAR";
+      setBadge(`LIVE VIEW / ${cameraSide} / ${ratioName()}`);
+    }
   }
 
   function ratioName() {
@@ -1719,8 +1825,10 @@ const photos = [
     if (stickerMark) stickerMark.textContent = mark.mark;
 
     if (stickerMeta) {
-      stickerMeta.textContent = mark.meta === "recipe" ? look.caption : "";
+      stickerMeta.textContent = mark.meta === "recipe" ? look.caption : mark.meta;
     }
+
+    if (markList) markList.classList.add("capture-watermark-list");
   }
 
   /* Live preview uses the same filter string the export uses. Once a frame
@@ -1866,41 +1974,75 @@ const photos = [
       stream.getTracks().forEach(track => track.stop());
       stream = null;
     }
-    if (video) video.srcObject = null;
+    if (video) {
+      video.srcObject = null;
+      video.classList.remove("capture-video-front");
+    }
+    if (flipButton) flipButton.hidden = true;
+  }
+
+  function syncFlipButton(disabled = false) {
+    if (!flipButton) return;
+    const showFront = facingMode === "environment";
+    flipButton.hidden = !stream || !video || video.hidden;
+    flipButton.disabled = disabled;
+    flipButton.setAttribute("aria-label", showFront ? "Switch to front camera" : "Switch to rear camera");
+    const label = flipButton.querySelector("span:last-child");
+    if (label) label.textContent = showFront ? "Front camera" : "Rear camera";
   }
 
   async function startCamera() {
     stopCamera();
+    if (frameButton) frameButton.disabled = true;
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       setStatus("This browser cannot access the camera. You can use an existing photo instead.");
       applyLiveLook();
-      return;
+      return false;
     }
 
     try {
       setStatus("Starting camera…");
       stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1440 } },
+        video: { facingMode: { ideal: facingMode }, width: { ideal: 1920 }, height: { ideal: 1440 } },
         audio: false
       });
       video.srcObject = stream;
+      video.classList.toggle("capture-video-front", facingMode === "user");
       /* reveal straight away: play() can settle late on some devices */
       video.hidden = false;
       video.play().catch(() => {});
       preview.hidden = true;
       frameButton.disabled = false;
-      setBadge("LIVE VIEW / CAMERA ON");
+      syncFlipButton();
+      setBadge(`LIVE VIEW / ${facingMode === "user" ? "FRONT" : "REAR"} / ${ratioName()}`);
       setStatus("Your camera stays in this browser. Nothing is uploaded.");
       applyLiveLook();
+      return true;
     } catch (error) {
       if (video) video.hidden = true;
+      if (frameButton) frameButton.disabled = true;
+      syncFlipButton();
       setBadge("LIVE VIEW / WAITING");
       setStatus(sharedFromLink
         ? "Camera setup loaded from a shared link. The camera is blocked here, so use an existing photo."
         : "Camera permission was blocked. You can use an existing photo instead.");
       applyLiveLook();
+      return false;
     }
+  }
+
+  async function flipCamera() {
+    const previousFacing = facingMode;
+    facingMode = facingMode === "environment" ? "user" : "environment";
+    syncFlipButton(true);
+    const started = await startCamera();
+    if (!started && studio.classList.contains("open")) {
+      facingMode = previousFacing;
+      const restored = await startCamera();
+      if (restored) setStatus("That camera is unavailable, so the previous camera is back on.");
+    }
+    syncHash();
   }
 
   function openStudio() {
@@ -1958,7 +2100,12 @@ const photos = [
       const grabbed = document.createElement("canvas");
       grabbed.width = video.videoWidth;
       grabbed.height = video.videoHeight;
-      grabbed.getContext("2d").drawImage(video, 0, 0, grabbed.width, grabbed.height);
+      const context = grabbed.getContext("2d");
+      if (facingMode === "user") {
+        context.translate(grabbed.width, 0);
+        context.scale(-1, 1);
+      }
+      context.drawImage(video, 0, 0, grabbed.width, grabbed.height);
 
       const frame = renderFrame(grabbed);
 
@@ -2006,6 +2153,8 @@ const photos = [
     if (!container) return;
 
     countElement.textContent = `${items.length} ${swatchKey === "swatch" ? "looks" : "designs"}`;
+    if (swatchKey === "design") container.classList.add("capture-watermark-list");
+    if (swatchKey === "swatch") container.classList.add("capture-film-list");
 
     items.forEach(item => {
       const chip = document.createElement("button");
@@ -2019,6 +2168,11 @@ const photos = [
         swatch.className = "capture-filter-swatch";
         swatch.style.background = item.swatch;
         chip.appendChild(swatch);
+      } else if (swatchKey === "design") {
+        const preview = document.createElement("span");
+        preview.className = "capture-mark-preview";
+        preview.textContent = item.preview || "✦";
+        chip.appendChild(preview);
       }
 
       const label = document.createElement("span");
@@ -2067,7 +2221,8 @@ const photos = [
       l: lensSelect.value,
       f: activeFilterId,
       r: ratioSelect.value,
-      w: activeWatermarkId
+      w: activeWatermarkId,
+      v: facingMode
     };
   }
 
@@ -2092,6 +2247,7 @@ const photos = [
     if (Object.prototype.hasOwnProperty.call(RATIOS, payload.r)) ratioSelect.value = payload.r;
     if (FILTERS.some(item => item.id === payload.f)) activeFilterId = payload.f;
     if (WATERMARKS.some(item => item.id === payload.w)) activeWatermarkId = payload.w;
+    if (payload.v === "user" || payload.v === "environment") facingMode = payload.v;
 
     return true;
   }
@@ -2173,6 +2329,7 @@ const photos = [
   if (openButton) openButton.addEventListener("click", openStudio);
   if (closeButton) closeButton.addEventListener("click", closeStudio);
   if (frameButton) frameButton.addEventListener("click", captureFrame);
+  if (flipButton) flipButton.addEventListener("click", flipCamera);
   if (downloadButton) downloadButton.addEventListener("click", downloadPhoto);
   if (sharePhotoButton) sharePhotoButton.addEventListener("click", sharePhoto);
   if (shareLinkButton) shareLinkButton.addEventListener("click", copySetupLink);
