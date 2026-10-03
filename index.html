@@ -702,6 +702,24 @@
       will-change: transform;
     }
 
+    .photo-card::before {
+      position: absolute;
+      z-index: 1;
+      inset: 0;
+      content: "";
+      pointer-events: none;
+      background:
+        radial-gradient(
+          circle at var(--spot-x, 50%) var(--spot-y, 50%),
+          rgba(255,255,255,.2),
+          transparent 34%
+        ),
+        linear-gradient(145deg, rgba(255,255,255,.1), transparent 38%);
+      mix-blend-mode: screen;
+      opacity: 0;
+      transition: opacity .45s var(--ease);
+    }
+
     .photo-card::after {
       position: absolute;
       z-index: 1;
@@ -726,6 +744,10 @@
 
     .photo-card:hover::after {
       transform: translateX(130%);
+    }
+
+    .photo-card:hover::before {
+      opacity: 1;
     }
 
     .photo-card img {
@@ -1713,7 +1735,9 @@
       max-height: 82vh;
       object-fit: contain;
       transform: scale(.96);
-      transition: transform .4s var(--ease);
+      filter: saturate(1.04) contrast(1.02);
+      transition: transform .4s var(--ease), filter .4s ease;
+      will-change: transform, opacity, filter;
     }
 
     .lightbox.open .lightbox-image {
@@ -4153,7 +4177,7 @@ const photos = [
         article.append(image, info);
 
         article.addEventListener("click", () => {
-          openLightbox(photo.id);
+          openLightbox(photo.id, visiblePhotos);
         });
 
         article.addEventListener("keydown", event => {
@@ -4162,7 +4186,7 @@ const photos = [
             event.key === " "
           ) {
             event.preventDefault();
-            openLightbox(photo.id);
+            openLightbox(photo.id, visiblePhotos);
           }
         });
 
@@ -4442,14 +4466,24 @@ const photos = [
       document.getElementById("lightboxNext");
 
     let currentPhotoIndex = 0;
+    let lightboxPhotos = photos;
     let previouslyFocusedElement = null;
 
-    function openLightbox(id) {
+    function openLightbox(id, sourcePhotos = photos) {
       previouslyFocusedElement =
         document.activeElement;
 
-      currentPhotoIndex =
-        photos.findIndex(photo => photo.id === id);
+      lightboxPhotos = sourcePhotos;
+      currentPhotoIndex = lightboxPhotos.findIndex(
+        photo => photo.id === id
+      );
+
+      if (currentPhotoIndex < 0) {
+        lightboxPhotos = photos;
+        currentPhotoIndex = lightboxPhotos.findIndex(
+          photo => photo.id === id
+        );
+      }
 
       updateLightbox();
 
@@ -4466,13 +4500,14 @@ const photos = [
 
       lightboxCaption.textContent =
         `${String(currentPhotoIndex + 1).padStart(2, "0")} / ` +
-        `${String(photos.length).padStart(2, "0")} · ` +
+        `${String(lightboxPhotos.length).padStart(2, "0")} · ` +
         `${photo.title} · ${photo.category} · ${photo.location}`;
 
       if (!reduceMotion && window.gsap) {
         gsap.to(lightboxImage, {
           opacity: 1,
           scale: 1,
+          filter: "blur(0px) saturate(1.04) contrast(1.02)",
           duration: .45,
           ease: "power3.out"
         });
@@ -4481,12 +4516,13 @@ const photos = [
 
     function updateLightbox() {
       const photo =
-        photos[currentPhotoIndex];
+        lightboxPhotos[currentPhotoIndex];
 
       if (!reduceMotion && window.gsap) {
         gsap.to(lightboxImage, {
           opacity: 0,
           scale: .96,
+          filter: "blur(6px) saturate(.88) contrast(1)",
           duration: .16,
           onComplete: () => {
             setLightboxContent(photo);
@@ -4511,15 +4547,15 @@ const photos = [
 
     function showPrevious() {
       currentPhotoIndex =
-        (currentPhotoIndex - 1 + photos.length) %
-        photos.length;
+        (currentPhotoIndex - 1 + lightboxPhotos.length) %
+        lightboxPhotos.length;
 
       updateLightbox();
     }
 
     function showNext() {
       currentPhotoIndex =
-        (currentPhotoIndex + 1) % photos.length;
+        (currentPhotoIndex + 1) % lightboxPhotos.length;
 
       updateLightbox();
     }
@@ -4756,11 +4792,35 @@ const photos = [
               const rotateX =
                 ((y / rect.height) - .5) * -8;
 
+              const spotX =
+                (x / rect.width) * 100;
+
+              const spotY =
+                (y / rect.height) * 100;
+
+              card.style.setProperty(
+                "--spot-x",
+                `${spotX.toFixed(1)}%`
+              );
+
+              card.style.setProperty(
+                "--spot-y",
+                `${spotY.toFixed(1)}%`
+              );
+
               gsap.to(card, {
                 rotateX,
                 rotateY,
                 transformPerspective: 900,
                 duration: .35,
+                ease: "power2.out"
+              });
+
+              gsap.to(card.querySelector("img"), {
+                x: ((x / rect.width) - .5) * -10,
+                y: ((y / rect.height) - .5) * -8,
+                scale: 1.05,
+                duration: .45,
                 ease: "power2.out"
               });
             }
@@ -4774,6 +4834,17 @@ const photos = [
                 rotateY: 0,
                 duration: .7,
                 ease: "elastic.out(1, .4)"
+              });
+
+              card.style.setProperty("--spot-x", "50%");
+              card.style.setProperty("--spot-y", "50%");
+
+              gsap.to(card.querySelector("img"), {
+                x: 0,
+                y: 0,
+                scale: 1,
+                duration: .7,
+                ease: "power3.out"
               });
             }
           );
