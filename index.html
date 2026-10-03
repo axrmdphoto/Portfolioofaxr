@@ -3257,7 +3257,7 @@
                   <div class="exploration-sticky">
                     <div class="exploration-heading">
                       <div class="eyebrow">
-                        03 — Visual Exhibition
+                        04 — Visual Exhibition
                       </div>
                       <h2 id="explorations-title">
                         Visual <span class="serif">Explorations</span>
@@ -3285,7 +3285,7 @@
                   <div class="container about-layout">
                     <div>
                       <div class="eyebrow">
-                        04 — Behind the Lens
+                        05 — Behind the Lens
                       </div>
                       <h2 class="about-title" id="about-title">
                         Behind the <span>Lens</span>
@@ -3331,7 +3331,7 @@
                 </section>
                 <section class="section roles" id="roles" aria-labelledby="roles-title">
                   <div class="container">
-                    <div class="eyebrow">05 — Roles</div>
+                    <div class="eyebrow">06 — Roles</div>
                     <h2 class="section-title" id="roles-title">
                       What I <span class="serif">run</span>
                     </h2>
@@ -3355,7 +3355,7 @@
                   <div class="container">
                     <div class="reels-header">
                       <div>
-                        <div class="eyebrow">06 — My Films</div>
+                        <div class="eyebrow">03 — My Films</div>
                         <h2 class="section-title" id="reels-title">
                           Cinematic <span class="serif">Reels</span>
                         </h2>
@@ -4083,6 +4083,13 @@ const photos = [
 
     document.getElementById("statPhotoCount").textContent = galleryStats.photos;
     document.getElementById("statLocationCount").textContent = galleryStats.locations;
+
+    const journalSection = document.getElementById("journal");
+    const reelsSection = document.getElementById("reels");
+
+    if (journalSection && reelsSection) {
+      journalSection.after(reelsSection);
+    }
 
     const dailyFeaturedMoments = [
       "A moment worth remembering.",
