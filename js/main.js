@@ -1313,35 +1313,42 @@ const photos = [
       }
     });
 
-/* Capture studio — private on-device camera with real lens, film and
-   filter rendering plus a vintage @axr.md sticker burned into every frame.
-   Nothing is uploaded. */
+/* Capture studio — private on-device camera. Lens, film, aspect ratio and
+   watermark are all rendered into the exported pixels, and the whole setup
+   can be shared with another visitor as a link. Nothing is uploaded. */
 (() => {
   const studio = document.getElementById("captureStudio");
   if (!studio) return;
 
-  const openButton = document.getElementById("captureMoment");
-  const closeButton = document.getElementById("captureClose");
-  const video = document.getElementById("captureVideo");
-  const preview = document.getElementById("capturePhotoPreview");
-  const status = document.getElementById("captureStatus");
-  const badge = document.getElementById("captureLiveBadge");
-  const frameButton = document.getElementById("captureFrame");
-  const retakeButton = document.getElementById("captureRetake");
-  const chooseButton = document.getElementById("captureChoosePhoto");
-  const fileInput = document.getElementById("captureFile");
-  const downloadButton = document.getElementById("captureDownload");
-  const options = document.getElementById("captureOptions");
-  const cameraSelect = document.getElementById("captureCamera");
-  const lensSelect = document.getElementById("captureLens");
-  const filterList = document.getElementById("captureFilters");
-  const filterCount = document.getElementById("captureFilterCount");
-  const sticker = document.getElementById("captureSticker");
-  const stickerMeta = document.getElementById("captureStickerMeta");
+  const el = id => document.getElementById(id);
 
-  /* Film / filter library. `filter` is a CSS filter string, which the 2D
-     canvas also understands, so one recipe drives the live preview and the
-     exported file. `swatch` is only the chip preview colour. */
+  const openButton = el("captureMoment");
+  const closeButton = el("captureClose");
+  const video = el("captureVideo");
+  const preview = el("capturePhotoPreview");
+  const status = el("captureStatus");
+  const badge = el("captureLiveBadge");
+  const frameButton = el("captureFrame");
+  const retakeButton = el("captureRetake");
+  const chooseButton = el("captureChoosePhoto");
+  const fileInput = el("captureFile");
+  const downloadButton = el("captureDownload");
+  const sharePhotoButton = el("captureSharePhoto");
+  const shareLinkButton = el("captureShareLink");
+  const options = el("captureOptions");
+  const cameraSelect = el("captureCamera");
+  const lensSelect = el("captureLens");
+  const ratioSelect = el("captureRatio");
+  const filterList = el("captureFilters");
+  const filterCount = el("captureFilterCount");
+  const markList = el("captureWatermarks");
+  const markCount = el("captureWatermarkCount");
+  const sticker = el("captureSticker");
+  const stickerMark = el("captureStickerMark");
+  const stickerMeta = el("captureStickerMeta");
+
+  /* Film library. `filter` is a CSS filter string, which the 2D canvas also
+     understands, so one recipe drives the viewfinder and the export. */
   const FILTERS = [
     { id: "vintage", label: "Vintage Color", filter: "sepia(.30) saturate(1.18) contrast(.94) brightness(1.06)", swatch: "#b08a5e" },
     { id: "monochrome", label: "Monochrome", filter: "grayscale(1) contrast(1.10) brightness(1.02)", swatch: "#8d8d8d" },
@@ -1359,31 +1366,65 @@ const photos = [
     { id: "original", label: "Original", filter: "none", swatch: "#7f8c99" }
   ];
 
-  /* Camera bodies add their own character before the film is applied. */
   const CAMERAS = {
-    "35mm rangefinder": { filter: "contrast(1.06) saturate(1.04)", grain: .05, vignette: .30, label: "35mm rangefinder" },
-    "classic 35mm SLR": { filter: "contrast(1.02) saturate(.96)", grain: .07, vignette: .22, label: "classic 35mm SLR" },
-    "vintage film compact": { filter: "sepia(.14) saturate(.92) brightness(1.04)", grain: .12, vignette: .40, label: "vintage film compact" },
-    "half-frame compact": { filter: "saturate(.88) contrast(1.10)", grain: .09, vignette: .46, label: "half-frame compact" }
+    "35mm rangefinder": { filter: "contrast(1.06) saturate(1.04)", grain: .05, vignette: .30 },
+    "classic 35mm SLR": { filter: "contrast(1.02) saturate(.96)", grain: .07, vignette: .22 },
+    "vintage film compact": { filter: "sepia(.14) saturate(.92) brightness(1.04)", grain: .12, vignette: .40 },
+    "half-frame compact": { filter: "saturate(.88) contrast(1.10)", grain: .09, vignette: .46 }
   };
 
-  /* Focal length is simulated by cropping (or widening) around the centre,
-     and each aperture brings its own depth-of-field falloff. */
+  /* Focal length is simulated by cropping around the centre; each aperture
+     adds its own falloff. */
   const LENSES = {
-    "28mm f/2.8": { scale: .86, vignette: .10, blurEdge: 2.2, grain: .02, label: "28mm f/2.8" },
-    "35mm f/2": { scale: 1, vignette: .06, blurEdge: 1.4, grain: .015, label: "35mm f/2" },
-    "50mm f/1.8": { scale: 1.22, vignette: .05, blurEdge: 1, grain: .01, label: "50mm f/1.8" },
-    "85mm f/1.4": { scale: 1.55, vignette: .04, blurEdge: .7, grain: .008, label: "85mm f/1.4" }
+    "28mm f/2.8": { scale: .86, vignette: .10, blurEdge: 2.2, grain: .02 },
+    "35mm f/2": { scale: 1, vignette: .06, blurEdge: 1.4, grain: .015 },
+    "50mm f/1.8": { scale: 1.22, vignette: .05, blurEdge: 1, grain: .01 },
+    "85mm f/1.4": { scale: 1.55, vignette: .04, blurEdge: .7, grain: .008 }
   };
+
+  const RATIOS = {
+    original: null,
+    "1:1": 1,
+    "4:5": 4 / 5,
+    "3:2": 3 / 2,
+    "16:9": 16 / 9,
+    "9:16": 9 / 16
+  };
+
+  /* Watermark designs. Each has a canvas renderer and a matching viewfinder
+     overlay so the visitor sees the style before shooting. */
+  const WATERMARKS = [
+    { id: "corner", label: "Corner mark", mark: "created by @axr.md", meta: "" },
+    { id: "signature", label: "Signature", mark: "@axr.md", meta: "recipe" },
+    { id: "plate", label: "Studio plate", mark: "✦ @axr.md", meta: "recipe" },
+    { id: "film", label: "Film edge", mark: "✦ @axr.md", meta: "recipe" },
+    { id: "brackets", label: "Corner brackets", mark: "@axr.md", meta: "" },
+    { id: "none", label: "No watermark", mark: "", meta: "" }
+  ];
 
   let activeFilterId = "vintage";
+  let activeWatermarkId = "corner";
   let stream = null;
   let lastFocus = null;
   let grainPattern = null;
   let sourceImage = null;
+  let sharedFromLink = false;
 
   function currentFilter() {
     return FILTERS.find(item => item.id === activeFilterId) || FILTERS[0];
+  }
+
+  function currentWatermark() {
+    return WATERMARKS.find(item => item.id === activeWatermarkId) || WATERMARKS[0];
+  }
+
+  /* Sources arrive as a live video, a loaded image or a grabbed canvas, so the
+     intrinsic size has to be read per type. */
+  function sourceSize(source) {
+    return {
+      width: source.videoWidth || source.naturalWidth || source.width || 0,
+      height: source.videoHeight || source.naturalHeight || source.height || 0
+    };
   }
 
   function currentCamera() {
@@ -1392,6 +1433,15 @@ const photos = [
 
   function currentLens() {
     return LENSES[lensSelect.value] || LENSES["35mm f/2"];
+  }
+
+  function currentRatio() {
+    const key = ratioSelect.value;
+    return Object.prototype.hasOwnProperty.call(RATIOS, key) ? RATIOS[key] : null;
+  }
+
+  function ratioLabel() {
+    return ratioSelect.options[ratioSelect.selectedIndex].text;
   }
 
   function recipe() {
@@ -1403,10 +1453,10 @@ const photos = [
       camera,
       lens,
       film,
-      css: [camera.filter, lens.blurEdge ? `blur(${lens.blurEdge * .35}px)` : "", film.filter === "none" ? "" : film.filter]
+      css: [camera.filter, lens.blurEdge ? `blur(${(lens.blurEdge * .35).toFixed(2)}px)` : "", film.filter === "none" ? "" : film.filter]
         .filter(Boolean)
         .join(" "),
-      caption: `${camera.label} · ${lens.label} · ${film.label.toLowerCase()}`
+      caption: `${cameraSelect.value} · ${lensSelect.value} · ${film.label.toLowerCase()}`
     };
   }
 
@@ -1418,25 +1468,242 @@ const photos = [
     if (badge) badge.textContent = message;
   }
 
+  /* Typography helpers — canvas has no letter-spacing everywhere, so tracked
+     text is drawn glyph by glyph for consistent results. */
+  function fontBrand(size) {
+    return `italic ${size}px Georgia, "Times New Roman", serif`;
+  }
+
+  function fontMeta(size) {
+    return `${size}px "Inter", "Helvetica Neue", Arial, sans-serif`;
+  }
+
+  function measureTracked(context, text, tracking) {
+    let width = 0;
+    for (const character of text) {
+      width += context.measureText(character).width + tracking;
+    }
+    return Math.max(0, width - tracking);
+  }
+
+  function fillTracked(context, text, x, y, tracking, align = "left") {
+    const width = measureTracked(context, text, tracking);
+    let cursor = align === "right" ? x - width : align === "center" ? x - width / 2 : x;
+
+    for (const character of text) {
+      context.fillText(character, cursor, y);
+      cursor += context.measureText(character).width + tracking;
+    }
+
+    return width;
+  }
+
+  function roundRect(context, x, y, width, height, radius) {
+    context.beginPath();
+    context.moveTo(x + radius, y);
+    context.arcTo(x + width, y, x + width, y + height, radius);
+    context.arcTo(x + width, y + height, x, y + height, radius);
+    context.arcTo(x, y + height, x, y, radius);
+    context.arcTo(x, y, x + width, y, radius);
+    context.closePath();
+  }
+
+  /* Watermark renderers. Every design keeps clear of the centre of the frame
+     and stays legible on both light and dark photos. */
+  const WATERMARK_RENDERERS = {
+    corner(context, width, height, look) {
+      const unit = Math.min(width, height);
+      const margin = Math.max(16, Math.round(unit * .045));
+      const size = Math.max(9, unit * .0155);
+
+      context.save();
+      context.font = fontMeta(size);
+      context.fillStyle = "rgba(255,255,255,.94)";
+      context.shadowColor = "rgba(0,0,0,.9)";
+      context.shadowBlur = Math.max(4, unit * .012);
+      context.textBaseline = "alphabetic";
+      fillTracked(context, "✦ CREATED BY @AXR.MD", margin, height - margin, size * .2);
+      context.restore();
+    },
+
+    signature(context, width, height, look) {
+      const unit = Math.min(width, height);
+      const margin = Math.max(18, Math.round(unit * .05));
+      const brandSize = Math.max(16, unit * .045);
+      const metaSize = Math.max(8, unit * .0135);
+      const tracking = metaSize * .22;
+
+      context.save();
+      context.textBaseline = "alphabetic";
+      context.textAlign = "left";
+      context.shadowColor = "rgba(0,0,0,.85)";
+      context.shadowBlur = Math.max(5, unit * .014);
+
+      context.font = fontBrand(brandSize);
+      context.fillStyle = "rgba(255,255,255,.97)";
+      const brandWidth = context.measureText("@axr.md").width;
+
+      context.font = fontMeta(metaSize);
+      const metaWidth = measureTracked(context, look.caption.toUpperCase(), tracking);
+
+      const right = width - margin;
+      const baseline = height - margin - metaSize * 1.5;
+
+      context.font = fontBrand(brandSize);
+      context.fillText("@axr.md", right - brandWidth, baseline);
+
+      context.shadowBlur = 0;
+      context.fillStyle = "rgba(255,255,255,.6)";
+      context.fillRect(right - brandWidth, baseline + brandSize * .22, brandWidth, Math.max(1, unit * .0016));
+
+      context.fillStyle = "rgba(255,255,255,.7)";
+      fillTracked(context, look.caption.toUpperCase(), right, height - margin, tracking, "right");
+      context.restore();
+    },
+
+    plate(context, width, height, look) {
+      const unit = Math.min(width, height);
+      const margin = Math.max(16, Math.round(unit * .042));
+      const brandSize = Math.max(13, unit * .028);
+      const metaSize = Math.max(8, unit * .0125);
+      const tracking = metaSize * .2;
+      const padX = brandSize * .62;
+      const padY = brandSize * .46;
+
+      context.save();
+      context.font = fontBrand(brandSize);
+      const brandWidth = context.measureText("✦ @axr.md").width;
+      context.font = fontMeta(metaSize);
+      const metaWidth = measureTracked(context, look.caption.toUpperCase(), tracking);
+
+      const boxWidth = Math.max(brandWidth, metaWidth) + padX * 2;
+      const boxHeight = brandSize + metaSize * 1.7 + padY * 2;
+      const x = margin;
+      const y = height - margin - boxHeight;
+
+      context.shadowColor = "rgba(0,0,0,.45)";
+      context.shadowBlur = Math.max(10, unit * .028);
+      roundRect(context, x, y, boxWidth, boxHeight, Math.max(6, unit * .016));
+      context.fillStyle = "rgba(12,12,12,.42)";
+      context.fill();
+      context.shadowBlur = 0;
+      context.lineWidth = Math.max(1, unit * .0014);
+      context.strokeStyle = "rgba(245,245,245,.5)";
+      context.stroke();
+
+      context.textBaseline = "alphabetic";
+      context.font = fontBrand(brandSize);
+      context.fillStyle = "rgba(255,255,255,.97)";
+      context.fillText("✦ @axr.md", x + padX, y + padY + brandSize * .82);
+
+      context.font = fontMeta(metaSize);
+      context.fillStyle = "rgba(255,255,255,.74)";
+      fillTracked(context, look.caption.toUpperCase(), x + padX, y + padY + brandSize * .82 + metaSize * 1.5, tracking);
+      context.restore();
+    },
+
+    film(context, width, height, look) {
+      const unit = Math.min(width, height);
+      const strip = Math.max(26, unit * .075);
+      const metaSize = Math.max(8, unit * .0125);
+      const tracking = metaSize * .24;
+      const markSize = Math.max(8, unit * .0135);
+
+      context.save();
+      context.fillStyle = "rgba(8,8,8,.62)";
+      context.fillRect(0, height - strip, width, strip);
+
+      context.fillStyle = "rgba(255,255,255,.16)";
+      const hole = Math.max(4, unit * .011);
+      for (let x = hole; x < width; x += hole * 2.6) {
+        context.fillRect(x, height - strip + hole * .55, hole * 1.5, hole * .55);
+        context.fillRect(x, height - hole * 1.1, hole * 1.5, hole * .55);
+      }
+
+      const textY = height - strip / 2 + markSize * .36;
+      context.textBaseline = "alphabetic";
+      context.font = fontMeta(markSize);
+      context.fillStyle = "rgba(255,255,255,.95)";
+      fillTracked(context, "✦ @AXR.MD", Math.max(14, unit * .04), textY, markSize * .26);
+
+      context.font = fontMeta(metaSize);
+      context.fillStyle = "rgba(255,255,255,.72)";
+      fillTracked(context, look.caption.toUpperCase(), width - Math.max(14, unit * .04), textY, tracking, "right");
+      context.restore();
+    },
+
+    brackets(context, width, height) {
+      const unit = Math.min(width, height);
+      const inset = Math.max(14, Math.round(unit * .038));
+      const arm = Math.max(16, unit * .05);
+      const weight = Math.max(1.4, unit * .0024);
+      const brandSize = Math.max(10, unit * .017);
+
+      context.save();
+      context.strokeStyle = "rgba(255,255,255,.82)";
+      context.lineWidth = weight;
+      context.lineCap = "square";
+
+      const corners = [
+        [inset, inset, 1, 1],
+        [width - inset, inset, -1, 1],
+        [inset, height - inset, 1, -1],
+        [width - inset, height - inset, -1, -1]
+      ];
+
+      corners.forEach(([x, y, dirX, dirY]) => {
+        context.beginPath();
+        context.moveTo(x + dirX * arm, y);
+        context.lineTo(x, y);
+        context.lineTo(x, y + dirY * arm);
+        context.stroke();
+      });
+
+      context.font = fontBrand(brandSize);
+      context.fillStyle = "rgba(255,255,255,.9)";
+      context.textBaseline = "alphabetic";
+      context.shadowColor = "rgba(0,0,0,.8)";
+      context.shadowBlur = Math.max(4, unit * .01);
+      context.textAlign = "center";
+      context.fillText("@axr.md", width / 2, height - inset - brandSize * .5);
+      context.restore();
+    },
+
+    none() {}
+  };
+
+  function drawWatermark(context, width, height, look) {
+    const draw = WATERMARK_RENDERERS[activeWatermarkId];
+    if (draw) draw(context, width, height, look);
+  }
+
+  function syncOverlay(look) {
+    const mark = currentWatermark();
+    const stillShown = preview && !preview.hidden;
+
+    if (sticker) {
+      sticker.dataset.design = mark.id;
+      sticker.style.opacity = stillShown || mark.id === "none" ? "0" : "1";
+    }
+
+    if (stickerMark) stickerMark.textContent = mark.mark;
+
+    if (stickerMeta) {
+      stickerMeta.textContent = mark.meta === "recipe" ? look.caption : "";
+    }
+  }
+
   /* Live preview uses the same filter string the export uses. Once a frame
      has been captured, every control change re-renders the real pixels so the
      downloaded file always matches what is on screen. */
   function applyLiveLook() {
-    const look = recipe().css;
-    const stillShown = preview && !preview.hidden;
+    const look = recipe();
 
-    if (video) video.style.filter = look === "none" ? "" : look;
+    if (video) video.style.filter = look.css === "none" ? "" : look.css;
 
-    if (stickerMeta) stickerMeta.textContent = recipe().caption;
+    syncOverlay(look);
 
-    /* While the camera is live the sticker is a preview; once a frame is
-       captured the real one is burned into the photo, so hide the overlay
-       to avoid showing it twice. */
-    if (sticker) {
-      sticker.style.opacity = stillShown ? "0" : "1";
-    }
-
-    if (stillShown && sourceImage) {
+    if (preview && !preview.hidden && sourceImage) {
       try {
         preview.src = renderFrame(sourceImage).toDataURL("image/jpeg", .92);
       } catch (error) {
@@ -1470,16 +1737,18 @@ const photos = [
     return grainPattern;
   }
 
-  /* Lens rendering: cover-crop at the focal length, with a blurred backdrop
-     when the chosen lens is wider than the frame. */
+  /* The frame is filled from the source without distortion: the chosen ratio
+     defines the canvas, the source is cover-cropped into it, and the lens
+     zoom is applied around the centre. */
   function drawLensFrame(context, source, width, height, lens, filter) {
-    const sourceWidth = source.videoWidth || source.naturalWidth || width;
-    const sourceHeight = source.videoHeight || source.naturalHeight || height;
+    const size = sourceSize(source);
+    const sourceWidth = size.width || width;
+    const sourceHeight = size.height || height;
 
     if (lens.scale < 1) {
       context.save();
-      /* the backdrop must carry the same film look, otherwise wide lenses
-         leak unfiltered colour into the edges of the frame */
+      /* the backdrop carries the same film look, otherwise wide lenses leak
+         unfiltered colour into the edges of the frame */
       context.filter = `${filter} blur(26px) brightness(.72)`;
       const cover = Math.max(width / sourceWidth, height / sourceHeight) * 1.25;
       context.drawImage(
@@ -1533,67 +1802,18 @@ const photos = [
     context.restore();
   }
 
-  /* The vintage sticker, burned into the pixels so it survives the download. */
-  function drawSticker(context, width, height, caption) {
-    const scale = Math.max(width / 1200, .55);
-    const padX = 18 * scale;
-    const padY = 13 * scale;
-    const markSize = 30 * scale;
-    const metaSize = 12 * scale;
-    const gap = 4 * scale;
+  function renderFrame(source) {
+    const size = sourceSize(source);
+    if (!size.width || !size.height) return null;
 
-    context.save();
-    context.font = `italic ${markSize}px Georgia, "Times New Roman", serif`;
-    const markWidth = context.measureText("✦ @axr.md").width;
-    context.font = `${metaSize}px Inter, Helvetica, Arial, sans-serif`;
-    const metaWidth = context.measureText(caption).width;
-
-    const boxWidth = Math.max(markWidth, metaWidth) + padX * 2;
-    const boxHeight = markSize + metaSize + gap + padY * 2;
-    const boxX = 26 * scale;
-    const boxY = height - boxHeight - 26 * scale;
-
-    context.translate(boxX + boxWidth / 2, boxY + boxHeight / 2);
-    context.rotate(-2.5 * (Math.PI / 180));
-    context.translate(-(boxX + boxWidth / 2), -(boxY + boxHeight / 2));
-
-    context.beginPath();
-    const radius = 14 * scale;
-    context.moveTo(boxX + radius, boxY);
-    context.arcTo(boxX + boxWidth, boxY, boxX + boxWidth, boxY + boxHeight, radius);
-    context.arcTo(boxX + boxWidth, boxY + boxHeight, boxX, boxY + boxHeight, radius);
-    context.arcTo(boxX, boxY + boxHeight, boxX, boxY, radius);
-    context.arcTo(boxX, boxY, boxX + boxWidth, boxY, radius);
-    context.closePath();
-
-    context.fillStyle = "rgba(16,16,16,.46)";
-    context.fill();
-    context.lineWidth = Math.max(1, 1.4 * scale);
-    context.strokeStyle = "rgba(245,245,245,.55)";
-    context.stroke();
-
-    context.textBaseline = "top";
-    context.fillStyle = "#f5f5f5";
-    context.font = `italic ${markSize}px Georgia, "Times New Roman", serif`;
-    context.shadowColor = "rgba(0,0,0,.6)";
-    context.shadowBlur = 8 * scale;
-    context.fillText("✦ @axr.md", boxX + padX, boxY + padY);
-    context.shadowBlur = 0;
-
-    context.fillStyle = "rgba(245,245,245,.75)";
-    context.font = `${metaSize}px Inter, Helvetica, Arial, sans-serif`;
-    context.fillText(caption.toUpperCase(), boxX + padX, boxY + padY + markSize + gap);
-
-    context.restore();
-  }
-
-  function renderFrame(source, outputWidth) {
-    const sourceWidth = source.videoWidth || source.naturalWidth;
-    const sourceHeight = source.videoHeight || source.naturalHeight;
+    const sourceWidth = size.width;
+    const sourceHeight = size.height;
     const look = recipe();
+    const ratio = currentRatio() || sourceWidth / sourceHeight;
 
-    const width = outputWidth || Math.min(sourceWidth, 2400);
-    const height = Math.round(width * (sourceHeight / sourceWidth));
+    /* never upscale past the source, so imported photos stay sharp */
+    const width = Math.min(sourceWidth, 2400);
+    const height = Math.max(1, Math.round(width / ratio));
 
     const canvas = document.createElement("canvas");
     canvas.width = width;
@@ -1605,7 +1825,7 @@ const photos = [
     drawLensFrame(context, source, width, height, look.lens, look.css);
     drawVignette(context, width, height, look.camera.vignette + look.lens.vignette);
     drawGrain(context, width, height, look.camera.grain + look.lens.grain);
-    drawSticker(context, width, height, look.caption);
+    drawWatermark(context, width, height, look);
 
     return canvas;
   }
@@ -1623,6 +1843,7 @@ const photos = [
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       setStatus("This browser cannot access the camera. You can use an existing photo instead.");
+      applyLiveLook();
       return;
     }
 
@@ -1633,16 +1854,21 @@ const photos = [
         audio: false
       });
       video.srcObject = stream;
-      await video.play().catch(() => {});
+      /* reveal straight away: play() can settle late on some devices */
       video.hidden = false;
+      video.play().catch(() => {});
       preview.hidden = true;
       frameButton.disabled = false;
       setBadge("LIVE VIEW / CAMERA ON");
       setStatus("Your camera stays in this browser. Nothing is uploaded.");
       applyLiveLook();
     } catch (error) {
+      if (video) video.hidden = true;
       setBadge("LIVE VIEW / WAITING");
-      setStatus("Camera permission was blocked. You can use an existing photo instead.");
+      setStatus(sharedFromLink
+        ? "Camera setup loaded from a shared link. The camera is blocked here, so use an existing photo."
+        : "Camera permission was blocked. You can use an existing photo instead.");
+      applyLiveLook();
     }
   }
 
@@ -1658,8 +1884,9 @@ const photos = [
       preview.removeAttribute("src");
     }
     sourceImage = null;
-    if (retakeButton) retakeButton.hidden = true;
-    if (downloadButton) downloadButton.hidden = true;
+    [retakeButton, downloadButton, sharePhotoButton].forEach(button => {
+      if (button) button.hidden = true;
+    });
     startCamera();
     if (closeButton) closeButton.focus();
   }
@@ -1679,27 +1906,35 @@ const photos = [
     preview.hidden = false;
     video.hidden = true;
     frameButton.disabled = true;
-    if (retakeButton) retakeButton.hidden = false;
-    if (downloadButton) downloadButton.hidden = false;
-    setBadge("PREVIEW / @axr.md");
-    setStatus("Frame ready. Download it or retake the shot.");
+    [retakeButton, downloadButton, sharePhotoButton].forEach(button => {
+      if (button) button.hidden = false;
+    });
+    setBadge(`PREVIEW / ${ratioLabel().toUpperCase()}`);
+    setStatus("Frame ready. Download it, share it, or retake the shot.");
     applyLiveLook();
   }
 
   function captureFrame() {
-    if (!video || !video.videoWidth) {
-      setStatus("Camera is not ready yet. Try again in a moment.");
+    /* a live video can report its size before the first frame is decodable */
+    if (!video || !video.videoWidth || video.readyState < 2) {
+      setStatus("Camera is not ready yet. Give it a second, then capture again.");
       return;
     }
 
     try {
-      const raw = document.createElement("canvas");
-      raw.width = video.videoWidth;
-      raw.height = video.videoHeight;
-      raw.getContext("2d").drawImage(video, 0, 0, raw.width, raw.height);
+      /* freeze the frame first, so later control changes re-render the shot the
+         visitor actually took instead of whatever the camera sees now */
+      const grabbed = document.createElement("canvas");
+      grabbed.width = video.videoWidth;
+      grabbed.height = video.videoHeight;
+      grabbed.getContext("2d").drawImage(video, 0, 0, grabbed.width, grabbed.height);
 
-      sourceImage = raw;
-      showPhoto(renderFrame(raw).toDataURL("image/jpeg", .92));
+      const frame = renderFrame(grabbed);
+
+      if (!frame) throw new Error("empty frame");
+
+      sourceImage = grabbed;
+      showPhoto(frame.toDataURL("image/jpeg", .92));
     } catch (error) {
       setStatus("That frame could not be processed. Try again.");
     }
@@ -1714,9 +1949,16 @@ const photos = [
       const image = new Image();
 
       image.onload = () => {
+        const frame = renderFrame(image);
+
+        if (!frame) {
+          setStatus("That image could not be processed. Try another one.");
+          return;
+        }
+
         try {
           sourceImage = image;
-          showPhoto(renderFrame(image).toDataURL("image/jpeg", .92));
+          showPhoto(frame.toDataURL("image/jpeg", .92));
         } catch (error) {
           setStatus("That image could not be processed. Try another one.");
         }
@@ -1729,69 +1971,195 @@ const photos = [
     reader.readAsDataURL(file);
   }
 
-  function buildFilterChips() {
-    if (!filterList) return;
+  function buildChips(container, items, countElement, activeId, onSelect, swatchKey) {
+    if (!container) return;
 
-    filterCount.textContent = `${FILTERS.length} looks`;
+    countElement.textContent = `${items.length} ${swatchKey === "swatch" ? "looks" : "designs"}`;
 
-    FILTERS.forEach(item => {
+    items.forEach(item => {
       const chip = document.createElement("button");
       chip.type = "button";
-      chip.className = `capture-filter-chip${item.id === activeFilterId ? " active" : ""}`;
+      chip.className = `capture-filter-chip${item.id === activeId ? " active" : ""}`;
       chip.dataset.filterId = item.id;
-      chip.setAttribute("aria-pressed", String(item.id === activeFilterId));
+      chip.setAttribute("aria-pressed", String(item.id === activeId));
 
-      const swatch = document.createElement("span");
-      swatch.className = "capture-filter-swatch";
-      swatch.style.background = item.swatch;
+      if (swatchKey === "swatch") {
+        const swatch = document.createElement("span");
+        swatch.className = "capture-filter-swatch";
+        swatch.style.background = item.swatch;
+        chip.appendChild(swatch);
+      }
 
       const label = document.createElement("span");
       label.textContent = item.label;
-
-      chip.append(swatch, label);
+      chip.appendChild(label);
 
       chip.addEventListener("click", () => {
-        activeFilterId = item.id;
+        onSelect(item.id);
 
-        filterList.querySelectorAll(".capture-filter-chip").forEach(other => {
+        container.querySelectorAll(".capture-filter-chip").forEach(other => {
           const active = other === chip;
           other.classList.toggle("active", active);
           other.setAttribute("aria-pressed", String(active));
         });
-
-        applyLiveLook();
       });
 
-      filterList.appendChild(chip);
+      container.appendChild(chip);
     });
+  }
+
+  function exportName() {
+    const film = currentFilter();
+    const parts = ["axr-md", lensSelect.value, film.id, ratioSelect.value]
+      .map(part => String(part).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""))
+      .filter(Boolean);
+
+    return `${parts.join("-")}.jpg`;
   }
 
   function downloadPhoto() {
     if (!preview || !preview.getAttribute("src")) return;
 
-    const look = recipe();
     const link = document.createElement("a");
     link.href = preview.src;
-    link.download = `axr-md-${look.lens.label.replace(/\s+/g, "-")}-${look.film.id}.jpg`;
+    link.download = exportName();
     document.body.appendChild(link);
     link.click();
     link.remove();
+  }
+
+  /* Sharing: the camera setup travels as a link so another visitor opens the
+     exact same body, lens, film, ratio and watermark. */
+  function setupPayload() {
+    return {
+      c: cameraSelect.value,
+      l: lensSelect.value,
+      f: activeFilterId,
+      r: ratioSelect.value,
+      w: activeWatermarkId
+    };
+  }
+
+  function setupLink() {
+    const encoded = btoa(JSON.stringify(setupPayload()));
+    return `${location.origin}${location.pathname}#capture=${encoded}`;
+  }
+
+  function syncHash() {
+    try {
+      history.replaceState(null, "", `#capture=${btoa(JSON.stringify(setupPayload()))}`);
+    } catch (error) {
+      /* private mode can block history writes; sharing still works */
+    }
+  }
+
+  function applySetup(payload) {
+    if (!payload) return false;
+
+    if (CAMERAS[payload.c]) cameraSelect.value = payload.c;
+    if (LENSES[payload.l]) lensSelect.value = payload.l;
+    if (Object.prototype.hasOwnProperty.call(RATIOS, payload.r)) ratioSelect.value = payload.r;
+    if (FILTERS.some(item => item.id === payload.f)) activeFilterId = payload.f;
+    if (WATERMARKS.some(item => item.id === payload.w)) activeWatermarkId = payload.w;
+
+    return true;
+  }
+
+  function readSetupFromUrl() {
+    const match = location.hash.match(/^#capture=(.+)$/);
+    if (!match) return false;
+
+    try {
+      return applySetup(JSON.parse(atob(decodeURIComponent(match[1]))));
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function markActiveChip(container, id) {
+    if (!container) return;
+
+    container.querySelectorAll(".capture-filter-chip").forEach(chip => {
+      const active = chip.dataset.filterId === id;
+      chip.classList.toggle("active", active);
+      chip.setAttribute("aria-pressed", String(active));
+    });
+  }
+
+  async function copySetupLink() {
+    const link = setupLink();
+
+    try {
+      await navigator.clipboard.writeText(link);
+      setStatus("Camera link copied. Send it to another visitor and they open your exact setup.");
+    } catch (error) {
+      const field = document.createElement("textarea");
+      field.value = link;
+      field.setAttribute("readonly", "");
+      field.style.position = "fixed";
+      field.style.opacity = "0";
+      document.body.appendChild(field);
+      field.select();
+
+      try {
+        document.execCommand("copy");
+        setStatus("Camera link copied. Send it to another visitor and they open your exact setup.");
+      } catch (copyError) {
+        setStatus(`Copy this link to share your camera: ${link}`);
+      }
+
+      field.remove();
+    }
+  }
+
+  async function sharePhoto() {
+    if (!preview || !preview.getAttribute("src")) return;
+
+    const name = exportName();
+
+    try {
+      const blob = await (await fetch(preview.src)).blob();
+      const file = new File([blob], name, { type: "image/jpeg" });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: "Captured by @axr.md",
+          text: "Captured with the @axr.md camera."
+        });
+        return;
+      }
+
+      downloadPhoto();
+      setStatus("Sharing is not supported here, so the photo was downloaded instead.");
+    } catch (error) {
+      if (error && error.name === "AbortError") return;
+      downloadPhoto();
+      setStatus("Sharing was blocked, so the photo was downloaded instead.");
+    }
   }
 
   if (openButton) openButton.addEventListener("click", openStudio);
   if (closeButton) closeButton.addEventListener("click", closeStudio);
   if (frameButton) frameButton.addEventListener("click", captureFrame);
   if (downloadButton) downloadButton.addEventListener("click", downloadPhoto);
+  if (sharePhotoButton) sharePhotoButton.addEventListener("click", sharePhoto);
+  if (shareLinkButton) shareLinkButton.addEventListener("click", copySetupLink);
 
-  if (cameraSelect) cameraSelect.addEventListener("change", applyLiveLook);
-  if (lensSelect) lensSelect.addEventListener("change", applyLiveLook);
+  [cameraSelect, lensSelect, ratioSelect].forEach(select => {
+    if (select) select.addEventListener("change", () => {
+      applyLiveLook();
+      syncHash();
+    });
+  });
 
   if (retakeButton) retakeButton.addEventListener("click", () => {
     preview.removeAttribute("src");
     preview.hidden = true;
     sourceImage = null;
-    retakeButton.hidden = true;
-    if (downloadButton) downloadButton.hidden = true;
+    [retakeButton, downloadButton, sharePhotoButton].forEach(button => {
+      if (button) button.hidden = true;
+    });
     startCamera();
   });
 
@@ -1811,6 +2179,26 @@ const photos = [
     if (event.key === "Escape" && studio.classList.contains("open")) closeStudio();
   });
 
-  buildFilterChips();
+  const sharedSetup = readSetupFromUrl();
+  sharedFromLink = Boolean(sharedSetup);
+
+  buildChips(filterList, FILTERS, filterCount, activeFilterId, id => {
+    activeFilterId = id;
+    applyLiveLook();
+    syncHash();
+  }, "swatch");
+
+  buildChips(markList, WATERMARKS, markCount, activeWatermarkId, id => {
+    activeWatermarkId = id;
+    applyLiveLook();
+    syncHash();
+  }, "design");
+
+  if (sharedSetup) {
+    markActiveChip(filterList, activeFilterId);
+    markActiveChip(markList, activeWatermarkId);
+    setStatus("Camera setup loaded from a shared link. Change anything you like.");
+  }
+
   applyLiveLook();
 })();

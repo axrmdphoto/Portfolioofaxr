@@ -2018,10 +2018,16 @@
   margin-top: 14px;
 }
 
+/* three picks sit side by side when there is room, and stack on phones */
 .capture-option-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 12px;
-  flex-wrap: wrap;
+  width: 100%;
+}
+
+.capture-option-row .capture-select-label select {
+  width: 100%;
 }
 
 .capture-filter-head {
@@ -2082,7 +2088,8 @@
   border-color: rgba(0,0,0,.35);
 }
 
-/* Vintage @axr.md sticker burned onto every frame */
+/* Live watermark preview inside the viewfinder. The real watermark is burned
+   into the exported photo; this only mirrors its position and styling. */
 .capture-sticker {
   position: absolute;
   bottom: 14px;
@@ -2115,6 +2122,179 @@
   font-size: .53rem;
   letter-spacing: .16em;
   text-transform: uppercase;
+}
+
+.wm-bracket {
+  display: none;
+}
+
+/* Corner mark — the smallest option */
+.capture-sticker[data-design="corner"] {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  transform: none;
+}
+
+.capture-sticker[data-design="corner"] .capture-sticker-mark {
+  font-family: var(--sans);
+  font-size: .58rem;
+  font-style: normal;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 5px rgba(0,0,0,.85);
+}
+
+.capture-sticker[data-design="corner"] .capture-sticker-meta {
+  display: none;
+}
+
+/* Signature — bottom right, no box */
+.capture-sticker[data-design="signature"] {
+  right: 14px;
+  left: auto;
+  justify-items: end;
+  padding: 0 0 4px;
+  border: 0;
+  border-bottom: 1px solid rgba(245,245,245,.55);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  transform: none;
+}
+
+.capture-sticker[data-design="signature"] .capture-sticker-mark {
+  font-size: 1.05rem;
+}
+
+.capture-sticker[data-design="signature"] .capture-sticker-meta {
+  font-size: .5rem;
+}
+
+/* Film edge — rebate strip across the bottom */
+.capture-sticker[data-design="film"] {
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 14px;
+  border: 0;
+  border-radius: 0;
+  background: rgba(8,8,8,.62);
+  box-shadow: none;
+  transform: none;
+}
+
+.capture-sticker[data-design="film"] .capture-sticker-mark {
+  font-family: var(--sans);
+  font-size: .56rem;
+  font-style: normal;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+}
+
+.capture-sticker[data-design="film"] .capture-sticker-meta {
+  font-size: .5rem;
+  text-align: right;
+}
+
+/* Corner brackets — minimal frame */
+.capture-sticker[data-design="brackets"] {
+  inset: 12px;
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  transform: none;
+}
+
+.capture-sticker[data-design="brackets"] .capture-sticker-mark,
+.capture-sticker[data-design="brackets"] .capture-sticker-meta {
+  display: none;
+}
+
+.capture-sticker[data-design="brackets"] .wm-bracket {
+  position: absolute;
+  display: block;
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid rgba(245,245,245,.8);
+}
+
+.capture-sticker[data-design="brackets"] .wm-tl {
+  top: 0;
+  left: 0;
+  border-right: 0;
+  border-bottom: 0;
+}
+
+.capture-sticker[data-design="brackets"] .wm-tr {
+  top: 0;
+  right: 0;
+  border-bottom: 0;
+  border-left: 0;
+}
+
+.capture-sticker[data-design="brackets"] .wm-bl {
+  bottom: 0;
+  left: 0;
+  border-top: 0;
+  border-right: 0;
+}
+
+.capture-sticker[data-design="brackets"] .wm-br {
+  right: 0;
+  bottom: 0;
+  border-top: 0;
+  border-left: 0;
+}
+
+/* No watermark */
+.capture-sticker[data-design="none"] {
+  display: none;
+}
+
+.capture-share {
+  display: grid;
+  gap: 7px;
+  margin-top: 16px;
+  padding-top: 15px;
+  border-top: 1px solid var(--stroke);
+}
+
+.capture-share-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  justify-self: start;
+  padding: 0 0 6px;
+  border: 0;
+  border-bottom: 1px solid rgba(137,170,204,.45);
+  background: none;
+  color: var(--accent-1);
+  font-size: .76rem;
+  transition: color .25s ease, border-color .25s ease;
+}
+
+.capture-share-button:hover {
+  border-color: var(--text);
+  color: var(--text);
+}
+
+.capture-share-note {
+  color: var(--muted);
+  font-size: .66rem;
+  line-height: 1.55;
 }
 
 .capture-select-label {
