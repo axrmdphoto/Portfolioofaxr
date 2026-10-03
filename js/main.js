@@ -1313,7 +1313,9 @@ const photos = [
       }
     });
 
-/* Capture studio — private on-device camera. Nothing is uploaded. */
+/* Capture studio — private on-device camera with real lens, film and
+   filter rendering plus a vintage @axr.md sticker burned into every frame.
+   Nothing is uploaded. */
 (() => {
   const studio = document.getElementById("captureStudio");
   if (!studio) return;
@@ -1330,9 +1332,83 @@ const photos = [
   const fileInput = document.getElementById("captureFile");
   const downloadButton = document.getElementById("captureDownload");
   const options = document.getElementById("captureOptions");
+  const cameraSelect = document.getElementById("captureCamera");
+  const lensSelect = document.getElementById("captureLens");
+  const filterList = document.getElementById("captureFilters");
+  const filterCount = document.getElementById("captureFilterCount");
+  const sticker = document.getElementById("captureSticker");
+  const stickerMeta = document.getElementById("captureStickerMeta");
 
+  /* Film / filter library. `filter` is a CSS filter string, which the 2D
+     canvas also understands, so one recipe drives the live preview and the
+     exported file. `swatch` is only the chip preview colour. */
+  const FILTERS = [
+    { id: "vintage", label: "Vintage Color", filter: "sepia(.30) saturate(1.18) contrast(.94) brightness(1.06)", swatch: "#b08a5e" },
+    { id: "monochrome", label: "Monochrome", filter: "grayscale(1) contrast(1.10) brightness(1.02)", swatch: "#8d8d8d" },
+    { id: "noir", label: "Noir", filter: "grayscale(1) contrast(1.55) brightness(.90)", swatch: "#1c1c1c" },
+    { id: "ash", label: "Ash Mono", filter: "grayscale(.85) sepia(.18) contrast(1.22)", swatch: "#9a9186" },
+    { id: "sepia", label: "Sepia", filter: "sepia(.78) contrast(1.06) brightness(1.02)", swatch: "#c19a5b" },
+    { id: "faded", label: "Faded Film", filter: "saturate(.68) contrast(.84) brightness(1.12)", swatch: "#a8b0b4" },
+    { id: "golden", label: "Golden Hour", filter: "sepia(.34) saturate(1.45) brightness(1.06)", swatch: "#d9a24a" },
+    { id: "warm", label: "Warm Glow", filter: "sepia(.18) saturate(1.32) hue-rotate(-8deg)", swatch: "#c98f6a" },
+    { id: "cool", label: "Cool Blue", filter: "saturate(1.05) hue-rotate(14deg) brightness(1.02)", swatch: "#6f8ba8" },
+    { id: "teal", label: "Teal & Orange", filter: "contrast(1.12) saturate(1.24) hue-rotate(-6deg)", swatch: "#5f8f92" },
+    { id: "bleach", label: "Bleach Bypass", filter: "contrast(1.38) saturate(.52)", swatch: "#9aa39a" },
+    { id: "dreamy", label: "Dreamy Soft", filter: "brightness(1.09) saturate(.86) blur(.5px)", swatch: "#c3bcd0" },
+    { id: "infrared", label: "Infrared", filter: "grayscale(.72) contrast(1.34) hue-rotate(150deg) saturate(1.5)", swatch: "#d59ec2" },
+    { id: "original", label: "Original", filter: "none", swatch: "#7f8c99" }
+  ];
+
+  /* Camera bodies add their own character before the film is applied. */
+  const CAMERAS = {
+    "35mm rangefinder": { filter: "contrast(1.06) saturate(1.04)", grain: .05, vignette: .30, label: "35mm rangefinder" },
+    "classic 35mm SLR": { filter: "contrast(1.02) saturate(.96)", grain: .07, vignette: .22, label: "classic 35mm SLR" },
+    "vintage film compact": { filter: "sepia(.14) saturate(.92) brightness(1.04)", grain: .12, vignette: .40, label: "vintage film compact" },
+    "half-frame compact": { filter: "saturate(.88) contrast(1.10)", grain: .09, vignette: .46, label: "half-frame compact" }
+  };
+
+  /* Focal length is simulated by cropping (or widening) around the centre,
+     and each aperture brings its own depth-of-field falloff. */
+  const LENSES = {
+    "28mm f/2.8": { scale: .86, vignette: .10, blurEdge: 2.2, grain: .02, label: "28mm f/2.8" },
+    "35mm f/2": { scale: 1, vignette: .06, blurEdge: 1.4, grain: .015, label: "35mm f/2" },
+    "50mm f/1.8": { scale: 1.22, vignette: .05, blurEdge: 1, grain: .01, label: "50mm f/1.8" },
+    "85mm f/1.4": { scale: 1.55, vignette: .04, blurEdge: .7, grain: .008, label: "85mm f/1.4" }
+  };
+
+  let activeFilterId = "vintage";
   let stream = null;
   let lastFocus = null;
+  let grainPattern = null;
+  let sourceImage = null;
+
+  function currentFilter() {
+    return FILTERS.find(item => item.id === activeFilterId) || FILTERS[0];
+  }
+
+  function currentCamera() {
+    return CAMERAS[cameraSelect.value] || CAMERAS["35mm rangefinder"];
+  }
+
+  function currentLens() {
+    return LENSES[lensSelect.value] || LENSES["35mm f/2"];
+  }
+
+  function recipe() {
+    const camera = currentCamera();
+    const lens = currentLens();
+    const film = currentFilter();
+
+    return {
+      camera,
+      lens,
+      film,
+      css: [camera.filter, lens.blurEdge ? `blur(${lens.blurEdge * .35}px)` : "", film.filter === "none" ? "" : film.filter]
+        .filter(Boolean)
+        .join(" "),
+      caption: `${camera.label} · ${lens.label} · ${film.label.toLowerCase()}`
+    };
+  }
 
   function setStatus(message) {
     if (status) status.textContent = message;
@@ -1340,6 +1416,198 @@ const photos = [
 
   function setBadge(message) {
     if (badge) badge.textContent = message;
+  }
+
+  /* Live preview uses the same filter string the export uses. Once a frame
+     has been captured, every control change re-renders the real pixels so the
+     downloaded file always matches what is on screen. */
+  function applyLiveLook() {
+    const look = recipe().css;
+    const stillShown = preview && !preview.hidden;
+
+    if (video) video.style.filter = look === "none" ? "" : look;
+
+    if (stickerMeta) stickerMeta.textContent = recipe().caption;
+
+    /* While the camera is live the sticker is a preview; once a frame is
+       captured the real one is burned into the photo, so hide the overlay
+       to avoid showing it twice. */
+    if (sticker) {
+      sticker.style.opacity = stillShown ? "0" : "1";
+    }
+
+    if (stillShown && sourceImage) {
+      try {
+        preview.src = renderFrame(sourceImage).toDataURL("image/jpeg", .92);
+      } catch (error) {
+        /* keep the previous frame if a re-render fails */
+      }
+    }
+
+    if (preview) preview.style.filter = "";
+  }
+
+  function buildGrainPattern(context) {
+    if (grainPattern) return grainPattern;
+
+    const size = 128;
+    const tile = document.createElement("canvas");
+    tile.width = size;
+    tile.height = size;
+    const tileContext = tile.getContext("2d");
+    const data = tileContext.createImageData(size, size);
+
+    for (let i = 0; i < data.data.length; i += 4) {
+      const tone = 118 + Math.random() * 74;
+      data.data[i] = tone;
+      data.data[i + 1] = tone;
+      data.data[i + 2] = tone;
+      data.data[i + 3] = 255;
+    }
+
+    tileContext.putImageData(data, 0, 0);
+    grainPattern = context.createPattern(tile, "repeat");
+    return grainPattern;
+  }
+
+  /* Lens rendering: cover-crop at the focal length, with a blurred backdrop
+     when the chosen lens is wider than the frame. */
+  function drawLensFrame(context, source, width, height, lens, filter) {
+    const sourceWidth = source.videoWidth || source.naturalWidth || width;
+    const sourceHeight = source.videoHeight || source.naturalHeight || height;
+
+    if (lens.scale < 1) {
+      context.save();
+      /* the backdrop must carry the same film look, otherwise wide lenses
+         leak unfiltered colour into the edges of the frame */
+      context.filter = `${filter} blur(26px) brightness(.72)`;
+      const cover = Math.max(width / sourceWidth, height / sourceHeight) * 1.25;
+      context.drawImage(
+        source,
+        (width - sourceWidth * cover) / 2,
+        (height - sourceHeight * cover) / 2,
+        sourceWidth * cover,
+        sourceHeight * cover
+      );
+      context.restore();
+    }
+
+    context.save();
+    context.filter = filter;
+    const scale = Math.max(width / sourceWidth, height / sourceHeight) * lens.scale;
+    const drawWidth = sourceWidth * scale;
+    const drawHeight = sourceHeight * scale;
+    context.drawImage(source, (width - drawWidth) / 2, (height - drawHeight) / 2, drawWidth, drawHeight);
+    context.restore();
+  }
+
+  function drawVignette(context, width, height, strength) {
+    if (strength <= 0) return;
+
+    const gradient = context.createRadialGradient(
+      width / 2,
+      height / 2,
+      Math.min(width, height) * .28,
+      width / 2,
+      height / 2,
+      Math.max(width, height) * .78
+    );
+
+    gradient.addColorStop(0, "rgba(0,0,0,0)");
+    gradient.addColorStop(1, `rgba(0,0,0,${strength})`);
+
+    context.save();
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, width, height);
+    context.restore();
+  }
+
+  function drawGrain(context, width, height, strength) {
+    if (strength <= 0) return;
+
+    context.save();
+    context.globalAlpha = strength;
+    context.globalCompositeOperation = "overlay";
+    context.fillStyle = buildGrainPattern(context);
+    context.fillRect(0, 0, width, height);
+    context.restore();
+  }
+
+  /* The vintage sticker, burned into the pixels so it survives the download. */
+  function drawSticker(context, width, height, caption) {
+    const scale = Math.max(width / 1200, .55);
+    const padX = 18 * scale;
+    const padY = 13 * scale;
+    const markSize = 30 * scale;
+    const metaSize = 12 * scale;
+    const gap = 4 * scale;
+
+    context.save();
+    context.font = `italic ${markSize}px Georgia, "Times New Roman", serif`;
+    const markWidth = context.measureText("✦ @axr.md").width;
+    context.font = `${metaSize}px Inter, Helvetica, Arial, sans-serif`;
+    const metaWidth = context.measureText(caption).width;
+
+    const boxWidth = Math.max(markWidth, metaWidth) + padX * 2;
+    const boxHeight = markSize + metaSize + gap + padY * 2;
+    const boxX = 26 * scale;
+    const boxY = height - boxHeight - 26 * scale;
+
+    context.translate(boxX + boxWidth / 2, boxY + boxHeight / 2);
+    context.rotate(-2.5 * (Math.PI / 180));
+    context.translate(-(boxX + boxWidth / 2), -(boxY + boxHeight / 2));
+
+    context.beginPath();
+    const radius = 14 * scale;
+    context.moveTo(boxX + radius, boxY);
+    context.arcTo(boxX + boxWidth, boxY, boxX + boxWidth, boxY + boxHeight, radius);
+    context.arcTo(boxX + boxWidth, boxY + boxHeight, boxX, boxY + boxHeight, radius);
+    context.arcTo(boxX, boxY + boxHeight, boxX, boxY, radius);
+    context.arcTo(boxX, boxY, boxX + boxWidth, boxY, radius);
+    context.closePath();
+
+    context.fillStyle = "rgba(16,16,16,.46)";
+    context.fill();
+    context.lineWidth = Math.max(1, 1.4 * scale);
+    context.strokeStyle = "rgba(245,245,245,.55)";
+    context.stroke();
+
+    context.textBaseline = "top";
+    context.fillStyle = "#f5f5f5";
+    context.font = `italic ${markSize}px Georgia, "Times New Roman", serif`;
+    context.shadowColor = "rgba(0,0,0,.6)";
+    context.shadowBlur = 8 * scale;
+    context.fillText("✦ @axr.md", boxX + padX, boxY + padY);
+    context.shadowBlur = 0;
+
+    context.fillStyle = "rgba(245,245,245,.75)";
+    context.font = `${metaSize}px Inter, Helvetica, Arial, sans-serif`;
+    context.fillText(caption.toUpperCase(), boxX + padX, boxY + padY + markSize + gap);
+
+    context.restore();
+  }
+
+  function renderFrame(source, outputWidth) {
+    const sourceWidth = source.videoWidth || source.naturalWidth;
+    const sourceHeight = source.videoHeight || source.naturalHeight;
+    const look = recipe();
+
+    const width = outputWidth || Math.min(sourceWidth, 2400);
+    const height = Math.round(width * (sourceHeight / sourceWidth));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+
+    const context = canvas.getContext("2d");
+    context.imageSmoothingQuality = "high";
+
+    drawLensFrame(context, source, width, height, look.lens, look.css);
+    drawVignette(context, width, height, look.camera.vignette + look.lens.vignette);
+    drawGrain(context, width, height, look.camera.grain + look.lens.grain);
+    drawSticker(context, width, height, look.caption);
+
+    return canvas;
   }
 
   function stopCamera() {
@@ -1352,14 +1620,16 @@ const photos = [
 
   async function startCamera() {
     stopCamera();
+
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       setStatus("This browser cannot access the camera. You can use an existing photo instead.");
       return;
     }
+
     try {
       setStatus("Starting camera…");
       stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
+        video: { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1440 } },
         audio: false
       });
       video.srcObject = stream;
@@ -1369,6 +1639,7 @@ const photos = [
       frameButton.disabled = false;
       setBadge("LIVE VIEW / CAMERA ON");
       setStatus("Your camera stays in this browser. Nothing is uploaded.");
+      applyLiveLook();
     } catch (error) {
       setBadge("LIVE VIEW / WAITING");
       setStatus("Camera permission was blocked. You can use an existing photo instead.");
@@ -1382,7 +1653,11 @@ const photos = [
     studio.removeAttribute("inert");
     document.body.classList.add("modal-open");
     if (options) options.hidden = false;
-    if (preview) preview.hidden = true;
+    if (preview) {
+      preview.hidden = true;
+      preview.removeAttribute("src");
+    }
+    sourceImage = null;
     if (retakeButton) retakeButton.hidden = true;
     if (downloadButton) downloadButton.hidden = true;
     startCamera();
@@ -1406,8 +1681,9 @@ const photos = [
     frameButton.disabled = true;
     if (retakeButton) retakeButton.hidden = false;
     if (downloadButton) downloadButton.hidden = false;
-    setBadge("PREVIEW / PRIVATE");
+    setBadge("PREVIEW / @axr.md");
     setStatus("Frame ready. Download it or retake the shot.");
+    applyLiveLook();
   }
 
   function captureFrame() {
@@ -1415,22 +1691,105 @@ const photos = [
       setStatus("Camera is not ready yet. Try again in a moment.");
       return;
     }
-    const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const context = canvas.getContext("2d");
-    context.filter = "saturate(.85) contrast(1.05) sepia(.18)";
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    showPhoto(canvas.toDataURL("image/jpeg", .92));
+
+    try {
+      const raw = document.createElement("canvas");
+      raw.width = video.videoWidth;
+      raw.height = video.videoHeight;
+      raw.getContext("2d").drawImage(video, 0, 0, raw.width, raw.height);
+
+      sourceImage = raw;
+      showPhoto(renderFrame(raw).toDataURL("image/jpeg", .92));
+    } catch (error) {
+      setStatus("That frame could not be processed. Try again.");
+    }
+  }
+
+  function handleFile(file) {
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const image = new Image();
+
+      image.onload = () => {
+        try {
+          sourceImage = image;
+          showPhoto(renderFrame(image).toDataURL("image/jpeg", .92));
+        } catch (error) {
+          setStatus("That image could not be processed. Try another one.");
+        }
+      };
+
+      image.onerror = () => setStatus("That file could not be read as an image.");
+      image.src = reader.result;
+    };
+
+    reader.readAsDataURL(file);
+  }
+
+  function buildFilterChips() {
+    if (!filterList) return;
+
+    filterCount.textContent = `${FILTERS.length} looks`;
+
+    FILTERS.forEach(item => {
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = `capture-filter-chip${item.id === activeFilterId ? " active" : ""}`;
+      chip.dataset.filterId = item.id;
+      chip.setAttribute("aria-pressed", String(item.id === activeFilterId));
+
+      const swatch = document.createElement("span");
+      swatch.className = "capture-filter-swatch";
+      swatch.style.background = item.swatch;
+
+      const label = document.createElement("span");
+      label.textContent = item.label;
+
+      chip.append(swatch, label);
+
+      chip.addEventListener("click", () => {
+        activeFilterId = item.id;
+
+        filterList.querySelectorAll(".capture-filter-chip").forEach(other => {
+          const active = other === chip;
+          other.classList.toggle("active", active);
+          other.setAttribute("aria-pressed", String(active));
+        });
+
+        applyLiveLook();
+      });
+
+      filterList.appendChild(chip);
+    });
+  }
+
+  function downloadPhoto() {
+    if (!preview || !preview.getAttribute("src")) return;
+
+    const look = recipe();
+    const link = document.createElement("a");
+    link.href = preview.src;
+    link.download = `axr-md-${look.lens.label.replace(/\s+/g, "-")}-${look.film.id}.jpg`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
   }
 
   if (openButton) openButton.addEventListener("click", openStudio);
   if (closeButton) closeButton.addEventListener("click", closeStudio);
   if (frameButton) frameButton.addEventListener("click", captureFrame);
+  if (downloadButton) downloadButton.addEventListener("click", downloadPhoto);
+
+  if (cameraSelect) cameraSelect.addEventListener("change", applyLiveLook);
+  if (lensSelect) lensSelect.addEventListener("change", applyLiveLook);
 
   if (retakeButton) retakeButton.addEventListener("click", () => {
     preview.removeAttribute("src");
     preview.hidden = true;
+    sourceImage = null;
     retakeButton.hidden = true;
     if (downloadButton) downloadButton.hidden = true;
     startCamera();
@@ -1439,24 +1798,10 @@ const photos = [
   if (chooseButton && fileInput) {
     chooseButton.addEventListener("click", () => fileInput.click());
     fileInput.addEventListener("change", () => {
-      const file = fileInput.files && fileInput.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => showPhoto(reader.result);
-      reader.readAsDataURL(file);
+      handleFile(fileInput.files && fileInput.files[0]);
       fileInput.value = "";
     });
   }
-
-  if (downloadButton) downloadButton.addEventListener("click", () => {
-    if (!preview.getAttribute("src")) return;
-    const link = document.createElement("a");
-    link.href = preview.src;
-    link.download = "md-abdulla-moment.jpg";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-  });
 
   studio.addEventListener("click", event => {
     if (event.target === studio) closeStudio();
@@ -1465,4 +1810,7 @@ const photos = [
   document.addEventListener("keydown", event => {
     if (event.key === "Escape" && studio.classList.contains("open")) closeStudio();
   });
+
+  buildFilterChips();
+  applyLiveLook();
 })();

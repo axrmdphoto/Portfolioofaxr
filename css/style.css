@@ -2018,6 +2018,105 @@
   margin-top: 14px;
 }
 
+.capture-option-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.capture-filter-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.capture-filter-count {
+  color: var(--muted);
+  font-size: .62rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.capture-filters {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.capture-filter-chip {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  border: 1px solid var(--stroke);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-size: .68rem;
+  transition: color .25s ease, border-color .25s ease, background .25s ease, transform .25s ease;
+}
+
+.capture-filter-chip:hover {
+  color: var(--text);
+  transform: translateY(-2px);
+}
+
+.capture-filter-chip.active {
+  border-color: var(--text);
+  background: var(--text);
+  color: #111;
+}
+
+.capture-filter-swatch {
+  width: 15px;
+  height: 15px;
+  border: 1px solid rgba(255,255,255,.28);
+  border-radius: 50%;
+  background: #6d7f8c;
+}
+
+.capture-filter-chip.active .capture-filter-swatch {
+  border-color: rgba(0,0,0,.35);
+}
+
+/* Vintage @axr.md sticker burned onto every frame */
+.capture-sticker {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  display: grid;
+  gap: 2px;
+  padding: 8px 13px;
+  border: 1px solid rgba(245,245,245,.5);
+  border-radius: 12px;
+  background: rgba(18,18,18,.42);
+  box-shadow: 0 6px 22px rgba(0,0,0,.35), inset 0 0 0 1px rgba(0,0,0,.18);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transform: rotate(-2.5deg);
+  pointer-events: none;
+  transition: opacity .3s ease;
+}
+
+.capture-sticker-mark {
+  color: #f5f5f5;
+  font-family: var(--serif);
+  font-size: .92rem;
+  font-style: italic;
+  letter-spacing: .02em;
+  text-shadow: 0 1px 6px rgba(0,0,0,.6);
+}
+
+.capture-sticker-meta {
+  color: rgba(245,245,245,.72);
+  font-size: .53rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
 .capture-select-label {
   display: grid;
   gap: 6px;
