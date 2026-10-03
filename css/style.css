@@ -347,7 +347,6 @@
       z-index: 0;
       object-fit: cover;
       filter: brightness(.62) saturate(.86);
-      transform: scale(1.04);
     }
 
     .hero-video {
@@ -355,12 +354,7 @@
       object-fit: cover;
       filter: brightness(.65) saturate(.82);
       transform: scale(1.08);
-      transition: transform 1.6s var(--ease);
       will-change: transform;
-    }
-
-    body.page-ready .hero-video {
-      transform: scale(1);
     }
 
     .hero-overlay {
@@ -754,7 +748,6 @@
       height: 115%;
       object-fit: cover;
       filter: brightness(.56);
-      transform: scale(1.08);
       will-change: transform;
     }
 
@@ -1932,6 +1925,7 @@
   border-radius: 18px;
   background: #000;
   aspect-ratio: 4 / 3;
+  transition: aspect-ratio .3s ease;
 }
 
 .capture-stage video,

@@ -1222,7 +1222,6 @@ const photos = [
 
       gsap.to(".hero-video", {
         yPercent: 8,
-        scale: 1.12,
         ease: "none",
         scrollTrigger: {
           trigger: ".hero",
@@ -1234,7 +1233,6 @@ const photos = [
 
       gsap.to("#featuredImage", {
         yPercent: -12,
-        scale: 1.14,
         ease: "none",
         scrollTrigger: {
           trigger: ".featured",
@@ -1346,6 +1344,7 @@ const photos = [
   const sticker = el("captureSticker");
   const stickerMark = el("captureStickerMark");
   const stickerMeta = el("captureStickerMeta");
+  const stage = el("captureStage");
 
   /* Film library. `filter` is a CSS filter string, which the 2D canvas also
      understands, so one recipe drives the viewfinder and the export. */
@@ -1389,6 +1388,16 @@ const photos = [
     "3:2": 3 / 2,
     "16:9": 16 / 9,
     "9:16": 9 / 16
+  };
+
+  /* CSS aspect-ratio for every frame shape */
+  const RATIO_FRAMES = {
+    original: null,
+    "1:1": "1 / 1",
+    "4:5": "4 / 5",
+    "3:2": "3 / 2",
+    "16:9": "16 / 9",
+    "9:16": "9 / 16"
   };
 
   /* Watermark designs. Each has a canvas renderer and a matching viewfinder
@@ -1438,10 +1447,6 @@ const photos = [
   function currentRatio() {
     const key = ratioSelect.value;
     return Object.prototype.hasOwnProperty.call(RATIOS, key) ? RATIOS[key] : null;
-  }
-
-  function ratioLabel() {
-    return ratioSelect.options[ratioSelect.selectedIndex].text;
   }
 
   function recipe() {
@@ -1677,6 +1682,31 @@ const photos = [
     if (draw) draw(context, width, height, look);
   }
 
+  /* The viewfinder shows the exact frame shape the visitor picked, so the
+     ratio is never a surprise when the photo is exported. */
+  function frameStage() {
+    if (!stage) return;
+
+    const frame = RATIO_FRAMES[ratioSelect.value];
+
+    if (frame) {
+      stage.style.aspectRatio = frame;
+    } else if (sourceImage) {
+      const size = sourceSize(sourceImage);
+      stage.style.aspectRatio = `${size.width} / ${size.height}`;
+    } else if (video && video.videoWidth) {
+      stage.style.aspectRatio = `${video.videoWidth} / ${video.videoHeight}`;
+    } else {
+      stage.style.aspectRatio = "4 / 3";
+    }
+
+    if (video && !video.hidden) setBadge(`LIVE VIEW / ${ratioName()}`);
+  }
+
+  function ratioName() {
+    return ratioSelect.value.toUpperCase();
+  }
+
   function syncOverlay(look) {
     const mark = currentWatermark();
     const stillShown = preview && !preview.hidden;
@@ -1701,6 +1731,7 @@ const photos = [
 
     if (video) video.style.filter = look.css === "none" ? "" : look.css;
 
+    frameStage();
     syncOverlay(look);
 
     if (preview && !preview.hidden && sourceImage) {
@@ -1909,7 +1940,7 @@ const photos = [
     [retakeButton, downloadButton, sharePhotoButton].forEach(button => {
       if (button) button.hidden = false;
     });
-    setBadge(`PREVIEW / ${ratioLabel().toUpperCase()}`);
+    setBadge(`PREVIEW / ${ratioName()}`);
     setStatus("Frame ready. Download it, share it, or retake the shot.");
     applyLiveLook();
   }
