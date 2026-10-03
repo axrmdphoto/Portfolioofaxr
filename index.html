@@ -3958,11 +3958,12 @@ const photos = [
             description: "A wooden boardwalk lined with colorful flags stretches across a calm body of water, leading to a small, red-roofed pavilion under a bright blue sky."
         },
         {
-            id: 31,
+            id: 33,
             src: "assets/images/palm-and-dome.jpg",
             title: "Palm Above the Dome",
             category: "Architecture",
             date: "2026",
+            addedAt: "2026-05-23",
             location: "Bilasipara",
             description: "A quiet architectural study where a tall palm rises beside a soft blue-and-white dome, framed by dense tropical foliage."
         },
@@ -3972,6 +3973,7 @@ const photos = [
             title: "Aquarium Light",
             category: "Interior",
             date: "2026",
+            addedAt: "2026-06-08",
             location: "Bilasipara",
             description: "Warm pendant lights, sculptural details and an aquarium glow create a richly layered interior moment."
         }
@@ -4322,7 +4324,16 @@ const photos = [
     const journalList =
       document.getElementById("journalList");
 
-    photos.slice(0, 6).forEach(photo => {
+    const recentJournalPhotos = photos
+      .map((photo, index) => ({ photo, index }))
+      .sort((a, b) =>
+        (b.photo.addedAt || "").localeCompare(a.photo.addedAt || "") ||
+        a.index - b.index
+      )
+      .slice(0, 6)
+      .map(entry => entry.photo);
+
+    recentJournalPhotos.forEach(photo => {
       const article =
         document.createElement("article");
 
@@ -4377,7 +4388,7 @@ const photos = [
       article.append(image, content, arrow);
 
       article.addEventListener("click", () => {
-        openLightbox(photo.id);
+        openLightbox(photo.id, recentJournalPhotos);
       });
 
       article.addEventListener("keydown", event => {
@@ -4386,7 +4397,7 @@ const photos = [
           event.key === " "
         ) {
           event.preventDefault();
-          openLightbox(photo.id);
+          openLightbox(photo.id, recentJournalPhotos);
         }
       });
 
