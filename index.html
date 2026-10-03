@@ -1136,6 +1136,11 @@
       pointer-events: none;
     }
 
+    .about-layout > div {
+      position: relative;
+      z-index: 1;
+    }
+
     .about-title {
       margin: 20px 0;
       font-size: clamp(3.4rem, 7vw, 7rem);
@@ -1150,20 +1155,41 @@
     }
 
     .about-copy {
-      max-width: 500px;
-      color: rgba(245,245,245,.9);
+      max-width: 54ch;
+      color: var(--muted);
       font-size: 1rem;
-      font-weight: 600;
-      line-height: 1.9;
+      font-weight: 400;
+      line-height: 1.85;
     }
 
     .profile-titles {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
       margin: 0 0 26px;
+      color: var(--muted);
+      font-size: .68rem;
+      letter-spacing: .08em;
+      line-height: 1.3;
+      text-transform: uppercase;
+    }
+
+    .profile-titles span {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 8px 12px;
+      border: 1px solid var(--stroke);
+      border-radius: 999px;
+      background: linear-gradient(135deg, rgba(255,255,255,.055), rgba(255,255,255,.015));
+      box-shadow: inset 0 1px rgba(255,255,255,.04);
+      transition: transform .35s var(--ease), border-color .35s ease, color .35s ease;
+    }
+
+    .profile-titles span:hover {
+      transform: translateY(-3px);
+      border-color: rgba(137,170,204,.55);
       color: var(--text);
-      font-family: var(--serif);
-      font-size: clamp(1.45rem, 2.8vw, 2.25rem);
-      font-style: italic;
-      line-height: 1.25;
     }
 
     .instagram-link {
@@ -1186,6 +1212,17 @@
       border: 1px solid rgba(137,170,204,.24);
       border-radius: 22px;
       box-shadow: 0 24px 70px rgba(0,0,0,.3), 0 0 35px rgba(78,133,191,.1);
+      transform: perspective(1100px) rotateY(-2deg);
+      transition: transform .7s var(--ease), box-shadow .7s ease, filter .7s ease;
+      will-change: transform;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .profile-photo:hover {
+        transform: perspective(1100px) rotateY(0) translateY(-5px) scale(1.015);
+        filter: saturate(1.08) contrast(1.03);
+        box-shadow: 0 34px 90px rgba(0,0,0,.42), 0 0 46px rgba(78,133,191,.18);
+      }
     }
 
     /* Skills and certifications */
@@ -1914,11 +1951,16 @@
         display: block;
       }
 
+      .about-layout::before {
+        display: none;
+      }
+
       .profile-photo {
-        width: min(64%, 240px);
+        width: min(78%, 320px);
         max-width: none;
-        margin: 28px auto 0 0;
-        border-radius: 20px;
+        margin: 30px auto 12px;
+        border-radius: 24px;
+        transform: none;
       }
 
       .about-layout > div:last-child {
@@ -1938,6 +1980,17 @@
       .about-copy {
         font-size: .98rem;
         line-height: 1.8;
+      }
+
+      .profile-titles {
+        gap: 7px;
+        margin-bottom: 22px;
+      }
+
+      .profile-titles span {
+        min-height: 32px;
+        padding: 7px 10px;
+        font-size: .61rem;
       }
 
       .skills-grid,
@@ -3230,7 +3283,10 @@
                     </div>
                     <div>
                       <p class="profile-titles">
-                        Creative Director • Cinematographer • Editor • Script Writer
+                        <span>Creative Director</span>
+                        <span>Cinematographer</span>
+                        <span>Editor</span>
+                        <span>Script Writer</span>
                       </p>
                       <p class="about-copy">
                         I am MD Abdulla, a creative content creator from Bilasipara,
