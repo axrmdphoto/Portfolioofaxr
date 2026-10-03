@@ -2040,6 +2040,13 @@
         grid-template-columns: 1fr;
       }
 
+      .cta h2 {
+        max-width: 14ch;
+        font-size: clamp(3.25rem, 11vw, 5rem);
+        letter-spacing: -.045em;
+        line-height: .96;
+      }
+
       .stat {
         border-right: 0;
         border-bottom: 1px solid var(--stroke);
@@ -2052,6 +2059,17 @@
       footer {
         grid-template-columns: 1fr;
         text-align: center;
+      }
+
+      footer > :first-child {
+        width: 100%;
+      }
+
+      .footer-credit {
+        max-width: 36ch;
+        margin-inline: auto;
+        line-height: 1.55;
+        text-wrap: pretty;
       }
 
       footer > :nth-child(2),
