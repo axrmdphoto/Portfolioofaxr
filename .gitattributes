@@ -1,0 +1,7 @@
+* text=auto eol=lf
+*.html text diff=html
+*.md text diff=markdown
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.svg text
