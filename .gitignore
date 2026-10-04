@@ -7,3 +7,17 @@ node_modules/
 dist/
 build/
 *.log
+
+screenshots/
+
+*.pid
+
+.agents/
+
+.agentsweb/
+
+.omgithub-runtime/
+
+.opencode-ssh/
+
+.opencode-web/
