@@ -1487,6 +1487,36 @@
       scroll-snap-align: center;
       scroll-snap-stop: always;
       will-change: transform, opacity;
+      /* Buttery trailing: each rAF update eases toward its target */
+      transition:
+        transform .22s cubic-bezier(.22, .8, .25, 1),
+        opacity .3s ease,
+        border-color .35s ease,
+        box-shadow .35s ease;
+    }
+
+    /* Scroll mode: smooth depth reveal while browsing the grid */
+    .certificates-grid:not(.swipe-mode) .certificate-card {
+      opacity: 0;
+      transform: translateY(30px) scale(.97);
+      filter: blur(7px);
+      transition:
+        opacity .8s var(--ease),
+        transform .8s var(--ease),
+        filter .8s var(--ease),
+        border-color .35s ease,
+        box-shadow .35s ease;
+      will-change: opacity, transform, filter;
+    }
+
+    .certificates-grid:not(.swipe-mode) .certificate-card.is-in {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0);
+    }
+
+    .certificates-grid:not(.swipe-mode) .certificate-card.is-in:hover {
+      transform: translateY(-4px) scale(1.01);
     }
 
     .certificate-card.is-active {
@@ -3560,6 +3590,15 @@
     opacity: 1;
     transform: none;
     filter: none;
+    transition: none;
+  }
+  .certificates-grid:not(.swipe-mode) .certificate-card {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+  .certificates-grid.swipe-mode .certificate-card {
     transition: none;
   }
 }
@@ -7359,7 +7398,7 @@ setReelsMode("swipe");
       const cCards = [...cGrid.querySelectorAll(".certificate-card")];
       let cMode = "swipe";
       let tgX = 0, tgY = 0, gX = 0, gY = 0;
-      let cVisible = false, cRaf = 0;
+      let cVisible = false, cRaf = 0, lastKick = 0;
 
       function setCertsMode(mode) {
         cMode = mode;
@@ -7388,6 +7427,8 @@ setReelsMode("swipe");
           if (cBar) cBar.style.transform = "scaleX(0)";
           stopDeck();
         } else {
+          /* Swipe motion must never inherit the scroll-reveal stagger delay */
+          cCards.forEach(card => { card.style.transitionDelay = ""; });
           startDeck();
           paintDeck();
         }
@@ -7440,11 +7481,15 @@ setReelsMode("swipe");
         }
       }
 
+      /* Idle-aware loop: runs while the deck is moving or the gyro is
+         settling, then parks so scrolling stays butter-smooth. */
       function deckLoop() {
         gX += (tgX - gX) * 0.08;
         gY += (tgY - gY) * 0.08;
         paintDeck();
-        if (cVisible && cMode === "swipe" && !reduced) {
+        const settling = Math.abs(tgX - gX) > 0.02 || Math.abs(tgY - gY) > 0.02;
+        const active = performance.now() - lastKick < 1600 || settling;
+        if (cVisible && cMode === "swipe" && !reduced && active) {
           cRaf = requestAnimationFrame(deckLoop);
         } else {
           cRaf = 0;
@@ -7452,8 +7497,14 @@ setReelsMode("swipe");
       }
 
       function startDeck() {
+        lastKick = performance.now();
         if (cRaf || reduced) { paintDeck(); return; }
         cRaf = requestAnimationFrame(deckLoop);
+      }
+
+      function kickDeck() {
+        lastKick = performance.now();
+        startDeck();
       }
 
       function stopDeck() {
@@ -7461,12 +7512,9 @@ setReelsMode("swipe");
         cRaf = 0;
       }
 
-      let paintQueued = false;
       cGrid.addEventListener("scroll", () => {
         if (cMode !== "swipe" || reduced) return;
-        if (paintQueued) return;
-        paintQueued = true;
-        requestAnimationFrame(() => { paintQueued = false; paintDeck(); });
+        kickDeck();
       }, { passive: true });
       window.addEventListener("resize", () => paintDeck());
 
@@ -7489,6 +7537,7 @@ setReelsMode("swipe");
         if (event.beta == null || event.gamma == null) return;
         tgX = Math.max(-6, Math.min(6, (event.beta - 45) * 0.12));
         tgY = Math.max(-8, Math.min(8, event.gamma * 0.18));
+        kickDeck();
       }, { passive: true });
 
       if (finePointer) {
@@ -7499,8 +7548,25 @@ setReelsMode("swipe");
           const ny = (event.clientY - r.top) / r.height - 0.5;
           tgY = nx * 7;
           tgX = ny * -5;
+          kickDeck();
         }, { passive: true });
-        cGrid.addEventListener("pointerleave", () => { tgX = 0; tgY = 0; });
+        cGrid.addEventListener("pointerleave", () => { tgX = 0; tgY = 0; kickDeck(); });
+      }
+
+      /* Scroll mode: smooth staggered depth reveal per card */
+      if ("IntersectionObserver" in window) {
+        const cReveal = new IntersectionObserver(entries => {
+          entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            const card = entry.target;
+            card.style.transitionDelay = `${(cCards.indexOf(card) % 2) * 90}ms`;
+            card.classList.add("is-in");
+            cReveal.unobserve(card);
+          });
+        }, { threshold: 0.12, rootMargin: "0px 0px -5% 0px" });
+        cCards.forEach(card => cReveal.observe(card));
+      } else {
+        cCards.forEach(card => card.classList.add("is-in"));
       }
 
       if (cPrev) cPrev.addEventListener("click", () => goCerts(-1));
