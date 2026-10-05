@@ -1420,6 +1420,107 @@
       vertical-align: middle;
     }
 
+    /* Certificates swipe deck: one-by-one coverflow */
+    .certificates-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .certs-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .certs-arrow {
+      display: grid;
+      width: 42px;
+      height: 42px;
+      place-items: center;
+      border: 1px solid var(--stroke);
+      border-radius: 50%;
+      background: var(--surface);
+      color: var(--text);
+      font-size: 1.1rem;
+      transition: border-color .25s ease, transform .25s var(--ease), background .25s ease;
+    }
+
+    .certs-arrow:hover {
+      border-color: rgba(137,170,204,.6);
+      background: var(--surface-2);
+      transform: translateY(-2px);
+    }
+
+    .certs-count {
+      min-width: 64px;
+      color: var(--muted);
+      font-size: .7rem;
+      letter-spacing: .14em;
+      text-align: center;
+    }
+
+    .certificates-grid.swipe-mode {
+      display: flex;
+      gap: 18px;
+      margin-inline: calc(50% - 50vw);
+      padding: 30px max(24px, calc((100vw - min(84vw, 430px)) / 2)) 34px;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      touch-action: pan-x pan-y;
+      perspective: 1400px;
+    }
+
+    .certificates-grid.swipe-mode::-webkit-scrollbar {
+      display: none;
+    }
+
+    .certificates-grid.swipe-mode .certificate-card {
+      flex: 0 0 min(80vw, 400px);
+      width: min(80vw, 400px);
+      margin-bottom: 0;
+      scroll-snap-align: center;
+      scroll-snap-stop: always;
+      will-change: transform, opacity;
+    }
+
+    .certificate-card.is-active {
+      border-color: rgba(137,170,204,.62);
+      box-shadow: 0 30px 80px rgba(0,0,0,.42), 0 0 36px rgba(78,133,191,.16);
+    }
+
+    .certs-progress {
+      height: 2px;
+      margin-top: 16px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+    }
+
+    .certs-progress i {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+      box-shadow: 0 0 12px rgba(78,133,191,.8);
+      transform: scaleX(0);
+      transform-origin: left;
+    }
+
+    .certs-hint {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: .62rem;
+      letter-spacing: .1em;
+      text-align: right;
+      text-transform: uppercase;
+    }
+
     /* Roles */
 
     .reels-section {
@@ -4073,7 +4174,19 @@
                     <h2 class="section-title" id="certificates-title">
                       Proof of <span class="serif">practice</span>
                     </h2>
-                    <div class="certificates-grid">
+                    <div class="certificates-toolbar">
+                      <span class="certs-count" id="certsCount" aria-live="polite">01 / 14</span>
+                      <div class="certs-controls">
+                        <button class="certs-arrow" id="certsPrev" type="button" aria-label="Previous certificate">←</button>
+                        <div class="gallery-mode" role="group" aria-label="Choose how to browse certificates">
+                          <span class="gallery-mode-label">View</span>
+                          <button class="mode-button" type="button" data-certs-mode="scroll" aria-pressed="false">Scroll</button>
+                          <button class="mode-button active" type="button" data-certs-mode="swipe" aria-pressed="true">Swipe</button>
+                        </div>
+                        <button class="certs-arrow" id="certsNext" type="button" aria-label="Next certificate">→</button>
+                      </div>
+                    </div>
+                    <div class="certificates-grid swipe-mode" id="certificatesGrid" aria-label="Certificates, swipe one by one">
                       <article class="certificate-card is-top">
                         <span class="certificate-number">01 — COMPUTER VISION</span>
                         <span class="certificate-flag">TOP PICK</span>
@@ -4204,6 +4317,8 @@
                         <a class="certificate-action" href="assets/images/certificates/marketing-design-easil.png" target="_blank" rel="noopener noreferrer">Open Certificate ↗</a>
                       </article>
                     </div>
+                    <div class="certs-progress" aria-hidden="true"><i id="certsProgressBar"></i></div>
+                    <p class="certs-hint" id="certsHint" aria-live="polite">Swipe one by one · center card in focus</p>
                   </div>
                 </section>
                 <section
@@ -5747,8 +5862,10 @@ const photos = [
           });
         });
 
+      /* Certificates run their own swipe-deck motion, so GSAP stays off them
+         and never fights the coverflow transform/opacity. */
       gsap.utils
-        .toArray(".skill-card, .role-card, .certificate-card, .stat")
+        .toArray(".skill-card, .role-card, .stat")
         .forEach((card, index) => {
           gsap.from(card, {
             opacity: 0,
@@ -7225,6 +7342,179 @@ setReelsMode("swipe");
         if (dx < 0) document.getElementById("lightboxNext")?.click();
         else document.getElementById("lightboxPrev")?.click();
       }, { passive: true });
+    }
+  } catch (error) {}
+
+  /* Certificates swipe deck: one-by-one coverflow with gyro + smoothing.
+     Runs only in swipe mode so it never fights the Scroll grid or GSAP. */
+  try {
+    const cGrid = document.getElementById("certificatesGrid");
+    const cHint = document.getElementById("certsHint");
+    const cCount = document.getElementById("certsCount");
+    const cBar = document.getElementById("certsProgressBar");
+    const cModeBtns = document.querySelectorAll("[data-certs-mode]");
+    const cPrev = document.getElementById("certsPrev");
+    const cNext = document.getElementById("certsNext");
+    if (cGrid) {
+      const cCards = [...cGrid.querySelectorAll(".certificate-card")];
+      let cMode = "swipe";
+      let tgX = 0, tgY = 0, gX = 0, gY = 0;
+      let cVisible = false, cRaf = 0;
+
+      function setCertsMode(mode) {
+        cMode = mode;
+        const swipe = mode === "swipe";
+        cGrid.classList.toggle("swipe-mode", swipe);
+        cGrid.scrollLeft = 0;
+        cModeBtns.forEach(button => {
+          const active = button.dataset.certsMode === mode;
+          button.classList.toggle("active", active);
+          button.setAttribute("aria-pressed", String(active));
+        });
+        if (cHint) {
+          cHint.textContent = swipe
+            ? "Swipe one by one · center card in focus"
+            : "Scroll down to browse all certificates";
+        }
+        if (!swipe || reduced) {
+          cCards.forEach(card => {
+            card.style.transform = "";
+            card.style.opacity = "";
+            card.style.zIndex = "";
+            card.style.filter = "";
+            card.classList.remove("is-active");
+          });
+          if (cCount) cCount.textContent = `${String(cCards.length).padStart(2, "0")} CERTIFICATES`;
+          if (cBar) cBar.style.transform = "scaleX(0)";
+          stopDeck();
+        } else {
+          startDeck();
+          paintDeck();
+        }
+        if (window.ScrollTrigger) ScrollTrigger.refresh();
+      }
+
+      function cardStep() {
+        const first = cCards[0];
+        if (!first) return 320;
+        return first.getBoundingClientRect().width + 18;
+      }
+
+      function goCerts(dir) {
+        if (cMode !== "swipe") return;
+        cGrid.scrollBy({ left: dir * cardStep(), behavior: reduced ? "auto" : "smooth" });
+      }
+
+      function paintDeck() {
+        if (cMode !== "swipe" || reduced || !cCards.length) return;
+        const vr = cGrid.getBoundingClientRect();
+        const vc = vr.left + vr.width / 2;
+        let best = null, bestAbs = Infinity;
+        cCards.forEach(card => {
+          const r = card.getBoundingClientRect();
+          if (!r.width) return;
+          const d = (r.left + r.width / 2 - vc) / r.width;
+          const ad = Math.min(Math.abs(d), 2);
+          if (Math.abs(d) < bestAbs) { bestAbs = Math.abs(d); best = card; }
+          const s = 1 - Math.min(ad * 0.13, 0.28);
+          const ry = Math.max(-1.6, Math.min(1.6, d)) * -13 + gY;
+          const rx = gX;
+          const z = -Math.round(ad * 90);
+          const lift = Math.round((1 - Math.min(ad, 1)) * 10);
+          card.style.transform =
+            `perspective(1400px) rotateY(${ry.toFixed(2)}deg) rotateX(${rx.toFixed(2)}deg) ` +
+            `translateZ(${z}px) translateY(${-lift}px) scale(${s.toFixed(3)})`;
+          card.style.opacity = (1 - Math.min(ad * 0.22, 0.55)).toFixed(3);
+          card.style.zIndex = String(20 - Math.round(ad * 6));
+          card.style.filter = ad > 0.9
+            ? `brightness(${(1 - Math.min((ad - 0.9) * 0.5, 0.35)).toFixed(3)})`
+            : "";
+          card.classList.toggle("is-active", Math.abs(d) < 0.35);
+        });
+        const max = cGrid.scrollWidth - cGrid.clientWidth;
+        const p = max > 0 ? Math.min(1, Math.max(0, cGrid.scrollLeft / max)) : 0;
+        if (cBar) cBar.style.transform = `scaleX(${p})`;
+        if (cCount && best) {
+          cCount.textContent =
+            `${String(cCards.indexOf(best) + 1).padStart(2, "0")} / ${String(cCards.length).padStart(2, "0")}`;
+        }
+      }
+
+      function deckLoop() {
+        gX += (tgX - gX) * 0.08;
+        gY += (tgY - gY) * 0.08;
+        paintDeck();
+        if (cVisible && cMode === "swipe" && !reduced) {
+          cRaf = requestAnimationFrame(deckLoop);
+        } else {
+          cRaf = 0;
+        }
+      }
+
+      function startDeck() {
+        if (cRaf || reduced) { paintDeck(); return; }
+        cRaf = requestAnimationFrame(deckLoop);
+      }
+
+      function stopDeck() {
+        if (cRaf) cancelAnimationFrame(cRaf);
+        cRaf = 0;
+      }
+
+      let paintQueued = false;
+      cGrid.addEventListener("scroll", () => {
+        if (cMode !== "swipe" || reduced) return;
+        if (paintQueued) return;
+        paintQueued = true;
+        requestAnimationFrame(() => { paintQueued = false; paintDeck(); });
+      }, { passive: true });
+      window.addEventListener("resize", () => paintDeck());
+
+      if ("IntersectionObserver" in window) {
+        new IntersectionObserver(entries => {
+          entries.forEach(entry => {
+            cVisible = entry.isIntersecting;
+            if (cVisible && cMode === "swipe" && !reduced) startDeck();
+            else if (!cVisible) stopDeck();
+          });
+        }, { threshold: 0.05 }).observe(cGrid);
+      } else {
+        cVisible = true;
+        startDeck();
+      }
+
+      /* Gyro: real device tilt on mobile, mouse parallax on desktop */
+      window.addEventListener("deviceorientation", event => {
+        if (reduced || cMode !== "swipe") return;
+        if (event.beta == null || event.gamma == null) return;
+        tgX = Math.max(-6, Math.min(6, (event.beta - 45) * 0.12));
+        tgY = Math.max(-8, Math.min(8, event.gamma * 0.18));
+      }, { passive: true });
+
+      if (finePointer) {
+        cGrid.addEventListener("pointermove", event => {
+          if (reduced || cMode !== "swipe") return;
+          const r = cGrid.getBoundingClientRect();
+          const nx = (event.clientX - r.left) / r.width - 0.5;
+          const ny = (event.clientY - r.top) / r.height - 0.5;
+          tgY = nx * 7;
+          tgX = ny * -5;
+        }, { passive: true });
+        cGrid.addEventListener("pointerleave", () => { tgX = 0; tgY = 0; });
+      }
+
+      if (cPrev) cPrev.addEventListener("click", () => goCerts(-1));
+      if (cNext) cNext.addEventListener("click", () => goCerts(1));
+      cModeBtns.forEach(button => {
+        button.addEventListener("click", () => setCertsMode(button.dataset.certsMode));
+      });
+      cGrid.addEventListener("keydown", event => {
+        if (cMode !== "swipe") return;
+        if (event.key === "ArrowRight") { event.preventDefault(); goCerts(1); }
+        if (event.key === "ArrowLeft") { event.preventDefault(); goCerts(-1); }
+      });
+
+      setCertsMode("swipe");
     }
   } catch (error) {}
 
