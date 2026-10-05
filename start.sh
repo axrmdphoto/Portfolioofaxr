@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "$0")"
-/usr/bin/time -p node "${RUNTIME_DIR:?}/scripts/default-start.mjs"
+if [ -n "${RUNTIME_DIR:-}" ] && [ -f "${RUNTIME_DIR}/scripts/default-start.mjs" ]; then
+  /usr/bin/time -p node "${RUNTIME_DIR}/scripts/default-start.mjs"
+else
+  node server.js
+fi
