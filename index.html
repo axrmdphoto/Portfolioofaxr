@@ -3116,12 +3116,401 @@
   color: var(--muted);
   font-size: .68rem;
 }
+
+/* ---- Depth & utility layer: progress, grain, dust, tilt, micro-details ---- */
+
+::selection {
+  background: rgba(137,170,204,.35);
+  color: #fff;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: linear-gradient(180deg, #2a3542, #18202b);
+  border: 2px solid #0a0a0a;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #89aacc, #4e85bf);
+}
+
+.scroll-progress {
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: transparent;
+  pointer-events: none;
+}
+.scroll-progress i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+  box-shadow: 0 0 12px rgba(78,133,191,.8);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.grain {
+  position: fixed;
+  z-index: 9997;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  pointer-events: none;
+  opacity: .05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  animation: grain-shift 1.2s steps(4) infinite;
+}
+@keyframes grain-shift {
+  0% { transform: translate(0,0); }
+  25% { transform: translate(-2%,1%); }
+  50% { transform: translate(1%,-2%); }
+  75% { transform: translate(-1%,2%); }
+  100% { transform: translate(2%,-1%); }
+}
+
+.dust {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.dust i {
+  position: absolute;
+  bottom: -12px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(214,235,255,.9), transparent 70%);
+  opacity: 0;
+  animation: dust-rise 11s linear infinite;
+}
+.dust i:nth-child(1) { left: 12%; animation-delay: 0s; }
+.dust i:nth-child(2) { left: 28%; animation-delay: 2.4s; width: 2px; height: 2px; }
+.dust i:nth-child(3) { left: 46%; animation-delay: 4.8s; }
+.dust i:nth-child(4) { left: 63%; animation-delay: 1.2s; width: 2px; height: 2px; }
+.dust i:nth-child(5) { left: 79%; animation-delay: 6.5s; }
+.dust i:nth-child(6) { left: 91%; animation-delay: 3.6s; width: 2px; height: 2px; }
+@keyframes dust-rise {
+  0% { opacity: 0; transform: translateY(0) translateX(0); }
+  12% { opacity: .8; }
+  100% { opacity: 0; transform: translateY(-72vh) translateX(26px); }
+}
+
+/* Smooth depth reveal */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(28px) scale(.985);
+  filter: blur(8px);
+  transition: opacity .9s var(--ease), transform .9s var(--ease), filter .9s var(--ease);
+  will-change: opacity, transform, filter;
+}
+[data-reveal].is-in {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+}
+
+/* 3D tilt depth for cards */
+.tilt-3d {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.tilt-3d .tilt-inner {
+  transform: translateZ(24px);
+}
+.reel-card::before,
+.skill-card::after,
+.role-card .role-glare {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity .4s ease;
+  background: radial-gradient(
+    circle at var(--mx, 50%) var(--my, 50%),
+    rgba(255,255,255,.16),
+    transparent 42%
+  );
+  mix-blend-mode: screen;
+}
+.reel-card:hover::before,
+.skill-card:hover::after {
+  opacity: 1;
+}
+.reel-card {
+  transform: perspective(1100px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(8px) scale(.995);
+}
+.reel-card.is-active {
+  transform: perspective(1100px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(0) scale(1);
+}
+.reel-card[data-reveal].is-in {
+  transition: opacity .9s var(--ease), filter .9s var(--ease), transform .35s var(--ease), border-color .35s ease, box-shadow .35s ease;
+}
+.reels-embed-wrap {
+  position: relative;
+  transform: translateZ(18px);
+}
+.reels-embed-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 8% -4% -10% -4%;
+  z-index: -1;
+  border-radius: 22px;
+  background: radial-gradient(ellipse at 50% 60%, rgba(78,133,191,.28), transparent 70%);
+  filter: blur(26px);
+  opacity: .7;
+  pointer-events: none;
+}
+.reel-video {
+  border-radius: 10px;
+  background: #000;
+}
+.reel-sound {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 11px;
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 999px;
+  background: rgba(8,10,13,.68);
+  color: #f5f5f5;
+  font-size: .66rem;
+  letter-spacing: .04em;
+  backdrop-filter: blur(10px);
+  transition: transform .25s var(--ease), border-color .25s ease, background .25s ease;
+}
+.reel-sound:hover {
+  transform: translateY(-2px);
+  border-color: rgba(137,170,204,.7);
+  background: rgba(20,28,38,.85);
+}
+.reel-state {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(0,0,0,.55);
+  color: #cfe3f7;
+  font-size: .6rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.reel-state b {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #7cba89;
+  box-shadow: 0 0 10px #7cba89;
+  animation: pulse 2s infinite;
+}
+
+/* Gallery search */
+.gallery-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: min(240px, 100%);
+  padding: 8px 14px;
+  border: 1px solid var(--stroke);
+  border-radius: 999px;
+  background: var(--surface);
+  transition: border-color .3s ease, box-shadow .3s ease;
+}
+.gallery-search:focus-within {
+  border-color: rgba(137,170,204,.6);
+  box-shadow: 0 0 0 3px rgba(78,133,191,.15);
+}
+.gallery-search input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: .78rem;
+}
+.gallery-search input::placeholder {
+  color: var(--muted);
+}
+.gallery-count {
+  color: var(--muted);
+  font-size: .68rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.photo-card {
+  background: linear-gradient(160deg, #181d24, #101317);
+}
+.photo-card img {
+  background: linear-gradient(110deg, #1a1f26 30%, #242c36 45%, #1a1f26 60%);
+  background-size: 200% 100%;
+  animation: img-shimmer 2.4s linear infinite;
+}
+.photo-card img[src] {
+  animation: none;
+  background: #101317;
+}
+@keyframes img-shimmer {
+  to { background-position: -200% 0; }
+}
+
+/* Lightbox actions */
+.lightbox-actions {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  z-index: 3;
+  display: flex;
+  gap: 8px;
+}
+.lightbox-actions button {
+  padding: 9px 14px;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 999px;
+  background: rgba(20,20,20,.82);
+  color: var(--text);
+  font-size: .68rem;
+  letter-spacing: .06em;
+  transition: border-color .25s ease, transform .25s var(--ease);
+}
+.lightbox-actions button:hover {
+  border-color: var(--accent-1);
+  transform: translateY(-2px);
+}
+
+/* Back to top */
+.to-top {
+  position: fixed;
+  z-index: 900;
+  right: 20px;
+  bottom: 20px;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(137,170,204,.4);
+  border-radius: 50%;
+  background:
+    conic-gradient(var(--accent-1) calc(var(--p, 0) * 1%), rgba(255,255,255,.08) 0),
+    rgba(12,14,17,.9);
+  color: var(--text);
+  font-size: 1.1rem;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(12px) scale(.94);
+  transition: opacity .35s var(--ease), transform .35s var(--ease), visibility .35s;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 12px 34px rgba(0,0,0,.4);
+}
+.to-top.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+.to-top:hover {
+  transform: translateY(-3px) scale(1.04);
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  z-index: 1200;
+  left: 50%;
+  bottom: 26px;
+  transform: translate(-50%, 16px);
+  max-width: min(92vw, 420px);
+  padding: 12px 18px;
+  border: 1px solid rgba(137,170,204,.4);
+  border-radius: 999px;
+  background: rgba(14,18,24,.94);
+  color: var(--text);
+  font-size: .76rem;
+  text-align: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .35s var(--ease), transform .35s var(--ease), visibility .35s;
+  box-shadow: 0 16px 44px rgba(0,0,0,.5);
+  backdrop-filter: blur(14px);
+}
+.toast.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+}
+
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+.button:active {
+  transform: translateY(0) scale(.97);
+}
+.nav-link {
+  position: relative;
+}
+.nav-link.active::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 6px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+  box-shadow: 0 0 10px rgba(78,133,191,.7);
+}
+.hero-content {
+  transform-style: preserve-3d;
+}
+.hero-animate {
+  transform: translateZ(var(--hz, 0px));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grain,
+  .dust {
+    display: none;
+  }
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+  .to-top {
+    transition: none;
+  }
+}
 </style>
 </head>
           <body>
             <a class="skip-link" href="#main-content">
               Skip to content
             </a>
+            <div class="scroll-progress" aria-hidden="true"><i id="scrollProgressBar"></i></div>
+            <div class="grain" aria-hidden="true"></div>
             <div
               class="cursor-glow"
               id="cursorGlow"
@@ -3306,6 +3695,11 @@
                     </p>
                   </div>
                   <div class="gallery-toolbar">
+                    <label class="gallery-search" aria-label="Search photographs">
+                      <span aria-hidden="true">⌕</span>
+                      <input id="gallerySearch" type="search" placeholder="Search title, place, mood…" autocomplete="off" />
+                    </label>
+                    <span class="gallery-count" id="galleryCount" aria-live="polite"></span>
                     <div
                       class="filters"
                       id="filters"
@@ -3837,6 +4231,8 @@
                     </div>
                   </div>
                 </section>
+                <button class="to-top" id="toTop" type="button" aria-label="Back to top">↑</button>
+                <div class="toast" id="toast" role="status" aria-live="polite"></div>
                 <div
                   class="marquee"
                   aria-hidden="true"
@@ -3919,6 +4315,10 @@
                 >
                 <span aria-hidden="true">→</span>
                 </button>
+                <div class="lightbox-actions">
+                  <button id="lightboxDownload" type="button">Download ↓</button>
+                  <button id="lightboxShare" type="button">Copy link ↗</button>
+                </div>
                   <div
                     class="lightbox-caption"
                     id="lightboxCaption"
@@ -6593,6 +6993,262 @@ reelsModeButtons.forEach(button => {
   button.addEventListener("click", () => setReelsMode(button.dataset.reelsMode));
 });
 setReelsMode("swipe");
+
+/* ---- Useful features + hyper-smooth depth layer (no backend, motion-safe) ---- */
+(() => {
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+  /* Toast */
+  const toast = document.getElementById("toast");
+  let toastTimer = null;
+  function showToast(message) {
+    if (!toast) return;
+    toast.textContent = message;
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove("show"), 2600);
+  }
+
+  /* Scroll progress + back to top */
+  const bar = document.getElementById("scrollProgressBar");
+  const toTop = document.getElementById("toTop");
+  function onScroll() {
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const p = max > 0 ? Math.min(1, window.scrollY / max) : 0;
+    if (bar) bar.style.transform = `scaleX(${p})`;
+    if (toTop) {
+      toTop.classList.toggle("show", window.scrollY > 600);
+      toTop.style.setProperty("--p", Math.round(p * 100));
+    }
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+  if (toTop) toTop.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
+  });
+
+  /* Depth reveal: reels only — titles/cards are already animated by GSAP,
+     and hiding them in CSS would corrupt gsap.from() end states. */
+  const revealTargets = document.querySelectorAll(".reel-card");
+  revealTargets.forEach(el => el.setAttribute("data-reveal", ""));
+  if ("IntersectionObserver" in window) {
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-in");
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: .12, rootMargin: "0px 0px -6% 0px" });
+    document.querySelectorAll("[data-reveal]").forEach(el => io.observe(el));
+  } else {
+    document.querySelectorAll("[data-reveal]").forEach(el => el.classList.add("is-in"));
+  }
+
+  /* 3D tilt with glare: reels only. Gallery / explorations / skills keep
+     their own GSAP tilt — sharing the transform property would fight it. */
+  if (finePointer && !reduced) {
+    let raf = 0;
+    document.addEventListener("pointermove", event => {
+      const card = event.target.closest && event.target.closest(".reel-card");
+      document.querySelectorAll(".reel-card").forEach(el => {
+        if (el !== card) {
+          el.style.setProperty("--rx", "0deg");
+          el.style.setProperty("--ry", "0deg");
+        }
+      });
+      if (!card) return;
+      const rect = card.getBoundingClientRect();
+      const x = (event.clientX - rect.left) / rect.width;
+      const y = (event.clientY - rect.top) / rect.height;
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        card.style.setProperty("--ry", `${((x - .5) * 7).toFixed(2)}deg`);
+        card.style.setProperty("--rx", `${((.5 - y) * 7).toFixed(2)}deg`);
+        card.style.setProperty("--mx", `${(x * 100).toFixed(1)}%`);
+        card.style.setProperty("--my", `${(y * 100).toFixed(1)}%`);
+      });
+    }, { passive: true });
+    document.addEventListener("pointerleave", () => {
+      document.querySelectorAll(".reel-card").forEach(el => {
+        el.style.setProperty("--rx", "0deg");
+        el.style.setProperty("--ry", "0deg");
+      });
+    }, true);
+  }
+
+  /* Hero + exploration dust (little floating light) */
+  if (!reduced) {
+    const hero = document.querySelector(".hero");
+    if (hero && !hero.querySelector(".dust")) {
+      const dust = document.createElement("div");
+      dust.className = "dust";
+      dust.setAttribute("aria-hidden", "true");
+      dust.innerHTML = "<i></i><i></i><i></i><i></i><i></i><i></i>";
+      hero.appendChild(dust);
+    }
+    /* Hero mouse depth: layered translateZ per element */
+    if (hero && finePointer) {
+      const layers = hero.querySelectorAll(".hero-animate");
+      hero.addEventListener("pointermove", event => {
+        const rect = hero.getBoundingClientRect();
+        const dx = (event.clientX - rect.left) / rect.width - .5;
+        const dy = (event.clientY - rect.top) / rect.height - .5;
+        layers.forEach((el, i) => {
+          const depth = (i + 1) * 6;
+          el.style.setProperty("--hz", `${depth}px`);
+          el.style.transform = `translate3d(${(dx * depth).toFixed(1)}px, ${(dy * depth).toFixed(1)}px, ${depth}px)`;
+        });
+      }, { passive: true });
+      hero.addEventListener("pointerleave", () => {
+        layers.forEach(el => { el.style.transform = ""; });
+      });
+    }
+  }
+
+  /* Reels: sound toggle + tap play/pause + state pill */
+  try {
+    const cards = document.querySelectorAll(".reel-card");
+    cards.forEach(card => {
+      const video = card.querySelector(".reel-video");
+      const wrap = card.querySelector(".reels-embed-wrap");
+      if (!video || !wrap) return;
+      wrap.style.position = "relative";
+      const state = document.createElement("span");
+      state.className = "reel-state";
+      state.innerHTML = "<b></b><span>Playing</span>";
+      wrap.appendChild(state);
+      const btn = document.createElement("button");
+      btn.className = "reel-sound";
+      btn.type = "button";
+      btn.setAttribute("aria-label", "Unmute this reel");
+      btn.textContent = "🔇 Tap for sound";
+      wrap.appendChild(btn);
+      const label = state.querySelector("span");
+      function sync() {
+        const playing = !video.paused && !video.ended;
+        if (label) label.textContent = playing ? "Playing" : "Paused";
+        btn.textContent = video.muted ? "🔇 Tap for sound" : "🔊 Sound on";
+        btn.setAttribute("aria-label", video.muted ? "Unmute this reel" : "Mute this reel");
+      }
+      btn.addEventListener("click", event => {
+        event.stopPropagation();
+        video.muted = !video.muted;
+        if (video.muted) delete video.dataset.unmuted;
+        else video.dataset.unmuted = "1";
+        if (video.paused) video.play().catch(() => {});
+        sync();
+        showToast(video.muted ? "Sound off" : "Sound on — enjoy the cut");
+      });
+      video.addEventListener("click", () => {
+        if (video.paused) video.play().catch(() => {});
+        else video.pause();
+        sync();
+      });
+      video.addEventListener("play", sync);
+      video.addEventListener("pause", sync);
+      sync();
+    });
+    /* Respect manual unmute: don't force-mute a video the visitor unmuted */
+    if (typeof playReel === "function") {
+      const original = playReel;
+      playReel = function (card) {
+        const currentVideo = card.querySelector(".reel-video");
+        if (!currentVideo) return;
+        reelVideos.forEach(video => {
+          if (video !== currentVideo) video.pause();
+        });
+        if (!currentVideo.dataset.unmuted) currentVideo.muted = true;
+        currentVideo.play().catch(() => {});
+      };
+    }
+  } catch (error) {}
+
+  /* Gallery: live search + count (works with existing filter rendering) */
+  try {
+    const search = document.getElementById("gallerySearch");
+    const count = document.getElementById("galleryCount");
+    const grid = document.getElementById("galleryGrid");
+    function applySearch() {
+      if (!grid) return;
+      const q = (search && search.value || "").trim().toLowerCase();
+      let visible = 0;
+      grid.querySelectorAll(".photo-card").forEach(card => {
+        const text = card.textContent.toLowerCase() + " " +
+          (card.querySelector("img")?.alt || "").toLowerCase();
+        const show = !q || text.includes(q);
+        card.style.display = show ? "" : "none";
+        if (show) visible++;
+      });
+      if (count) count.textContent = visible ? `${visible} frame${visible === 1 ? "" : "s"}` : "No matches";
+    }
+    if (search) search.addEventListener("input", applySearch);
+    if (grid && "MutationObserver" in window) {
+      new MutationObserver(() => applySearch()).observe(grid, { childList: true });
+    }
+    applySearch();
+  } catch (error) {}
+
+  /* Lightbox: download + copy link + swipe */
+  try {
+    const img = document.getElementById("lightboxImage");
+    const dl = document.getElementById("lightboxDownload");
+    const share = document.getElementById("lightboxShare");
+    const lightbox = document.getElementById("lightbox");
+    if (dl) dl.addEventListener("click", async () => {
+      const src = img && img.src;
+      if (!src) return;
+      try {
+        const res = await fetch(src, { mode: "cors" });
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `md-abdulla-${Date.now()}.jpg`;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 4000);
+        showToast("Photo downloading");
+      } catch (error) {
+        window.open(src, "_blank", "noopener");
+        showToast("Opened full photo in a new tab");
+      }
+    });
+    if (share) share.addEventListener("click", async () => {
+      const src = img && img.src;
+      if (!src) return;
+      try {
+        await navigator.clipboard.writeText(src);
+        showToast("Photo link copied");
+      } catch (error) {
+        showToast("Copy this URL: " + src);
+      }
+    });
+    if (lightbox) {
+      let startX = 0;
+      lightbox.addEventListener("touchstart", e => {
+        startX = e.touches[0].clientX;
+      }, { passive: true });
+      lightbox.addEventListener("touchend", e => {
+        const dx = e.changedTouches[0].clientX - startX;
+        if (Math.abs(dx) < 42) return;
+        if (dx < 0) document.getElementById("lightboxNext")?.click();
+        else document.getElementById("lightboxPrev")?.click();
+      }, { passive: true });
+    }
+  } catch (error) {}
+
+  /* Copy email on click (still opens mail app) */
+  document.querySelectorAll('a[href^="mailto:"]').forEach(link => {
+    link.addEventListener("click", async () => {
+      const email = link.getAttribute("href").replace("mailto:", "").split("?")[0];
+      try {
+        await navigator.clipboard.writeText(email);
+        showToast("Email copied: " + email);
+      } catch (error) {}
+    });
+  });
+})();
 
 </script>
 </body>
