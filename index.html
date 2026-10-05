@@ -1470,10 +1470,9 @@
       padding: 30px max(24px, calc((100vw - min(84vw, 430px)) / 2)) 34px;
       overflow-x: auto;
       overscroll-behavior-x: contain;
-      scroll-snap-type: x mandatory;
+      scroll-snap-type: x proximity;
       scrollbar-width: none;
       touch-action: pan-x pan-y;
-      perspective: 1400px;
     }
 
     .certificates-grid.swipe-mode::-webkit-scrollbar {
@@ -1485,14 +1484,18 @@
       width: min(80vw, 400px);
       margin-bottom: 0;
       scroll-snap-align: center;
-      scroll-snap-stop: always;
-      will-change: transform, opacity;
-      /* Buttery trailing: each rAF update eases toward its target */
+      opacity: .68;
+      transform: scale(.95);
       transition:
-        transform .22s cubic-bezier(.22, .8, .25, 1),
-        opacity .3s ease,
+        transform .45s var(--ease),
+        opacity .45s ease,
         border-color .35s ease,
         box-shadow .35s ease;
+    }
+
+    .certificates-grid.swipe-mode .certificate-card.is-active {
+      opacity: 1;
+      transform: scale(1);
     }
 
     /* Scroll mode: smooth depth reveal while browsing the grid */
@@ -7397,8 +7400,7 @@ setReelsMode("swipe");
     if (cGrid) {
       const cCards = [...cGrid.querySelectorAll(".certificate-card")];
       let cMode = "swipe";
-      let tgX = 0, tgY = 0, gX = 0, gY = 0;
-      let cVisible = false, cRaf = 0, lastKick = 0;
+      let cActive = null, tickQueued = false;
 
       function setCertsMode(mode) {
         cMode = mode;
@@ -7415,22 +7417,15 @@ setReelsMode("swipe");
             ? "Swipe one by one · center card in focus"
             : "Scroll down to browse all certificates";
         }
-        if (!swipe || reduced) {
-          cCards.forEach(card => {
-            card.style.transform = "";
-            card.style.opacity = "";
-            card.style.zIndex = "";
-            card.style.filter = "";
-            card.classList.remove("is-active");
-          });
+        if (!swipe) {
+          cCards.forEach(card => card.classList.remove("is-active"));
+          cActive = null;
           if (cCount) cCount.textContent = `${String(cCards.length).padStart(2, "0")} CERTIFICATES`;
           if (cBar) cBar.style.transform = "scaleX(0)";
-          stopDeck();
         } else {
-          /* Swipe motion must never inherit the scroll-reveal stagger delay */
+          /* Swipe focus must never inherit the scroll-reveal stagger delay */
           cCards.forEach(card => { card.style.transitionDelay = ""; });
-          startDeck();
-          paintDeck();
+          updateCerts();
         }
         if (window.ScrollTrigger) ScrollTrigger.refresh();
       }
@@ -7446,32 +7441,25 @@ setReelsMode("swipe");
         cGrid.scrollBy({ left: dir * cardStep(), behavior: reduced ? "auto" : "smooth" });
       }
 
-      function paintDeck() {
-        if (cMode !== "swipe" || reduced || !cCards.length) return;
+      /* Calm tracker: only the nearest-to-center card is marked active.
+         The browser owns the scroll and CSS eases the focus change —
+         no per-frame transforms, no gyro, nothing to fight or jank. */
+      function updateCerts() {
+        if (cMode !== "swipe" || !cCards.length) return;
         const vr = cGrid.getBoundingClientRect();
         const vc = vr.left + vr.width / 2;
-        let best = null, bestAbs = Infinity;
+        let best = cCards[0], bestAbs = Infinity;
         cCards.forEach(card => {
           const r = card.getBoundingClientRect();
           if (!r.width) return;
-          const d = (r.left + r.width / 2 - vc) / r.width;
-          const ad = Math.min(Math.abs(d), 2);
-          if (Math.abs(d) < bestAbs) { bestAbs = Math.abs(d); best = card; }
-          const s = 1 - Math.min(ad * 0.13, 0.28);
-          const ry = Math.max(-1.6, Math.min(1.6, d)) * -13 + gY;
-          const rx = gX;
-          const z = -Math.round(ad * 90);
-          const lift = Math.round((1 - Math.min(ad, 1)) * 10);
-          card.style.transform =
-            `perspective(1400px) rotateY(${ry.toFixed(2)}deg) rotateX(${rx.toFixed(2)}deg) ` +
-            `translateZ(${z}px) translateY(${-lift}px) scale(${s.toFixed(3)})`;
-          card.style.opacity = (1 - Math.min(ad * 0.22, 0.55)).toFixed(3);
-          card.style.zIndex = String(20 - Math.round(ad * 6));
-          card.style.filter = ad > 0.9
-            ? `brightness(${(1 - Math.min((ad - 0.9) * 0.5, 0.35)).toFixed(3)})`
-            : "";
-          card.classList.toggle("is-active", Math.abs(d) < 0.35);
+          const abs = Math.abs(r.left + r.width / 2 - vc);
+          if (abs < bestAbs) { bestAbs = abs; best = card; }
         });
+        if (best !== cActive) {
+          if (cActive) cActive.classList.remove("is-active");
+          cActive = best;
+          if (cActive) cActive.classList.add("is-active");
+        }
         const max = cGrid.scrollWidth - cGrid.clientWidth;
         const p = max > 0 ? Math.min(1, Math.max(0, cGrid.scrollLeft / max)) : 0;
         if (cBar) cBar.style.transform = `scaleX(${p})`;
@@ -7481,77 +7469,17 @@ setReelsMode("swipe");
         }
       }
 
-      /* Idle-aware loop: runs while the deck is moving or the gyro is
-         settling, then parks so scrolling stays butter-smooth. */
-      function deckLoop() {
-        gX += (tgX - gX) * 0.08;
-        gY += (tgY - gY) * 0.08;
-        paintDeck();
-        const settling = Math.abs(tgX - gX) > 0.02 || Math.abs(tgY - gY) > 0.02;
-        const active = performance.now() - lastKick < 1600 || settling;
-        if (cVisible && cMode === "swipe" && !reduced && active) {
-          cRaf = requestAnimationFrame(deckLoop);
-        } else {
-          cRaf = 0;
-        }
-      }
-
-      function startDeck() {
-        lastKick = performance.now();
-        if (cRaf || reduced) { paintDeck(); return; }
-        cRaf = requestAnimationFrame(deckLoop);
-      }
-
-      function kickDeck() {
-        lastKick = performance.now();
-        startDeck();
-      }
-
-      function stopDeck() {
-        if (cRaf) cancelAnimationFrame(cRaf);
-        cRaf = 0;
+      function queueCerts() {
+        if (tickQueued) return;
+        tickQueued = true;
+        requestAnimationFrame(() => { tickQueued = false; updateCerts(); });
       }
 
       cGrid.addEventListener("scroll", () => {
-        if (cMode !== "swipe" || reduced) return;
-        kickDeck();
+        if (cMode !== "swipe") return;
+        queueCerts();
       }, { passive: true });
-      window.addEventListener("resize", () => paintDeck());
-
-      if ("IntersectionObserver" in window) {
-        new IntersectionObserver(entries => {
-          entries.forEach(entry => {
-            cVisible = entry.isIntersecting;
-            if (cVisible && cMode === "swipe" && !reduced) startDeck();
-            else if (!cVisible) stopDeck();
-          });
-        }, { threshold: 0.05 }).observe(cGrid);
-      } else {
-        cVisible = true;
-        startDeck();
-      }
-
-      /* Gyro: real device tilt on mobile, mouse parallax on desktop */
-      window.addEventListener("deviceorientation", event => {
-        if (reduced || cMode !== "swipe") return;
-        if (event.beta == null || event.gamma == null) return;
-        tgX = Math.max(-6, Math.min(6, (event.beta - 45) * 0.12));
-        tgY = Math.max(-8, Math.min(8, event.gamma * 0.18));
-        kickDeck();
-      }, { passive: true });
-
-      if (finePointer) {
-        cGrid.addEventListener("pointermove", event => {
-          if (reduced || cMode !== "swipe") return;
-          const r = cGrid.getBoundingClientRect();
-          const nx = (event.clientX - r.left) / r.width - 0.5;
-          const ny = (event.clientY - r.top) / r.height - 0.5;
-          tgY = nx * 7;
-          tgX = ny * -5;
-          kickDeck();
-        }, { passive: true });
-        cGrid.addEventListener("pointerleave", () => { tgX = 0; tgY = 0; kickDeck(); });
-      }
+      window.addEventListener("resize", () => updateCerts());
 
       /* Scroll mode: smooth staggered depth reveal per card */
       if ("IntersectionObserver" in window) {
