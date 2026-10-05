@@ -3396,30 +3396,6 @@
   to { background-position: -200% 0; }
 }
 
-/* Lightbox actions */
-.lightbox-actions {
-  position: absolute;
-  bottom: 24px;
-  right: 24px;
-  z-index: 3;
-  display: flex;
-  gap: 8px;
-}
-.lightbox-actions button {
-  padding: 9px 14px;
-  border: 1px solid rgba(255,255,255,.2);
-  border-radius: 999px;
-  background: rgba(20,20,20,.82);
-  color: var(--text);
-  font-size: .68rem;
-  letter-spacing: .06em;
-  transition: border-color .25s ease, transform .25s var(--ease);
-}
-.lightbox-actions button:hover {
-  border-color: var(--accent-1);
-  transform: translateY(-2px);
-}
-
 /* Back to top */
 .to-top {
   position: fixed;
@@ -4409,10 +4385,6 @@
                 >
                 <span aria-hidden="true">→</span>
                 </button>
-                <div class="lightbox-actions">
-                  <button id="lightboxDownload" type="button">Download ↓</button>
-                  <button id="lightboxShare" type="button">Copy link ↗</button>
-                </div>
                   <div
                     class="lightbox-caption"
                     id="lightboxCaption"
@@ -7284,40 +7256,9 @@ setReelsMode("swipe");
     applySearch();
   } catch (error) {}
 
-  /* Lightbox: download + copy link + swipe */
+  /* Lightbox: swipe */
   try {
-    const img = document.getElementById("lightboxImage");
-    const dl = document.getElementById("lightboxDownload");
-    const share = document.getElementById("lightboxShare");
     const lightbox = document.getElementById("lightbox");
-    if (dl) dl.addEventListener("click", async () => {
-      const src = img && img.src;
-      if (!src) return;
-      try {
-        const res = await fetch(src, { mode: "cors" });
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `md-abdulla-${Date.now()}.jpg`;
-        a.click();
-        setTimeout(() => URL.revokeObjectURL(url), 4000);
-        showToast("Photo downloading");
-      } catch (error) {
-        window.open(src, "_blank", "noopener");
-        showToast("Opened full photo in a new tab");
-      }
-    });
-    if (share) share.addEventListener("click", async () => {
-      const src = img && img.src;
-      if (!src) return;
-      try {
-        await navigator.clipboard.writeText(src);
-        showToast("Photo link copied");
-      } catch (error) {
-        showToast("Copy this URL: " + src);
-      }
-    });
     if (lightbox) {
       let startX = 0;
       lightbox.addEventListener("touchstart", e => {
