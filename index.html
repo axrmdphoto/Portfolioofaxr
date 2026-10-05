@@ -3396,39 +3396,6 @@
   to { background-position: -200% 0; }
 }
 
-/* Back to top */
-.to-top {
-  position: fixed;
-  z-index: 900;
-  right: 20px;
-  bottom: 20px;
-  width: 48px;
-  height: 48px;
-  display: grid;
-  place-items: center;
-  border: 1px solid rgba(137,170,204,.4);
-  border-radius: 50%;
-  background:
-    conic-gradient(var(--accent-1) calc(var(--p, 0) * 1%), rgba(255,255,255,.08) 0),
-    rgba(12,14,17,.9);
-  color: var(--text);
-  font-size: 1.1rem;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(12px) scale(.94);
-  transition: opacity .35s var(--ease), transform .35s var(--ease), visibility .35s;
-  backdrop-filter: blur(12px);
-  box-shadow: 0 12px 34px rgba(0,0,0,.4);
-}
-.to-top.show {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0) scale(1);
-}
-.to-top:hover {
-  transform: translateY(-3px) scale(1.04);
-}
-
 /* Toast */
 .toast {
   position: fixed;
@@ -3492,9 +3459,6 @@
     opacity: 1;
     transform: none;
     filter: none;
-    transition: none;
-  }
-  .to-top {
     transition: none;
   }
 }
@@ -4301,7 +4265,6 @@
                     </div>
                   </div>
                 </section>
-                <button class="to-top" id="toTop" type="button" aria-label="Back to top">↑</button>
                 <div class="toast" id="toast" role="status" aria-live="polite"></div>
                 <div
                   class="marquee"
@@ -7076,23 +7039,15 @@ setReelsMode("swipe");
     toastTimer = setTimeout(() => toast.classList.remove("show"), 2600);
   }
 
-  /* Scroll progress + back to top */
+  /* Scroll progress */
   const bar = document.getElementById("scrollProgressBar");
-  const toTop = document.getElementById("toTop");
   function onScroll() {
     const max = document.documentElement.scrollHeight - window.innerHeight;
     const p = max > 0 ? Math.min(1, window.scrollY / max) : 0;
     if (bar) bar.style.transform = `scaleX(${p})`;
-    if (toTop) {
-      toTop.classList.toggle("show", window.scrollY > 600);
-      toTop.style.setProperty("--p", Math.round(p * 100));
-    }
   }
   window.addEventListener("scroll", onScroll, { passive: true });
   onScroll();
-  if (toTop) toTop.addEventListener("click", () => {
-    window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
-  });
 
   /* Depth reveal: reels only — titles/cards are already animated by GSAP,
      and hiding them in CSS would corrupt gsap.from() end states. */
