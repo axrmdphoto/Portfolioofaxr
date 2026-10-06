@@ -1491,6 +1491,7 @@
       scrollbar-width: none;
       -webkit-overflow-scrolling: touch;
       touch-action: pan-x pan-y;
+      perspective: 1200px;
     }
 
     .certificates-grid.swipe-mode::-webkit-scrollbar {
@@ -1506,6 +1507,8 @@
       position: relative;
       opacity: 0.62;
       transform: scale(0.94);
+      transform-style: preserve-3d;
+      perspective: 1000px;
       translate: none;
       -webkit-backface-visibility: hidden;
       backface-visibility: hidden;
@@ -1517,15 +1520,60 @@
       will-change: transform, opacity;
     }
 
+    /* Specular holographic sheen layer for hyper-realistic glass reflection */
+    .certificate-sheen {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      z-index: 5;
+      background: radial-gradient(
+        circle 340px at var(--cert-spec-x, 50%) var(--cert-spec-y, 35%),
+        rgba(255, 255, 255, 0.42) 0%,
+        rgba(137, 170, 204, 0.22) 32%,
+        rgba(190, 140, 255, 0.09) 55%,
+        transparent 75%
+      );
+      opacity: var(--cert-glare-op, 0.2);
+      mix-blend-mode: overlay;
+      transform: translateZ(42px);
+      transition: opacity 0.3s ease;
+    }
+
     .certificates-grid.swipe-mode .certificate-card:hover {
       translate: none;
     }
 
     .certificates-grid.swipe-mode .certificate-card.is-active {
       opacity: 1;
-      transform: scale(1);
-      border-color: rgba(137, 170, 204, 0.72);
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45), 0 0 32px rgba(78, 133, 191, 0.2);
+      transform: scale(1) rotateX(var(--cert-rx, 0deg)) rotateY(var(--cert-ry, 0deg));
+      border-color: rgba(137, 170, 204, 0.76);
+      box-shadow:
+        calc(var(--cert-ry-num, 0) * -1.8px) calc(var(--cert-rx-num, 0) * 1.8px + 22px) 60px rgba(0, 0, 0, 0.5),
+        0 0 36px rgba(78, 133, 191, 0.28);
+      transition:
+        transform 0.06s linear,
+        opacity 0.28s ease,
+        border-color 0.28s ease,
+        box-shadow 0.1s linear;
+    }
+
+    /* Hyper-realistic 3D parallax depth layers inside active card */
+    .certificates-grid.swipe-mode .certificate-card.is-active .certificate-preview {
+      transform: translateZ(26px);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.38);
+      transition: transform 0.06s linear, box-shadow 0.25s ease;
+    }
+
+    .certificates-grid.swipe-mode .certificate-card.is-active .certificate-flag,
+    .certificates-grid.swipe-mode .certificate-card.is-active .certificate-number {
+      transform: translateZ(36px);
+      display: inline-block;
+    }
+
+    .certificates-grid.swipe-mode .certificate-card.is-active h3,
+    .certificates-grid.swipe-mode .certificate-card.is-active .certificate-action {
+      transform: translateZ(30px);
     }
 
     /* Scroll mode: smooth depth reveal while browsing the grid */
@@ -1584,6 +1632,143 @@
       letter-spacing: .1em;
       text-align: right;
       text-transform: uppercase;
+    }
+
+    /* Credentials summary & trust ribbon */
+    .certs-credentials-summary {
+      margin-top: 32px;
+      padding: 26px 22px;
+      border: 1px solid var(--stroke);
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(22, 30, 39, 0.55), rgba(10, 12, 15, 0.72));
+      backdrop-filter: blur(12px);
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+
+    .credentials-badge-strip {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .cred-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border: 1px solid rgba(137, 170, 204, 0.22);
+      border-radius: 999px;
+      background: rgba(137, 170, 204, 0.06);
+      color: var(--muted);
+      font-size: 0.75rem;
+      letter-spacing: 0.04em;
+    }
+
+    .cred-chip strong {
+      color: var(--accent-1);
+      font-weight: 600;
+    }
+
+    .cred-chip-icon {
+      color: var(--accent-1);
+      font-size: 0.82rem;
+    }
+
+    .certs-category-filter {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 18px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .certs-filter-title {
+      color: var(--muted);
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .certs-filter-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .cert-filter-btn {
+      padding: 7px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: all 0.22s ease;
+    }
+
+    .cert-filter-btn:hover {
+      border-color: rgba(137, 170, 204, 0.5);
+      color: var(--text);
+      background: rgba(137, 170, 204, 0.1);
+    }
+
+    .cert-filter-btn.active {
+      border-color: rgba(137, 170, 204, 0.75);
+      color: var(--text);
+      background: linear-gradient(135deg, rgba(78, 133, 191, 0.32), rgba(137, 170, 204, 0.18));
+      box-shadow: 0 0 16px rgba(78, 133, 191, 0.28);
+    }
+
+    .certs-institutions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding-top: 16px;
+    }
+
+    .certs-inst-label {
+      color: var(--muted);
+      font-size: 0.64rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .certs-inst-logos {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .inst-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.24);
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 0.68rem;
+      letter-spacing: 0.02em;
+    }
+
+    .inst-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      box-shadow: 0 0 6px currentColor;
     }
 
     /* Roles */
@@ -2248,6 +2433,21 @@
 
       .section {
         padding: 90px 0;
+      }
+
+      .section.certificates {
+        padding-top: 70px;
+        padding-bottom: 30px;
+      }
+
+      .section[aria-label="Photography statistics"] {
+        padding-top: 30px;
+        padding-bottom: 60px;
+      }
+
+      .certs-credentials-summary {
+        margin-top: 24px;
+        padding: 20px 14px;
       }
 
       section[id] {
@@ -4306,7 +4506,8 @@
                       </div>
                     </div>
                     <div class="certificates-grid swipe-mode" id="certificatesGrid" aria-label="Certificates, swipe one by one">
-                      <article class="certificate-card is-top">
+                      <article class="certificate-card is-top" data-cert-cat="ai">
+                        <div class="certificate-sheen" aria-hidden="true"></div>
                         <span class="certificate-number">01 — COMPUTER VISION</span>
                         <span class="certificate-flag">TOP PICK</span>
                         <h3>Build a Computer Vision App with Azure Cognitive Services</h3>
@@ -4316,7 +4517,8 @@
                         </a>
                         <a class="certificate-action" href="assets/images/certificates/computer-vision-azure.png" target="_blank" rel="noopener noreferrer">Open Certificate ↗</a>
                       </article>
-                      <article class="certificate-card is-top">
+                      <article class="certificate-card is-top" data-cert-cat="ai">
+                        <div class="certificate-sheen" aria-hidden="true"></div>
                         <span class="certificate-number">02 — GOOGLE CLOUD AI</span>
                         <span class="certificate-flag">TOP PICK</span>
                         <h3>Gemini for Google Workspace</h3>
@@ -4326,7 +4528,8 @@
                         </a>
                         <a class="certificate-action" href="https://i.supaimg.com/8e0923ed-9bb9-4654-8b98-67c158f6c70c/ad6af2ce-c8e6-4e48-888d-0cfa84e49f2b.png" target="_blank" rel="noopener noreferrer">Open Certificate ↗</a>
                       </article>
-                      <article class="certificate-card is-top">
+                      <article class="certificate-card is-top" data-cert-cat="ai">
+                        <div class="certificate-sheen" aria-hidden="true"></div>
                         <span class="certificate-number">03 — ANTHROPIC AI</span>
                         <span class="certificate-flag">TOP PICK</span>
                         <h3>Claude 101</h3>
@@ -4336,7 +4539,8 @@
                         </a>
                         <a class="certificate-action" href="https://i.supaimg.com/8e0923ed-9bb9-4654-8b98-67c158f6c70c/e79673cf-a152-4845-a3ba-48a2af8c23ae.png" target="_blank" rel="noopener noreferrer">Open Certificate ↗</a>
                       </article>
-                      <article class="certificate-card">
+                      <article class="certificate-card" data-cert-cat="design">
+                        <div class="certificate-sheen" aria-hidden="true"></div>
                         <span class="certificate-number">04 — UI/UX DESIGN</span>
                         <h3>Website UI/UX Designing using ChatGPT</h3>
                         <p>Online course on Simplilearn SkillUP, completed 5th October 2026.</p>
@@ -4345,7 +4549,8 @@
                         </a>
                         <a class="certificate-action" href="https://i.supaimg.com/8e0923ed-9bb9-4654-8b98-67c158f6c70c/9326fb6b-397f-4391-81a5-bb86f8cf5e77.png" target="_blank" rel="noopener noreferrer">Open Certificate ↗</a>
                       </article>
-                      <article class="certificate-card">
+                      <article class="certificate-card" data-cert-cat="marketing">
+                        <div class="certificate-sheen" aria-hidden="true"></div>
                         <span class="certificate-number">05 — VIDEO CREATION</span>
                         <h3>Create Engaging Video with Google Vids</h3>
                         <p>Online course powered by Google Cloud on the Simplilearn SkillUP portal, completed 5th October 2026.</p>
@@ -4354,7 +4559,8 @@
                         </a>
                         <a class="certificate-action" href="https://i.supaimg.com/8e0923ed-9bb9-4654-8b98-67c158f6c70c/be2cb5fe-3e53-40ad-bee9-c55f0c1cc579.png" target="_blank" rel="noopener noreferrer">Open Certificate ↗</a>
                       </article>
-                      <article class="certificate-card">
+                      <article class="certificate-card" data-cert-cat="marketing">
+                        <div class="certificate-sheen" aria-hidden="true"></div>
                         <span class="certificate-number">06 — VIDEO EDITING</span>
                         <h3>Video Editing Course</h3>
                         <p>173 hours of distance learning, 13 chapters and 3 hours of practical work.</p>
@@ -4363,7 +4569,8 @@
                         </a>
                         <a class="certificate-action" href="assets/images/certificates/video-editing.png" target="_blank" rel="noopener noreferrer">Open Certificate ↗</a>
                       </article>
-                      <article class="certificate-card">
+                      <article class="certificate-card" data-cert-cat="marketing">
+                        <div class="certificate-sheen" aria-hidden="true"></div>
                         <span class="certificate-number">07 — DIGITAL MARKETING</span>
                         <h3>Basics of Digital Marketing</h3>
                         <p>Developed and delivered by UniAthena in partnership with Cambridge International Qualifications, UK. Blockchain verified.</p>
@@ -4372,7 +4579,8 @@
                         </a>
                         <a class="certificate-action" href="https://i.supaimg.com/8e0923ed-9bb9-4654-8b98-67c158f6c70c/8bfbfc16-5413-4b45-b1cb-f9b99a43bc76.png" target="_blank" rel="noopener noreferrer">Open Certificate ↗</a>
                       </article>
-                      <article class="certificate-card">
+                      <article class="certificate-card" data-cert-cat="marketing">
+                        <div class="certificate-sheen" aria-hidden="true"></div>
                         <span class="certificate-number">08 — GOOGLE ANALYTICS</span>
                         <h3>Getting Started in Google Analytics</h3>
                         <p>Guided project authorized by Coursera and offered through Coursera.</p>
@@ -4381,7 +4589,8 @@
                         </a>
                         <a class="certificate-action" href="assets/images/certificates/google-analytics.png" target="_blank" rel="noopener noreferrer">Open Certificate ↗</a>
                       </article>
-                      <article class="certificate-card">
+                      <article class="certificate-card" data-cert-cat="ai">
+                        <div class="certificate-sheen" aria-hidden="true"></div>
                         <span class="certificate-number">09 — MASTER AI</span>
                         <h3>Master ChatGPT</h3>
                         <p>Course developed and delivered by UniAthena. Blockchain verified.</p>
@@ -4390,7 +4599,8 @@
                         </a>
                         <a class="certificate-action" href="https://i.supaimg.com/8e0923ed-9bb9-4654-8b98-67c158f6c70c/c289b677-053b-4cc7-8541-4ab76c11453a.png" target="_blank" rel="noopener noreferrer">Open Certificate ↗</a>
                       </article>
-                      <article class="certificate-card">
+                      <article class="certificate-card" data-cert-cat="tech">
+                        <div class="certificate-sheen" aria-hidden="true"></div>
                         <span class="certificate-number">10 — CYBER LAW</span>
                         <h3>Basics of Cyber Law</h3>
                         <p>Developed and delivered by UniAthena in partnership with Cambridge International Qualifications, UK. Blockchain verified.</p>
@@ -4399,7 +4609,8 @@
                         </a>
                         <a class="certificate-action" href="https://i.supaimg.com/8e0923ed-9bb9-4654-8b98-67c158f6c70c/bb5e4d88-18bc-465a-94db-7db610baae77.png" target="_blank" rel="noopener noreferrer">Open Certificate ↗</a>
                       </article>
-                      <article class="certificate-card">
+                      <article class="certificate-card" data-cert-cat="tech">
+                        <div class="certificate-sheen" aria-hidden="true"></div>
                         <span class="certificate-number">11 — ESG</span>
                         <h3>Basics of ESG Regulatory Landscape</h3>
                         <p>Developed and delivered by UniAthena in partnership with Cambridge International Qualifications, UK. Blockchain verified.</p>
@@ -4408,7 +4619,8 @@
                         </a>
                         <a class="certificate-action" href="https://i.supaimg.com/8e0923ed-9bb9-4654-8b98-67c158f6c70c/a4f43487-4bc2-461a-9479-9d6527cf7b58.png" target="_blank" rel="noopener noreferrer">Open Certificate ↗</a>
                       </article>
-                      <article class="certificate-card">
+                      <article class="certificate-card" data-cert-cat="tech">
+                        <div class="certificate-sheen" aria-hidden="true"></div>
                         <span class="certificate-number">12 — HTML PROGRAMMING</span>
                         <h3>HTML Programming Course</h3>
                         <p>46 hours of distance learning across 9 chapters.</p>
@@ -4417,7 +4629,8 @@
                         </a>
                         <a class="certificate-action" href="assets/images/certificates/html-programming.png" target="_blank" rel="noopener noreferrer">Open Certificate ↗</a>
                       </article>
-                      <article class="certificate-card">
+                      <article class="certificate-card" data-cert-cat="design">
+                        <div class="certificate-sheen" aria-hidden="true"></div>
                         <span class="certificate-number">13 — WORDPRESS</span>
                         <h3>Build a Free Website with WordPress</h3>
                         <p>Guided project authorized by Coursera and offered through Coursera.</p>
@@ -4426,7 +4639,8 @@
                         </a>
                         <a class="certificate-action" href="assets/images/certificates/build-website-wordpress.png" target="_blank" rel="noopener noreferrer">Open Certificate ↗</a>
                       </article>
-                      <article class="certificate-card">
+                      <article class="certificate-card" data-cert-cat="design">
+                        <div class="certificate-sheen" aria-hidden="true"></div>
                         <span class="certificate-number">14 — MARKETING DESIGN</span>
                         <h3>Marketing Design with Easil</h3>
                         <p>Guided project authorized by Coursera and offered through Coursera.</p>
@@ -4438,6 +4652,45 @@
                     </div>
                     <div class="certs-progress" aria-hidden="true"><i id="certsProgressBar"></i></div>
                     <p class="certs-hint" id="certsHint" aria-live="polite">Swipe one by one · center card in focus</p>
+
+                    <div class="certs-credentials-summary" aria-label="Credentials and Accreditations Summary">
+                      <div class="credentials-badge-strip">
+                        <div class="cred-chip">
+                          <span class="cred-chip-icon">✦</span>
+                          <span class="cred-chip-text"><strong>14+</strong> Verified Credentials</span>
+                        </div>
+                        <div class="cred-chip">
+                          <span class="cred-chip-icon">🏛</span>
+                          <span class="cred-chip-text"><strong>6</strong> Global Institutions</span>
+                        </div>
+                        <div class="cred-chip">
+                          <span class="cred-chip-icon">✓</span>
+                          <span class="cred-chip-text"><strong>100%</strong> Authenticated & Verifiable</span>
+                        </div>
+                      </div>
+
+                      <div class="certs-category-filter" role="tablist" aria-label="Filter certificates by specialization">
+                        <span class="certs-filter-title">Jump to Specialization Track:</span>
+                        <div class="certs-filter-buttons">
+                          <button class="cert-filter-btn active" type="button" data-cert-cat="all" role="tab" aria-selected="true">All (14)</button>
+                          <button class="cert-filter-btn" type="button" data-cert-cat="ai" role="tab" aria-selected="false">AI & Cloud (4)</button>
+                          <button class="cert-filter-btn" type="button" data-cert-cat="design" role="tab" aria-selected="false">UI/UX & Design (3)</button>
+                          <button class="cert-filter-btn" type="button" data-cert-cat="marketing" role="tab" aria-selected="false">Growth & Analytics (4)</button>
+                          <button class="cert-filter-btn" type="button" data-cert-cat="tech" role="tab" aria-selected="false">Web & Systems (3)</button>
+                        </div>
+                      </div>
+
+                      <div class="certs-institutions">
+                        <span class="certs-inst-label">Accredited by Authorized Providers</span>
+                        <div class="certs-inst-logos">
+                          <span class="inst-pill"><span class="inst-dot" style="background:#4285F4"></span>Google Cloud</span>
+                          <span class="inst-pill"><span class="inst-dot" style="background:#00A4EF"></span>Microsoft Azure</span>
+                          <span class="inst-pill"><span class="inst-dot" style="background:#D97706"></span>Anthropic AI</span>
+                          <span class="inst-pill"><span class="inst-dot" style="background:#0056D2"></span>Coursera Network</span>
+                          <span class="inst-pill"><span class="inst-dot" style="background:#10B981"></span>Cambridge / UniAthena</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </section>
                 <section
@@ -7598,7 +7851,7 @@ document.addEventListener("visibilitychange", () => {
     }
   } catch (error) {}
 
-  /* Certificates swipe deck: native 120fps hardware-accelerated momentum swipe */
+  /* Certificates swipe deck: native 120fps momentum swipe + gyro 3D parallax depth */
   try {
     const cGrid = document.getElementById("certificatesGrid");
     const cHint = document.getElementById("certsHint");
@@ -7607,11 +7860,73 @@ document.addEventListener("visibilitychange", () => {
     const cModeBtns = document.querySelectorAll("[data-certs-mode]");
     const cPrev = document.getElementById("certsPrev");
     const cNext = document.getElementById("certsNext");
+    const catBtns = document.querySelectorAll(".cert-filter-btn");
+
     if (cGrid) {
       const cCards = [...cGrid.querySelectorAll(".certificate-card")];
       let cMode = "swipe";
       let cActiveIdx = 0;
       let cScrollTick = false;
+
+      /* Gyro & 3D Depth Engine (active card only, lerp-damped, zero main-thread lag) */
+      let tgPitch = 0, tgRoll = 0;
+      let curPitch = 0, curRoll = 0;
+      let gyroRaf = 0;
+      let certsInView = false;
+      let isSwipingCerts = false;
+      let swipeTimeout = null;
+
+      function updateActiveCardTilt() {
+        if (reduced || !certsInView || cMode !== "swipe") {
+          gyroRaf = 0;
+          return;
+        }
+
+        curPitch += (tgPitch - curPitch) * 0.12;
+        curRoll += (tgRoll - curRoll) * 0.12;
+
+        const activeCard = cCards[cActiveIdx];
+        if (activeCard && !isSwipingCerts) {
+          activeCard.style.setProperty("--cert-rx", `${curPitch.toFixed(2)}deg`);
+          activeCard.style.setProperty("--cert-ry", `${curRoll.toFixed(2)}deg`);
+          activeCard.style.setProperty("--cert-rx-num", curPitch.toFixed(2));
+          activeCard.style.setProperty("--cert-ry-num", curRoll.toFixed(2));
+          activeCard.style.setProperty("--cert-spec-x", `${(50 - curRoll * 2.5).toFixed(1)}%`);
+          activeCard.style.setProperty("--cert-spec-y", `${(38 + curPitch * 2.2).toFixed(1)}%`);
+          activeCard.style.setProperty("--cert-glare-op", `${(0.24 + (Math.abs(curRoll) + Math.abs(curPitch)) * 0.015).toFixed(2)}`);
+        }
+
+        const delta = Math.abs(tgPitch - curPitch) + Math.abs(tgRoll - curRoll);
+        if (delta > 0.02) {
+          gyroRaf = requestAnimationFrame(updateActiveCardTilt);
+        } else {
+          gyroRaf = 0;
+        }
+      }
+
+      function kickTilt() {
+        if (!gyroRaf && certsInView && !reduced && cMode === "swipe") {
+          gyroRaf = requestAnimationFrame(updateActiveCardTilt);
+        }
+      }
+
+      function stopTilt() {
+        if (gyroRaf) cancelAnimationFrame(gyroRaf);
+        gyroRaf = 0;
+        tgPitch = 0;
+        tgRoll = 0;
+        curPitch = 0;
+        curRoll = 0;
+      }
+
+      function syncCertCat(cat) {
+        if (!cat || !catBtns.length) return;
+        catBtns.forEach(btn => {
+          const match = btn.dataset.certCat === cat;
+          btn.classList.toggle("active", match);
+          btn.setAttribute("aria-selected", String(match));
+        });
+      }
 
       function updateCertsDeck() {
         if (cMode !== "swipe" || !cCards.length) return;
@@ -7632,12 +7947,24 @@ document.addEventListener("visibilitychange", () => {
         }
 
         if (bestIdx !== cActiveIdx) {
-          if (cCards[cActiveIdx]) cCards[cActiveIdx].classList.remove("is-active");
+          if (cCards[cActiveIdx]) {
+            const oldCard = cCards[cActiveIdx];
+            oldCard.classList.remove("is-active");
+            oldCard.style.removeProperty("--cert-rx");
+            oldCard.style.removeProperty("--cert-ry");
+            oldCard.style.removeProperty("--cert-rx-num");
+            oldCard.style.removeProperty("--cert-ry-num");
+            oldCard.style.removeProperty("--cert-spec-x");
+            oldCard.style.removeProperty("--cert-spec-y");
+            oldCard.style.removeProperty("--cert-glare-op");
+          }
           cCards[bestIdx].classList.add("is-active");
           cActiveIdx = bestIdx;
           if (cCount) {
             cCount.textContent = `${String(bestIdx + 1).padStart(2, "0")} / ${String(cCards.length).padStart(2, "0")}`;
           }
+          syncCertCat(cCards[bestIdx]?.dataset?.certCat);
+          kickTilt();
         }
 
         const maxScroll = cGrid.scrollWidth - cGrid.clientWidth;
@@ -7663,7 +7990,17 @@ document.addEventListener("visibilitychange", () => {
             : "Scroll down to browse all certificates";
         }
         if (!swipe) {
-          cCards.forEach(card => card.classList.remove("is-active"));
+          stopTilt();
+          cCards.forEach(card => {
+            card.classList.remove("is-active");
+            card.style.removeProperty("--cert-rx");
+            card.style.removeProperty("--cert-ry");
+            card.style.removeProperty("--cert-rx-num");
+            card.style.removeProperty("--cert-ry-num");
+            card.style.removeProperty("--cert-spec-x");
+            card.style.removeProperty("--cert-spec-y");
+            card.style.removeProperty("--cert-glare-op");
+          });
           if (cCount) cCount.textContent = `${String(cCards.length).padStart(2, "0")} CERTIFICATES`;
           if (cBar) cBar.style.transform = "scaleX(0)";
         } else {
@@ -7675,6 +8012,7 @@ document.addEventListener("visibilitychange", () => {
             cCount.textContent = `01 / ${String(cCards.length).padStart(2, "0")}`;
           }
           if (cBar) cBar.style.transform = "scaleX(0)";
+          kickTilt();
         }
         if (window.ScrollTrigger) ScrollTrigger.refresh();
       }
@@ -7704,8 +8042,52 @@ document.addEventListener("visibilitychange", () => {
         });
       });
 
+      /* Gyroscope listener for mobile */
+      window.addEventListener("deviceorientation", event => {
+        if (reduced || !certsInView || cMode !== "swipe" || isSwipingCerts) return;
+        if (event.beta == null || event.gamma == null) return;
+
+        const pitch = Math.max(-12, Math.min(12, (event.beta - 45) * 0.35));
+        const roll = Math.max(-15, Math.min(15, event.gamma * 0.4));
+
+        tgPitch = pitch;
+        tgRoll = roll;
+        kickTilt();
+      }, { passive: true });
+
+      /* Desktop mouse parallax */
+      if (finePointer) {
+        cGrid.addEventListener("pointermove", event => {
+          if (reduced || !certsInView || cMode !== "swipe" || isSwipingCerts) return;
+          const activeCard = cCards[cActiveIdx];
+          if (!activeCard) return;
+
+          const rect = activeCard.getBoundingClientRect();
+          const nx = (event.clientX - rect.left) / rect.width - 0.5;
+          const ny = (event.clientY - rect.top) / rect.height - 0.5;
+
+          tgRoll = Math.max(-14, Math.min(14, nx * 18));
+          tgPitch = Math.max(-12, Math.min(12, ny * -16));
+          kickTilt();
+        }, { passive: true });
+
+        cGrid.addEventListener("pointerleave", () => {
+          tgPitch = 0;
+          tgRoll = 0;
+          kickTilt();
+        });
+      }
+
+      /* Native momentum scroll with swipe sleep guard */
       cGrid.addEventListener("scroll", () => {
         if (cMode !== "swipe") return;
+        isSwipingCerts = true;
+        clearTimeout(swipeTimeout);
+        swipeTimeout = setTimeout(() => {
+          isSwipingCerts = false;
+          kickTilt();
+        }, 140);
+
         if (!cScrollTick) {
           cScrollTick = true;
           requestAnimationFrame(() => {
@@ -7717,6 +8099,56 @@ document.addEventListener("visibilitychange", () => {
 
       window.addEventListener("resize", () => {
         if (cMode === "swipe") updateCertsDeck();
+      });
+
+      /* IntersectionObserver to sleep gyro when certificates are off-screen */
+      if ("IntersectionObserver" in window) {
+        const certsObs = new IntersectionObserver(entries => {
+          entries.forEach(entry => {
+            certsInView = entry.isIntersecting;
+            if (certsInView) {
+              kickTilt();
+            } else {
+              stopTilt();
+              const activeCard = cCards[cActiveIdx];
+              if (activeCard) {
+                activeCard.style.removeProperty("--cert-rx");
+                activeCard.style.removeProperty("--cert-ry");
+              }
+            }
+          });
+        }, { threshold: 0.1 });
+        certsObs.observe(cGrid);
+      } else {
+        certsInView = true;
+      }
+
+      /* Category filter buttons click handlers */
+      catBtns.forEach(btn => {
+        btn.addEventListener("click", () => {
+          const cat = btn.dataset.certCat;
+          catBtns.forEach(b => {
+            const sel = b === btn;
+            b.classList.toggle("active", sel);
+            b.setAttribute("aria-selected", String(sel));
+          });
+          if (cat === "all") {
+            cCards[0]?.scrollIntoView({
+              behavior: reduced ? "auto" : "smooth",
+              inline: "center",
+              block: "nearest"
+            });
+            return;
+          }
+          const target = cCards.find(c => c.dataset.certCat === cat);
+          if (target) {
+            target.scrollIntoView({
+              behavior: reduced ? "auto" : "smooth",
+              inline: "center",
+              block: "nearest"
+            });
+          }
+        });
       });
 
       /* Scroll mode: smooth staggered depth reveal per card */
