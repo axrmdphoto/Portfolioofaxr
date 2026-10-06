@@ -3903,6 +3903,382 @@
   transform: translateZ(var(--hz, 0px));
 }
 
+/* ---- Portfolio features: nav scroll, services, journey, reviews, faq+book ---- */
+
+.nav {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav::-webkit-scrollbar {
+  display: none;
+}
+.nav-link,
+.nav-instagram {
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 42px;
+}
+.service-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 30px 26px;
+  border: 1px solid var(--stroke);
+  border-radius: 22px;
+  background: linear-gradient(160deg, rgba(26,34,45,.85), rgba(10,12,15,.75));
+  box-shadow: 0 20px 60px rgba(0,0,0,.22);
+  transition: translate .35s var(--ease), border-color .35s ease, box-shadow .35s ease;
+}
+.service-card:hover {
+  translate: 0 -6px;
+  border-color: rgba(137,170,204,.55);
+  box-shadow: 0 26px 70px rgba(0,0,0,.34), 0 0 28px rgba(78,133,191,.12);
+}
+.service-card.featured-service {
+  border-color: rgba(137,170,204,.55);
+  background: linear-gradient(160deg, rgba(38,54,72,.9), rgba(10,13,17,.8));
+}
+.service-tag {
+  align-self: flex-start;
+  padding: 5px 12px;
+  border: 1px solid rgba(137,170,204,.4);
+  border-radius: 999px;
+  color: var(--accent-1);
+  font-size: .62rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+.service-card h3 {
+  margin: 20px 0 10px;
+  font-family: var(--serif);
+  font-size: 2rem;
+  font-style: italic;
+  font-weight: 400;
+}
+.service-price {
+  color: var(--text);
+  font-size: .82rem;
+  letter-spacing: .02em;
+}
+.service-price span {
+  color: var(--muted);
+}
+.service-list {
+  margin: 16px 0 22px;
+  padding: 0;
+  list-style: none;
+  color: var(--muted);
+  font-size: .85rem;
+  line-height: 1.7;
+}
+.service-list li {
+  padding-left: 22px;
+  position: relative;
+}
+.service-list li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--accent-1);
+}
+.service-book {
+  margin-top: auto;
+  align-self: flex-start;
+  padding: 11px 20px;
+  border: 1px solid rgba(137,170,204,.45);
+  border-radius: 999px;
+  background: rgba(137,170,204,.08);
+  color: var(--text);
+  font-size: .74rem;
+  transition: transform .3s var(--ease), background .3s ease;
+}
+.service-book:hover {
+  transform: translateY(-2px);
+  background: rgba(137,170,204,.16);
+}
+
+.journey {
+  position: relative;
+  margin-top: 42px;
+  padding-left: 30px;
+  border-left: 1px solid rgba(137,170,204,.25);
+  display: grid;
+  gap: 26px;
+}
+.journey-item {
+  position: relative;
+}
+.journey-item::before {
+  content: "";
+  position: absolute;
+  left: -36px;
+  top: 4px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid var(--accent-1);
+  box-shadow: 0 0 14px rgba(78,133,191,.7);
+}
+.journey-year {
+  color: var(--accent-1);
+  font-size: .66rem;
+  letter-spacing: .2em;
+}
+.journey-item h3 {
+  margin: 8px 0 6px;
+  font-size: 1.15rem;
+  letter-spacing: -.02em;
+}
+.journey-item p {
+  margin: 0;
+  max-width: 60ch;
+  color: var(--muted);
+  font-size: .88rem;
+  line-height: 1.7;
+}
+
+.reviews-wrap {
+  position: relative;
+  margin-top: 42px;
+  padding: 30px 26px;
+  border: 1px solid var(--stroke);
+  border-radius: 22px;
+  background: linear-gradient(160deg, rgba(24,31,41,.8), rgba(10,12,15,.75));
+  overflow: hidden;
+}
+.reviews-track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: min(100%, 560px);
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  padding-bottom: 6px;
+}
+.reviews-track::-webkit-scrollbar {
+  display: none;
+}
+.review-card {
+  scroll-snap-align: center;
+  padding: 24px;
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 18px;
+  background: rgba(255,255,255,.03);
+}
+.review-card blockquote {
+  margin: 0 0 14px;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1.35rem;
+  line-height: 1.5;
+}
+.review-who {
+  color: var(--muted);
+  font-size: .72rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.review-stars {
+  color: var(--accent-1);
+  letter-spacing: .2em;
+  font-size: .8rem;
+}
+.reviews-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+}
+.reviews-nav button {
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--stroke);
+  border-radius: 50%;
+  background: var(--surface);
+  font-size: 1rem;
+  transition: border-color .25s ease, transform .25s var(--ease);
+}
+.reviews-nav button:hover {
+  border-color: var(--accent-1);
+  transform: translateY(-2px);
+}
+.reviews-dots {
+  display: flex;
+  gap: 6px;
+  margin-left: 6px;
+}
+.reviews-dots i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.18);
+  transition: background .3s ease, transform .3s ease;
+}
+.reviews-dots i.on {
+  background: var(--accent-1);
+  transform: scale(1.3);
+}
+.review-form {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+.review-form input {
+  flex: 1 1 160px;
+  min-width: 0;
+  padding: 11px 14px;
+  border: 1px solid var(--stroke);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: .8rem;
+  outline: 0;
+}
+.review-form input:focus {
+  border-color: rgba(137,170,204,.6);
+}
+
+.book-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 42px;
+  align-items: start;
+}
+.faq-list {
+  display: grid;
+  gap: 10px;
+}
+.faq-item {
+  border: 1px solid var(--stroke);
+  border-radius: 16px;
+  background: var(--surface);
+  overflow: hidden;
+  transition: border-color .3s ease;
+}
+.faq-item.open {
+  border-color: rgba(137,170,204,.5);
+}
+.faq-q {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: .88rem;
+  text-align: left;
+}
+.faq-q span:last-child {
+  color: var(--accent-1);
+  font-size: 1.1rem;
+  transition: transform .3s var(--ease);
+}
+.faq-item.open .faq-q span:last-child {
+  transform: rotate(45deg);
+}
+.faq-a {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .4s var(--ease);
+}
+.faq-a p {
+  margin: 0;
+  padding: 0 18px 18px;
+  color: var(--muted);
+  font-size: .84rem;
+  line-height: 1.7;
+}
+.book-form {
+  padding: 26px;
+  border: 1px solid rgba(137,170,204,.3);
+  border-radius: 22px;
+  background: linear-gradient(160deg, rgba(26,34,45,.85), rgba(10,12,15,.8));
+}
+.book-form h3 {
+  margin: 0 0 6px;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1.7rem;
+  font-weight: 400;
+}
+.book-form > p {
+  margin: 0 0 18px;
+  color: var(--muted);
+  font-size: .82rem;
+}
+.book-form label {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+  color: var(--muted);
+  font-size: .64rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.book-form input,
+.book-form select,
+.book-form textarea {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--stroke);
+  border-radius: 12px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: .85rem;
+  font-family: var(--sans);
+  outline: 0;
+}
+.book-form input:focus,
+.book-form select:focus,
+.book-form textarea:focus {
+  border-color: rgba(137,170,204,.6);
+  box-shadow: 0 0 0 3px rgba(78,133,191,.15);
+}
+.book-form textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+.book-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.book-submit {
+  width: 100%;
+  margin-top: 4px;
+  min-height: 48px;
+}
+.book-note {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: .7rem;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .services-grid,
+  .book-grid {
+    grid-template-columns: 1fr;
+  }
+  .book-row {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .grain,
   .dust {
@@ -4813,6 +5189,15 @@
                 <a class="nav-link" href="#gallery">
                   Work
                 </a>
+                <a class="nav-link" href="#services">
+                  Services
+                </a>
+                <a class="nav-link" href="#testimonials">
+                  Reviews
+                </a>
+                <a class="nav-link" href="#book">
+                  Book
+                </a>
                 <a class="nav-link" href="#contact">
                   Contact
                 </a>
@@ -5614,6 +5999,177 @@
                           <span class="inst-pill"><span class="inst-dot" style="background:#10B981"></span>Cambridge / UniAthena</span>
                         </div>
                       </div>
+                    </div>
+                  </div>
+                </section>
+                <section class="section" id="services" aria-labelledby="services-title">
+                  <div class="container">
+                    <div class="eyebrow">10 — Services</div>
+                    <h2 class="section-title" id="services-title">
+                      Hire me for <span class="serif">the shoot</span>
+                    </h2>
+                    <p class="section-copy">
+                      Three focused offers. Every project gets a pre-shoot call,
+                      on-time delivery and files ready for Instagram, print and web.
+                    </p>
+                    <div class="services-grid">
+                      <article class="service-card">
+                        <span class="service-tag">Photo Stories</span>
+                        <h3>Portraits &amp; Events</h3>
+                        <p class="service-price">Custom quote <span>· 20+ edited photos</span></p>
+                        <ul class="service-list">
+                          <li>1–2 hour shoot in Bilasipara &amp; nearby</li>
+                          <li>Candid + posed coverage</li>
+                          <li>Edited gallery in 5–7 days</li>
+                        </ul>
+                        <button class="service-book" type="button" data-service="Portraits & Events">Book this shoot →</button>
+                      </article>
+                      <article class="service-card featured-service">
+                        <span class="service-tag">Most booked</span>
+                        <h3>Cinematic Reels</h3>
+                        <p class="service-price">Custom quote <span>· shoot + edit</span></p>
+                        <ul class="service-list">
+                          <li>Short-form video for brands &amp; places</li>
+                          <li>Hook, pacing and sound design included</li>
+                          <li>1 reel + 1 teaser cut</li>
+                        </ul>
+                        <button class="service-book" type="button" data-service="Cinematic Reels">Book this shoot →</button>
+                      </article>
+                      <article class="service-card">
+                        <span class="service-tag">Brand + Web</span>
+                        <h3>Brand &amp; Website</h3>
+                        <p class="service-price">Custom quote <span>· design + build</span></p>
+                        <ul class="service-list">
+                          <li>Product photos + launch content</li>
+                          <li>One-page site like this one</li>
+                          <li>Instagram setup &amp; handover call</li>
+                        </ul>
+                        <button class="service-book" type="button" data-service="Brand & Website">Book this shoot →</button>
+                      </article>
+                    </div>
+                  </div>
+                </section>
+                <section class="section" id="journey" aria-labelledby="journey-title">
+                  <div class="container">
+                    <div class="eyebrow">11 — Journey</div>
+                    <h2 class="section-title" id="journey-title">
+                      How I <span class="serif">got here</span>
+                    </h2>
+                    <div class="journey">
+                      <div class="journey-item">
+                        <span class="journey-year">2023 — START</span>
+                        <h3>Picked up the camera</h3>
+                        <p>Started shooting streets, skies and everyday life around Bilasipara — learning light, framing and patience.</p>
+                      </div>
+                      <div class="journey-item">
+                        <span class="journey-year">2024 — PLATFORM</span>
+                        <h3>Founded @awesomebilasipara</h3>
+                        <p>Turned local stories into cinematic reels — markets, stations, festivals and village life.</p>
+                      </div>
+                      <div class="journey-item">
+                        <span class="journey-year">2025 — BRANDS</span>
+                        <h3>Shooting for businesses</h3>
+                        <p>Promotional films for local gyms, schools, shops and @little_loopcrochet — plus 170+ hours of editing study.</p>
+                      </div>
+                      <div class="journey-item">
+                        <span class="journey-year">2026 — EXPANDED</span>
+                        <h3>Photo + film + web</h3>
+                        <p>Now offering photography, reels and small-business websites from one place — this portfolio included.</p>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+                <section class="section" id="testimonials" aria-labelledby="testimonials-title">
+                  <div class="container">
+                    <div class="eyebrow">12 — Kind words</div>
+                    <h2 class="section-title" id="testimonials-title">
+                      What people <span class="serif">say</span>
+                    </h2>
+                    <div class="reviews-wrap">
+                      <div class="reviews-track" id="reviewsTrack" aria-label="Client reviews">
+                        <article class="review-card">
+                          <div class="review-stars" aria-label="5 out of 5 stars">★★★★★</div>
+                          <blockquote>“He sees frames nobody else notices. Our shop reel brought real footfall in the first week.”</blockquote>
+                          <div class="review-who">Local business owner — Bilasipara</div>
+                        </article>
+                        <article class="review-card">
+                          <div class="review-stars" aria-label="5 out of 5 stars">★★★★★</div>
+                          <blockquote>“Fast, polite and prepared. The admission promo looked like a film, not an ad.”</blockquote>
+                          <div class="review-who">School event organizer — Dhubri</div>
+                        </article>
+                        <article class="review-card">
+                          <div class="review-stars" aria-label="5 out of 5 stars">★★★★★</div>
+                          <blockquote>“Product photos plus a clean one-page site — our crochet brand finally looks like us.”</blockquote>
+                          <div class="review-who">@little_loopcrochet — handmade brand</div>
+                        </article>
+                      </div>
+                      <div class="reviews-nav">
+                        <button id="reviewsPrev" type="button" aria-label="Previous review">←</button>
+                        <button id="reviewsNext" type="button" aria-label="Next review">→</button>
+                        <div class="reviews-dots" id="reviewsDots" aria-hidden="true"></div>
+                      </div>
+                      <form class="review-form" id="reviewForm">
+                        <input id="reviewName" type="text" maxlength="40" placeholder="Your name" aria-label="Your name" />
+                        <input id="reviewText" type="text" maxlength="140" placeholder="Say something kind (140 chars)" aria-label="Your review" />
+                        <button class="service-book" type="submit">Add →</button>
+                      </form>
+                    </div>
+                  </div>
+                </section>
+                <section class="section" id="book" aria-labelledby="book-title">
+                  <div class="container">
+                    <div class="eyebrow">13 — FAQ &amp; Booking</div>
+                    <h2 class="section-title" id="book-title">
+                      Book <span class="serif">the date</span>
+                    </h2>
+                    <div class="book-grid">
+                      <div class="faq-list" id="faqList">
+                        <div class="faq-item">
+                          <button class="faq-q" type="button" aria-expanded="false">How do I book a shoot? <span>+</span></button>
+                          <div class="faq-a"><p>Fill the form with your date and idea. I reply within 24–48 hours with availability and a fixed quote — no advance needed to talk.</p></div>
+                        </div>
+                        <div class="faq-item">
+                          <button class="faq-q" type="button" aria-expanded="false">Where do you shoot? <span>+</span></button>
+                          <div class="faq-a"><p>Based in Bilasipara, Assam. I travel across Dhubri &amp; Kokrajhar — travel cost is shared upfront, never a surprise.</p></div>
+                        </div>
+                        <div class="faq-item">
+                          <button class="faq-q" type="button" aria-expanded="false">How long is delivery? <span>+</span></button>
+                          <div class="faq-a"><p>Photos in 5–7 days, reels in 7–10 days with one revision round included. Urgent delivery is possible — mention it in the form.</p></div>
+                        </div>
+                        <div class="faq-item">
+                          <button class="faq-q" type="button" aria-expanded="false">Do I get raw files? <span>+</span></button>
+                          <div class="faq-a"><p>You get high-resolution edited photos and the final reel in Instagram-ready + full-quality versions. Raw files on request.</p></div>
+                        </div>
+                        <div class="faq-item">
+                          <button class="faq-q" type="button" aria-expanded="false">How does payment work? <span>+</span></button>
+                          <div class="faq-a"><p>Fixed quote before the shoot, 50% to lock the date, rest on delivery. UPI accepted.</p></div>
+                        </div>
+                      </div>
+                      <form class="book-form" id="bookForm">
+                        <h3>Check availability</h3>
+                        <p>Replies within 24–48 hours. No spam, ever.</p>
+                        <div class="book-row">
+                          <label>Name
+                            <input id="bookName" type="text" placeholder="Your name" autocomplete="name" />
+                          </label>
+                          <label>Date
+                            <input id="bookDate" type="date" />
+                          </label>
+                        </div>
+                        <label>Service
+                          <select id="bookService">
+                            <option>Portraits &amp; Events</option>
+                            <option>Cinematic Reels</option>
+                            <option>Brand &amp; Website</option>
+                            <option>Something else</option>
+                          </select>
+                        </label>
+                        <label>Tell me about it
+                          <textarea id="bookMsg" placeholder="What, where, and what feeling do you want?"></textarea>
+                        </label>
+                        <button class="button button-primary book-submit" type="submit">Send booking request ↗</button>
+                        <p class="book-note">Opens your email app with everything pre-filled.</p>
+                      </form>
                     </div>
                   </div>
                 </section>
@@ -9818,6 +10374,168 @@ document.addEventListener("visibilitychange", () => {
       } catch (error) {}
     });
   });
+
+/* ---- Portfolio features: services booking, reviews, faq, inquiry form ---- */
+(() => {
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const toast = document.getElementById("toast");
+  let toastTimer = null;
+  function notify(message) {
+    if (!toast) return;
+    toast.textContent = message;
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove("show"), 2600);
+  }
+
+  /* Service cards -> prefill booking form */
+  const serviceSelect = document.getElementById("bookService");
+  document.querySelectorAll(".service-book[data-service]").forEach(button => {
+    button.addEventListener("click", () => {
+      const value = button.dataset.service;
+      if (serviceSelect) {
+        [...serviceSelect.options].forEach(o => { if (o.text.trim() === value) serviceSelect.value = o.value; });
+      }
+      document.getElementById("book")?.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
+      notify(`"${value}" selected — tell me your date`);
+    });
+  });
+
+  /* Reviews slider */
+  try {
+    const track = document.getElementById("reviewsTrack");
+    const dots = document.getElementById("reviewsDots");
+    const prev = document.getElementById("reviewsPrev");
+    const next = document.getElementById("reviewsNext");
+    function cards() { return [...track.querySelectorAll(".review-card")]; }
+    function buildDots() {
+      dots.innerHTML = "";
+      cards().forEach((_, i) => {
+        const d = document.createElement("i");
+        if (i === 0) d.classList.add("on");
+        dots.appendChild(d);
+      });
+    }
+    function activeIndex() {
+      const list = cards();
+      let best = 0, bestDist = Infinity;
+      list.forEach((card, i) => {
+        const dist = Math.abs(card.offsetLeft - track.scrollLeft);
+        if (dist < bestDist) { bestDist = dist; best = i; }
+      });
+      return best;
+    }
+    function syncDots() {
+      const i = activeIndex();
+      [...dots.children].forEach((d, k) => d.classList.toggle("on", k === i));
+    }
+    function go(dir) {
+      const card = track.querySelector(".review-card");
+      const step = card ? card.offsetWidth + 16 : 400;
+      track.scrollBy({ left: dir * step, behavior: reduced ? "auto" : "smooth" });
+    }
+    if (track && prev && next) {
+      buildDots();
+      prev.addEventListener("click", () => go(-1));
+      next.addEventListener("click", () => go(1));
+      track.addEventListener("scroll", () => requestAnimationFrame(syncDots), { passive: true });
+      dots.addEventListener("click", event => {
+        const i = [...dots.children].indexOf(event.target);
+        if (i < 0) return;
+        track.scrollTo({ left: cards()[i].offsetLeft - track.offsetLeft, behavior: reduced ? "auto" : "smooth" });
+      });
+      let auto = null;
+      function startAuto() {
+        if (reduced) return;
+        stopAuto();
+        auto = setInterval(() => {
+          const i = activeIndex();
+          if (i >= cards().length - 1) track.scrollTo({ left: 0, behavior: "smooth" });
+          else go(1);
+        }, 6000);
+      }
+      function stopAuto() { if (auto) clearInterval(auto); auto = null; }
+      track.addEventListener("pointerenter", stopAuto);
+      track.addEventListener("pointerleave", startAuto);
+      track.addEventListener("focusin", stopAuto);
+      track.addEventListener("focusout", startAuto);
+      startAuto();
+      /* Visitor reviews (local only) */
+      try {
+        const saved = JSON.parse(localStorage.getItem("axr-reviews") || "[]");
+        saved.forEach(addReviewCard);
+      } catch (error) {}
+      function addReviewCard(review) {
+        const card = document.createElement("article");
+        card.className = "review-card";
+        const stars = document.createElement("div");
+        stars.className = "review-stars";
+        stars.textContent = "★★★★★";
+        const quote = document.createElement("blockquote");
+        quote.textContent = `\u201C${review.text}\u201D`;
+        const who = document.createElement("div");
+        who.className = "review-who";
+        who.textContent = `${review.name} — visitor`;
+        card.append(stars, quote, who);
+        track.appendChild(card);
+        buildDots();
+      }
+      const form = document.getElementById("reviewForm");
+      form?.addEventListener("submit", event => {
+        event.preventDefault();
+        const name = document.getElementById("reviewName").value.trim().slice(0, 40) || "Friend";
+        const text = document.getElementById("reviewText").value.trim().slice(0, 140);
+        if (!text) { notify("Write a few words first"); return; }
+        const review = { name, text };
+        addReviewCard(review);
+        try {
+          const saved = JSON.parse(localStorage.getItem("axr-reviews") || "[]");
+          saved.push(review);
+          localStorage.setItem("axr-reviews", JSON.stringify(saved));
+        } catch (error) {}
+        form.reset();
+        track.scrollTo({ left: track.scrollWidth, behavior: reduced ? "auto" : "smooth" });
+        notify("Thank you — your words are on the wall");
+      });
+    }
+  } catch (error) {}
+
+  /* FAQ accordion (one open at a time) */
+  try {
+    const items = document.querySelectorAll(".faq-item");
+    items.forEach(item => {
+      const button = item.querySelector(".faq-q");
+      const panel = item.querySelector(".faq-a");
+      button?.addEventListener("click", () => {
+        const isOpen = item.classList.contains("open");
+        items.forEach(other => {
+          other.classList.remove("open");
+          other.querySelector(".faq-a").style.maxHeight = "";
+          other.querySelector(".faq-q")?.setAttribute("aria-expanded", "false");
+        });
+        if (!isOpen) {
+          item.classList.add("open");
+          panel.style.maxHeight = panel.scrollHeight + "px";
+          button.setAttribute("aria-expanded", "true");
+        }
+      });
+    });
+  } catch (error) {}
+
+  /* Booking form -> prefilled email */
+  document.getElementById("bookForm")?.addEventListener("submit", event => {
+    event.preventDefault();
+    const name = document.getElementById("bookName").value.trim();
+    const date = document.getElementById("bookDate").value;
+    const service = document.getElementById("bookService").value;
+    const message = document.getElementById("bookMsg").value.trim();
+    if (!name || !message) { notify("Add your name and a line about the shoot"); return; }
+    const subject = encodeURIComponent(`Shoot inquiry — ${service} — ${name}`);
+    const body = encodeURIComponent(`Hi Abdulla,\n\nName: ${name}\nService: ${service}\nDate: ${date || "flexible"}\n\n${message}\n\n— sent from your portfolio`);
+    window.location.href = `mailto:axr.md.photo@gmail.com?subject=${subject}&body=${body}`;
+    notify("Opening your email app with the request ready");
+  });
+})();
 
   /* Contact: dedicated copy-email + share-portfolio buttons */
   try {
