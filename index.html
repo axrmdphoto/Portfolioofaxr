@@ -137,6 +137,10 @@
     }
 
     button {
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      border: none;
       color: inherit;
       font: inherit;
       cursor: pointer;
@@ -2496,7 +2500,8 @@
       }
 
       .nav-link,
-      .nav-instagram {
+      .nav-instagram,
+      .mood-selector {
         display: none;
       }
 
@@ -3912,6 +3917,8 @@
   .reels-grid.swipe-mode .reel-card {
     transition: none;
   }
+}
+
   /* Atmospheric Film Mood Switcher */
   .mood-selector {
     position: relative;
@@ -3920,23 +3927,25 @@
   }
 
   .mood-btn {
+    -webkit-appearance: none;
+    appearance: none;
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    padding: 8px 12px;
-    border: 1px solid var(--stroke);
+    padding: 8px 13px;
+    border: 1px solid rgba(255,255,255,.14);
     border-radius: 999px;
-    background: rgba(255,255,255,.05);
+    background: rgba(255,255,255,.06);
     color: var(--text);
     font-size: .7rem;
     font-weight: 500;
     letter-spacing: .02em;
     cursor: pointer;
-    transition: background .25s ease, border-color .25s ease, transform .2s ease;
+    transition: background .25s ease, border-color .25s ease;
   }
 
   .mood-btn:hover {
-    background: rgba(255,255,255,.1);
+    background: rgba(255,255,255,.12);
     border-color: var(--accent-1);
   }
 
@@ -3967,12 +3976,12 @@
     z-index: 120;
     width: 260px;
     padding: 8px;
-    border: 1px solid rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.14);
     border-radius: 18px;
-    background: rgba(18,20,24,.96);
+    background: #111419;
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    box-shadow: 0 20px 60px rgba(0,0,0,.6), 0 0 30px rgba(78,133,191,.15);
+    box-shadow: 0 20px 60px rgba(0,0,0,.75), 0 0 30px rgba(78,133,191,.15);
     animation: mood-menu-in .25s var(--ease);
   }
 
@@ -3987,32 +3996,35 @@
     font-weight: 700;
     letter-spacing: .2em;
     color: var(--muted);
-    border-bottom: 1px solid rgba(255,255,255,.07);
-    margin-bottom: 4px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    margin-bottom: 6px;
   }
 
   .mood-item {
+    -webkit-appearance: none;
+    appearance: none;
     display: flex;
     align-items: center;
     gap: 10px;
     width: 100%;
-    padding: 8px 10px;
+    padding: 9px 11px;
     border: 1px solid transparent;
     border-radius: 12px;
-    background: transparent;
+    background: rgba(255,255,255,.025);
     color: var(--text);
     text-align: left;
     cursor: pointer;
     transition: background .2s ease, border-color .2s ease;
+    margin-bottom: 4px;
   }
 
   .mood-item:hover {
-    background: rgba(255,255,255,.06);
+    background: rgba(255,255,255,.08);
   }
 
   .mood-item.active {
-    background: rgba(255,255,255,.09);
-    border-color: rgba(255,255,255,.14);
+    background: rgba(255,255,255,.12);
+    border-color: rgba(255,255,255,.18);
   }
 
   .mood-swatch {
@@ -4032,21 +4044,21 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
-    line-height: 1.2;
+    line-height: 1.25;
   }
 
   .mood-meta strong {
-    font-size: .74rem;
-    color: var(--text);
+    font-size: .76rem;
+    color: #ffffff;
   }
 
   .mood-meta small {
-    font-size: .62rem;
+    font-size: .64rem;
     color: var(--muted);
   }
 
   .mood-check {
-    font-size: .8rem;
+    font-size: .85rem;
     color: var(--accent-1);
     opacity: 0;
     transition: opacity .2s ease;
@@ -4058,19 +4070,30 @@
 
   @media (max-width: 760px) {
     .nav.mobile-open .mood-selector {
+      display: block;
       grid-column: span 2;
       width: 100%;
-      margin-top: 6px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255,255,255,.08);
     }
     .nav.mobile-open .mood-btn {
       width: 100%;
-      justify-content: center;
-      min-height: 44px;
+      justify-content: space-between;
+      min-height: 46px;
+      padding: 11px 16px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 14px;
+      font-size: .8rem;
     }
     .nav.mobile-open .mood-menu {
       position: static;
       width: 100%;
       margin-top: 8px;
+      background: #0e1116;
+      border: 1px solid rgba(255,255,255,.14);
+      box-shadow: 0 12px 35px rgba(0,0,0,.6);
     }
   }
 
@@ -4098,7 +4121,7 @@
   .cert-modal-backdrop {
     position: absolute;
     inset: 0;
-    background: rgba(6,7,9,.88);
+    background: rgba(4,6,8,.92);
     backdrop-filter: blur(28px);
     -webkit-backdrop-filter: blur(28px);
   }
@@ -4106,12 +4129,12 @@
   .cert-modal-container {
     position: relative;
     z-index: 2;
-    width: min(1140px, 100%);
+    width: min(1120px, 100%);
     max-height: min(92vh, 880px);
-    background: linear-gradient(150deg, rgba(24,28,34,.96), rgba(13,16,20,.98));
+    background: #0f1217;
     border: 1px solid rgba(255,255,255,.14);
     border-radius: 24px;
-    box-shadow: 0 35px 90px rgba(0,0,0,.75), 0 0 50px rgba(78,133,191,.15);
+    box-shadow: 0 35px 90px rgba(0,0,0,.85), 0 0 50px rgba(78,133,191,.15);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -4124,16 +4147,18 @@
   }
 
   .cert-modal-close {
+    -webkit-appearance: none;
+    appearance: none;
     position: absolute;
-    top: 18px;
-    right: 18px;
+    top: 16px;
+    right: 16px;
     z-index: 10;
     width: 42px;
     height: 42px;
-    border: 1px solid rgba(255,255,255,.14);
+    border: 1px solid rgba(255,255,255,.16);
     border-radius: 50%;
-    background: rgba(18,22,28,.8);
-    color: var(--text);
+    background: rgba(18,22,28,.88);
+    color: #ffffff;
     font-size: 1.4rem;
     display: grid;
     place-items: center;
@@ -4142,7 +4167,7 @@
   }
 
   .cert-modal-close:hover {
-    background: rgba(255,255,255,.15);
+    background: rgba(255,255,255,.2);
     border-color: var(--accent-1);
     transform: scale(1.08);
   }
@@ -4152,6 +4177,7 @@
     grid-template-columns: 1.15fr 0.85fr;
     overflow-y: auto;
     max-height: inherit;
+    -webkit-overflow-scrolling: touch;
   }
 
   .cert-modal-visual {
@@ -4160,7 +4186,7 @@
     align-items: center;
     justify-content: center;
     padding: 36px 28px;
-    background: rgba(0,0,0,.35);
+    background: rgba(0,0,0,.45);
     border-right: 1px solid rgba(255,255,255,.08);
   }
 
@@ -4171,20 +4197,22 @@
     justify-content: center;
     border-radius: 14px;
     overflow: hidden;
-    box-shadow: 0 16px 45px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.1);
-    background: #0d1015;
+    box-shadow: 0 16px 45px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.1);
+    background: #080a0e;
   }
 
   .cert-modal-img {
     width: 100%;
     height: auto;
-    max-height: min(68vh, 600px);
+    max-height: min(65vh, 560px);
     object-fit: contain;
     display: block;
     transition: opacity .25s ease;
   }
 
   .cert-modal-nav {
+    -webkit-appearance: none;
+    appearance: none;
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
@@ -4192,10 +4220,10 @@
     height: 44px;
     border: 1px solid rgba(255,255,255,.18);
     border-radius: 50%;
-    background: rgba(15,19,26,.85);
+    background: rgba(15,19,26,.88);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    color: var(--text);
+    color: #ffffff;
     font-size: 1.2rem;
     display: grid;
     place-items: center;
@@ -4214,11 +4242,12 @@
   .cert-modal-next { right: 14px; }
 
   .cert-modal-details {
-    padding: 40px 36px;
+    padding: 36px 32px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     gap: 20px;
+    background: #0f1217;
   }
 
   .cert-modal-meta-top {
@@ -4276,16 +4305,17 @@
 
   .cert-modal-title {
     margin: 4px 0 10px;
-    font-size: clamp(1.4rem, 2.2vw, 2rem);
-    line-height: 1.15;
+    font-size: clamp(1.3rem, 2.2vw, 1.8rem);
+    line-height: 1.2;
     font-weight: 500;
     letter-spacing: -.03em;
+    color: #ffffff;
   }
 
   .cert-modal-desc {
     color: var(--muted);
     font-size: .84rem;
-    line-height: 1.6;
+    line-height: 1.55;
     margin: 0 0 16px;
   }
 
@@ -4294,8 +4324,8 @@
     gap: 12px;
     padding: 16px;
     border-radius: 14px;
-    border: 1px solid rgba(255,255,255,.07);
-    background: rgba(255,255,255,.025);
+    border: 1px solid rgba(255,255,255,.08);
+    background: rgba(255,255,255,.03);
   }
 
   .cert-spec-item {
@@ -4315,7 +4345,7 @@
 
   .cert-spec-value {
     font-weight: 500;
-    color: var(--text);
+    color: #ffffff;
     text-align: right;
   }
 
@@ -4336,12 +4366,14 @@
   }
 
   .cert-copy-btn {
-    padding: 4px 9px;
-    border: 1px solid rgba(255,255,255,.16);
+    -webkit-appearance: none;
+    appearance: none;
+    padding: 5px 11px;
+    border: 1px solid rgba(255,255,255,.18);
     border-radius: 6px;
     background: rgba(255,255,255,.08);
-    font-size: .68rem;
-    color: var(--text);
+    font-size: .7rem;
+    color: #ffffff;
     cursor: pointer;
     transition: background .2s ease, border-color .2s ease;
   }
@@ -4367,26 +4399,50 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    background: var(--text);
+    color: var(--bg);
+    font-weight: 600;
   }
 
   @media (max-width: 860px) {
     .cert-modal {
-      padding: 12px;
+      padding: 10px;
     }
     .cert-modal-container {
+      width: 100%;
       max-height: 92vh;
+      border-radius: 20px;
     }
     .cert-modal-body {
-      grid-template-columns: 1fr;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
     }
     .cert-modal-visual {
-      padding: 24px 16px;
+      padding: 24px 14px 16px;
       border-right: none;
       border-bottom: 1px solid rgba(255,255,255,.08);
+      min-height: 200px;
+    }
+    .cert-modal-frame {
+      max-height: 240px;
+    }
+    .cert-modal-img {
+      max-height: 230px;
+      width: auto;
+      max-width: 100%;
     }
     .cert-modal-details {
-      padding: 24px 20px;
+      padding: 20px 16px;
+      gap: 16px;
     }
+    .cert-modal-nav {
+      width: 38px;
+      height: 38px;
+      font-size: 1rem;
+    }
+    .cert-modal-prev { left: 8px; }
+    .cert-modal-next { right: 8px; }
   }
 
   /* Gear & Production Toolkit Section */
@@ -4415,12 +4471,14 @@
   }
 
   .gear-tab-btn {
-    padding: 8px 16px;
+    -webkit-appearance: none;
+    appearance: none;
+    padding: 9px 18px;
     border-radius: 999px;
     border: 1px solid transparent;
     background: transparent;
     color: var(--muted);
-    font-size: .74rem;
+    font-size: .76rem;
     font-weight: 500;
     cursor: pointer;
     transition: color .25s ease, background .25s ease, border-color .25s ease;
@@ -4433,8 +4491,8 @@
   .gear-tab-btn.active {
     color: var(--text);
     background: rgba(255,255,255,.1);
-    border-color: rgba(255,255,255,.12);
-    box-shadow: 0 4px 14px rgba(0,0,0,.25);
+    border-color: rgba(255,255,255,.16);
+    box-shadow: 0 4px 14px rgba(0,0,0,.3);
   }
 
   .gear-grid {
@@ -4498,6 +4556,7 @@
     margin: 0;
     line-height: 1.3;
     letter-spacing: -.02em;
+    color: var(--text);
   }
 
   .gear-desc {
@@ -4528,23 +4587,39 @@
     }
   }
 
-  @media (max-width: 600px) {
-    .gear-grid {
-      grid-template-columns: 1fr;
+  @media (max-width: 680px) {
+    .gear-section {
+      padding: 80px 0;
+    }
+    .gear-header-row {
+      display: block;
+      margin-bottom: 24px;
     }
     .gear-filter-tabs {
+      display: flex;
       width: 100%;
-      border-radius: 16px;
+      border-radius: 14px;
+      margin-top: 18px;
+      padding: 4px;
+      overflow-x: auto;
+      gap: 4px;
     }
     .gear-tab-btn {
-      flex: 1;
+      flex: 1 1 auto;
       text-align: center;
+      padding: 8px 10px;
+      white-space: nowrap;
+      font-size: .7rem;
     }
-    .gear-section {
-      padding: 90px 0;
+    .gear-grid {
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    .gear-card {
+      padding: 20px;
+      border-radius: 18px;
     }
   }
-}
 </style>
 </head>
           <body>
@@ -9570,6 +9645,8 @@ document.addEventListener("visibilitychange", () => {
         renderCertModal(currentCertIndex + 1);
       }
     });
+
+    renderCertModal(0);
   } catch (error) {}
 
   /* Copy email on click (still opens mail app) */
