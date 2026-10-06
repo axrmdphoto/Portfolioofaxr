@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://axrmdphoto.github.io/Portfolioofaxr/sitemap.xml

@@ -11,6 +11,9 @@
       content="MD Abdulla is a photographer, filmmaker and website designer from Bilasipara, Assam, creating visual stories and polished digital experiences for brands."
       />
       <meta name="theme-color" content="#0a0a0a" />
+      <link rel="canonical" href="https://axrmdphoto.github.io/Portfolioofaxr/" />
+      <link rel="manifest" href="site.webmanifest" />
+      <meta property="og:url" content="https://axrmdphoto.github.io/Portfolioofaxr/" />
       <meta property="og:title" content="MD ABDULLA — Photography &amp; Digital Design" />
       <meta
         property="og:description"
@@ -2341,8 +2344,67 @@
       object-fit: contain;
       transform: scale(.96);
       filter: saturate(1.04) contrast(1.02);
-      transition: transform .4s var(--ease), filter .4s ease;
+      transition: transform .4s var(--ease), filter .4s ease, scale .35s var(--ease);
       will-change: transform, opacity, filter;
+      cursor: zoom-in;
+    }
+
+    /* Click-to-zoom uses the separate `scale` property so it never
+       fights the GSAP entrance animation, which owns `transform`. */
+    .lightbox-image.zoomed {
+      scale: 1.9;
+      cursor: zoom-out;
+    }
+
+    /* Gallery favorites (heart on each card + empty state) */
+    .fav-btn {
+      position: absolute;
+      z-index: 3;
+      top: 10px;
+      right: 10px;
+      display: grid;
+      width: 38px;
+      height: 38px;
+      place-items: center;
+      border: 1px solid rgba(255,255,255,.22);
+      border-radius: 50%;
+      background: rgba(8,10,13,.62);
+      color: #f5f5f5;
+      font-size: 1rem;
+      line-height: 1;
+      opacity: 0;
+      transform: scale(.9);
+      transition: opacity .3s var(--ease), transform .3s var(--ease), border-color .25s ease, color .25s ease;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .photo-card:hover .fav-btn,
+    .photo-card:focus-within .fav-btn,
+    .fav-btn.active {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .fav-btn:hover {
+      border-color: rgba(255,143,165,.8);
+      transform: scale(1.08);
+    }
+
+    .fav-btn.active {
+      border-color: rgba(255,143,165,.8);
+      color: #ff8fa5;
+    }
+
+    .fav-empty {
+      grid-column: 1 / -1;
+      padding: 34px 20px;
+      border: 1px dashed var(--stroke);
+      border-radius: 20px;
+      color: var(--muted);
+      font-size: .85rem;
+      line-height: 1.7;
+      text-align: center;
     }
 
     .lightbox.open .lightbox-image {
@@ -5748,11 +5810,18 @@
                     </p>
                     <div class="contact-actions">
                     <a
-                      href="mailto:axr.md.photo@gmail.com"
+                      href="mailto:axr.md.photo@gmail.com?subject=Shoot%20%2F%20collaboration%20inquiry"
                       class="button button-primary"
                       >
                       Email me ↗
                     </a>
+                    <button
+                      class="button button-secondary"
+                      id="copyEmailBtn"
+                      type="button"
+                      >
+                      Copy email
+                    </button>
                     <a
                       href="https://www.instagram.com/axr.md/"
                       target="_blank"
@@ -5761,6 +5830,13 @@
                       >
                       Instagram ↗
                     </a>
+                    <button
+                      class="button button-secondary"
+                      id="sharePageBtn"
+                      type="button"
+                      >
+                      Share ↗
+                    </button>
                     </div>
                   </div>
                 </section>
@@ -6422,6 +6498,34 @@ const photos = [
 
     let activeCategory = "All";
 
+    /* Saved frames live in localStorage, so visitors keep their own
+       shortlist on this device with no account and no upload. */
+    const FAV_KEY = "mdabdulla:favs";
+
+    function readFavs() {
+      try {
+        const list = JSON.parse(localStorage.getItem(FAV_KEY) || "[]");
+        return Array.isArray(list) ? list : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function isFav(id) {
+      return readFavs().includes(id);
+    }
+
+    function toggleFav(id) {
+      const favs = readFavs();
+      const at = favs.indexOf(id);
+      if (at >= 0) favs.splice(at, 1);
+      else favs.push(id);
+      try {
+        localStorage.setItem(FAV_KEY, JSON.stringify(favs));
+      } catch (error) {}
+      return at < 0;
+    }
+
     categories.forEach(category => {
       const button =
         document.createElement("button");
@@ -6450,16 +6554,50 @@ const photos = [
       filters.appendChild(button);
     });
 
+    const savedButton = document.createElement("button");
+    savedButton.className = "filter";
+    savedButton.type = "button";
+    savedButton.textContent = "♥ Saved";
+
+    savedButton.addEventListener("click", () => {
+      activeCategory = "♥ Saved";
+
+      document
+        .querySelectorAll(".filter")
+        .forEach(item => {
+          item.classList.toggle(
+            "active",
+            item === savedButton
+          );
+        });
+
+      renderGallery();
+    });
+
+    filters.appendChild(savedButton);
+
     function renderGallery() {
       galleryGrid.innerHTML = "";
 
       const visiblePhotos =
         activeCategory === "All"
           ? photos
-          : photos.filter(
+          : activeCategory === "♥ Saved"
+            ? photos.filter(photo => isFav(photo.id))
+            : photos.filter(
               photo =>
                 photo.category === activeCategory
             );
+
+      if (!visiblePhotos.length) {
+        const empty = document.createElement("div");
+        empty.className = "fav-empty";
+        empty.textContent = activeCategory === "♥ Saved"
+          ? "No saved frames yet — tap ♥ on any photo to keep it here on this device."
+          : "No photographs match this view yet.";
+        galleryGrid.appendChild(empty);
+        return;
+      }
 
       visiblePhotos.forEach(photo => {
         const article =
@@ -6500,7 +6638,24 @@ const photos = [
           `${photo.category} / ${photo.date} / ${photo.location}`;
 
         info.append(title, meta);
-        article.append(image, info);
+
+        const fav = document.createElement("button");
+        fav.className = `fav-btn${isFav(photo.id) ? " active" : ""}`;
+        fav.type = "button";
+        fav.textContent = isFav(photo.id) ? "♥" : "♡";
+        fav.setAttribute("aria-label", `Save ${photo.title} to favorites`);
+        fav.setAttribute("aria-pressed", String(isFav(photo.id)));
+
+        fav.addEventListener("click", event => {
+          event.stopPropagation();
+          const saved = toggleFav(photo.id);
+          fav.classList.toggle("active", saved);
+          fav.textContent = saved ? "♥" : "♡";
+          fav.setAttribute("aria-pressed", String(saved));
+          if (activeCategory === "♥ Saved" && !saved) renderGallery();
+        });
+
+        article.append(image, info, fav);
 
         article.addEventListener("click", () => {
           openLightbox(photo.id, visiblePhotos);
@@ -9659,6 +9814,105 @@ document.addEventListener("visibilitychange", () => {
       } catch (error) {}
     });
   });
+
+  /* Contact: dedicated copy-email + share-portfolio buttons */
+  try {
+    const copyBtn = document.getElementById("copyEmailBtn");
+    if (copyBtn) copyBtn.addEventListener("click", async () => {
+      const email = "axr.md.photo@gmail.com";
+      try {
+        await navigator.clipboard.writeText(email);
+        showToast("Email copied: " + email);
+      } catch (error) {
+        showToast(email);
+      }
+    });
+
+    const shareBtn = document.getElementById("sharePageBtn");
+    if (shareBtn) shareBtn.addEventListener("click", async () => {
+      const data = {
+        title: "MD Abdulla — Photography & Digital Design",
+        text: "Photography, cinematic reels and visual stories by MD Abdulla.",
+        url: location.href
+      };
+      if (navigator.share) {
+        try {
+          await navigator.share(data);
+        } catch (error) {}
+      } else {
+        try {
+          await navigator.clipboard.writeText(location.href);
+          showToast("Portfolio link copied — send it anywhere");
+        } catch (error) {
+          showToast("Copy this link: " + location.href);
+        }
+      }
+    });
+  } catch (error) {}
+
+  /* Lightbox click-to-zoom: uses the separate `scale` property so it
+     never fights the GSAP entrance animation that owns `transform`. */
+  try {
+    const zoomImg = document.getElementById("lightboxImage");
+    if (zoomImg) {
+      zoomImg.addEventListener("click", event => {
+        event.stopPropagation();
+        if (zoomImg.classList.contains("zoomed")) {
+          zoomImg.classList.remove("zoomed");
+          zoomImg.style.transformOrigin = "";
+          return;
+        }
+        const rect = zoomImg.getBoundingClientRect();
+        const x = ((event.clientX - rect.left) / rect.width) * 100;
+        const y = ((event.clientY - rect.top) / rect.height) * 100;
+        zoomImg.style.transformOrigin = `${x.toFixed(1)}% ${y.toFixed(1)}%`;
+        zoomImg.classList.add("zoomed");
+      });
+      ["lightboxPrev", "lightboxNext", "lightboxClose"].forEach(id => {
+        document.getElementById(id)?.addEventListener("click", () => {
+          zoomImg.classList.remove("zoomed");
+          zoomImg.style.transformOrigin = "";
+        });
+      });
+      document.addEventListener("keydown", event => {
+        if (event.key === "Escape") {
+          zoomImg.classList.remove("zoomed");
+          zoomImg.style.transformOrigin = "";
+        }
+      });
+    }
+  } catch (error) {}
+
+  /* Stats count up once when they scroll into view */
+  try {
+    const stats = document.querySelector(".stats");
+    if (stats && "IntersectionObserver" in window) {
+      const counted = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          counted.disconnect();
+          document.querySelectorAll(".stat-number").forEach(el => {
+            const raw = el.textContent.trim();
+            if (!/^\d+$/.test(raw)) return;
+            const target = parseInt(raw, 10);
+            if (reduced) {
+              el.textContent = target;
+              return;
+            }
+            const start = performance.now();
+            const duration = 1300;
+            (function tick(now) {
+              const p = Math.min((now - start) / duration, 1);
+              const eased = 1 - Math.pow(1 - p, 3);
+              el.textContent = Math.round(target * eased);
+              if (p < 1) requestAnimationFrame(tick);
+            })(start);
+          });
+        });
+      }, { threshold: 0.3 });
+      counted.observe(stats);
+    }
+  } catch (error) {}
 })();
 
 </script>

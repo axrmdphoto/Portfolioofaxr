@@ -1,0 +1,23 @@
+{
+  "name": "MD Abdulla — Photography & Digital Design",
+  "short_name": "MD Abdulla",
+  "description": "Photography, filmmaking, brand storytelling and website design by MD Abdulla.",
+  "start_url": "https://axrmdphoto.github.io/Portfolioofaxr/",
+  "scope": "https://axrmdphoto.github.io/Portfolioofaxr/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "icons": [
+    {
+      "src": "favicon/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "favicon/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ]
+}
