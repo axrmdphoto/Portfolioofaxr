@@ -3633,13 +3633,15 @@
 .grain {
   position: fixed;
   z-index: 9997;
-  inset: -50%;
-  width: 200%;
-  height: 200%;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
   opacity: .05;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-  animation: grain-shift 1.2s steps(4) infinite;
+  /* Static: an infinitely-animating fullscreen layer keeps the compositor
+     awake forever. The film look remains; motion was barely visible. */
+  transform: translateZ(0);
 }
 @keyframes grain-shift {
   0% { transform: translate(0,0); }
@@ -3678,18 +3680,18 @@
   100% { opacity: 0; transform: translateY(-72vh) translateX(26px); }
 }
 
-/* Smooth depth reveal */
+/* Smooth depth reveal (opacity + transform only: animating filter: blur
+   forces a repaint every frame and janks low-end GPUs) */
 [data-reveal] {
   opacity: 0;
   transform: translateY(28px) scale(.985);
-  filter: blur(8px);
-  transition: opacity .9s var(--ease), transform .9s var(--ease), filter .9s var(--ease);
-  will-change: opacity, transform, filter;
+  transition: opacity .9s var(--ease), transform .9s var(--ease);
+  will-change: opacity, transform;
 }
 [data-reveal].is-in {
   opacity: 1;
   transform: translateY(0) scale(1);
-  filter: blur(0);
+  will-change: auto;
 }
 
 /* 3D tilt depth for cards */
@@ -4276,6 +4278,41 @@
   }
   .book-row {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ---- Mobile performance: blur and constant motion are the top jank
+   sources on phone GPUs. Solid backgrounds replace small blurred pills;
+   only the nav keeps a light blur. Dust drift and exploration float
+   are stilled on small screens. ---- */
+@media (max-width: 760px) {
+  .nav {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .reel-sound,
+  .reel-state,
+  .toast,
+  .to-top,
+  .capture-flip,
+  .capture-live-badge,
+  .lightbox-actions button {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .reel-sound,
+  .toast,
+  .to-top {
+    background: rgba(10, 12, 16, .96);
+  }
+  .dust {
+    display: none;
+  }
+  .exploration-image {
+    animation: none;
+  }
+  .marquee-track {
+    animation-duration: 60s;
   }
 }
 
@@ -5582,7 +5619,7 @@
                         <h3 class="reel-title"><a class="reel-title-link" href="https://www.instagram.com/reel/DV8sEJsCCII/" target="_blank" rel="noopener noreferrer">Sukoon in Every Frame</a></h3>
                         <p class="reel-description">Original footage captured and edited by MD Abdulla.</p>
                         <div class="reels-embed-wrap">
-                          <video class="reel-video" autoplay muted loop playsinline controls preload="metadata" aria-label="Instagram Reel 01">
+                          <video class="reel-video" muted loop playsinline controls preload="none" aria-label="Instagram Reel 01">
                             <source src="assets/videos/awesomebilasipara-20261003-0001.mp4" type="video/mp4" />
                           </video>
                         </div>
@@ -5596,7 +5633,7 @@
                         <h3 class="reel-title"><a class="reel-title-link" href="https://www.instagram.com/reel/DWEEzB6kXjP/" target="_blank" rel="noopener noreferrer">The Biggest Gym in Bilasipara</a></h3>
                         <p class="reel-description">Original footage captured and edited by MD Abdulla.</p>
                         <div class="reels-embed-wrap">
-                          <video class="reel-video" autoplay muted loop playsinline controls preload="metadata" aria-label="Instagram Reel 02">
+                          <video class="reel-video" muted loop playsinline controls preload="none" aria-label="Instagram Reel 02">
                             <source src="assets/videos/awesomebilasipara-20261003-0002.mp4" type="video/mp4" />
                           </video>
                         </div>
@@ -5610,7 +5647,7 @@
                         <h3 class="reel-title"><a class="reel-title-link" href="https://www.instagram.com/reel/DWF9sQ9Ecr2/" target="_blank" rel="noopener noreferrer">Random Frames — Bilasipara Market</a></h3>
                         <p class="reel-description">Original footage captured and edited by MD Abdulla.</p>
                         <div class="reels-embed-wrap">
-                          <video class="reel-video" autoplay muted loop playsinline controls preload="metadata" aria-label="Instagram Reel 03">
+                          <video class="reel-video" muted loop playsinline controls preload="none" aria-label="Instagram Reel 03">
                             <source src="assets/videos/awesomebilasipara-20261003-0003.mp4" type="video/mp4" />
                           </video>
                         </div>
@@ -5624,7 +5661,7 @@
                         <h3 class="reel-title"><a class="reel-title-link" href="https://www.instagram.com/reel/DWHIaSOCPa6/" target="_blank" rel="noopener noreferrer">Eid Preparation — Batapara</a></h3>
                         <p class="reel-description">Original footage captured and edited by MD Abdulla.</p>
                         <div class="reels-embed-wrap">
-                          <video class="reel-video" autoplay muted loop playsinline controls preload="metadata" aria-label="Instagram Reel 04">
+                          <video class="reel-video" muted loop playsinline controls preload="none" aria-label="Instagram Reel 04">
                             <source src="assets/videos/awesomebilasipara-20261003-0004.mp4" type="video/mp4" />
                           </video>
                         </div>
@@ -5638,7 +5675,7 @@
                         <h3 class="reel-title"><a class="reel-title-link" href="https://www.instagram.com/reel/DWV5jy8EaYz/" target="_blank" rel="noopener noreferrer">The Untold Beauty of Village &amp; Nature</a></h3>
                         <p class="reel-description">Original footage captured and edited by MD Abdulla.</p>
                         <div class="reels-embed-wrap">
-                          <video class="reel-video" autoplay muted loop playsinline controls preload="metadata" aria-label="Instagram Reel 05">
+                          <video class="reel-video" muted loop playsinline controls preload="none" aria-label="Instagram Reel 05">
                             <source src="assets/videos/awesomebilasipara-20261003-0005.mp4" type="video/mp4" />
                           </video>
                         </div>
@@ -5652,7 +5689,7 @@
                         <h3 class="reel-title"><a class="reel-title-link" href="https://www.instagram.com/reel/DWa2gIUERpD/" target="_blank" rel="noopener noreferrer">Hungry Land — Bilasipara</a></h3>
                         <p class="reel-description">Original footage captured and edited by MD Abdulla.</p>
                         <div class="reels-embed-wrap">
-                          <video class="reel-video" autoplay muted loop playsinline controls preload="metadata" aria-label="Instagram Reel 06">
+                          <video class="reel-video" muted loop playsinline controls preload="none" aria-label="Instagram Reel 06">
                             <source src="assets/videos/awesomebilasipara-20261003-0006.mp4" type="video/mp4" />
                           </video>
                         </div>
@@ -5666,7 +5703,7 @@
                         <h3 class="reel-title"><a class="reel-title-link" href="https://www.instagram.com/reel/DWjFOH8DX2y/" target="_blank" rel="noopener noreferrer">Admissions Open 2026–27</a></h3>
                         <p class="reel-description">Original footage captured and edited by MD Abdulla.</p>
                         <div class="reels-embed-wrap">
-                          <video class="reel-video" autoplay muted loop playsinline controls preload="metadata" aria-label="Instagram Reel 07">
+                          <video class="reel-video" muted loop playsinline controls preload="none" aria-label="Instagram Reel 07">
                             <source src="assets/videos/awesomebilasipara-20261003-0007.mp4" type="video/mp4" />
                           </video>
                         </div>
@@ -5680,7 +5717,7 @@
                         <h3 class="reel-title"><a class="reel-title-link" href="https://www.instagram.com/reel/DWoFJc4kR2Z/" target="_blank" rel="noopener noreferrer">Bilasipara Railway Station (BLPA)</a></h3>
                         <p class="reel-description">Original footage captured and edited by MD Abdulla.</p>
                         <div class="reels-embed-wrap">
-                          <video class="reel-video" autoplay muted loop playsinline controls preload="metadata" aria-label="Instagram Reel 08">
+                          <video class="reel-video" muted loop playsinline controls preload="none" aria-label="Instagram Reel 08">
                             <source src="assets/videos/awesomebilasipara-20261003-0008.mp4" type="video/mp4" />
                           </video>
                         </div>
@@ -5694,7 +5731,7 @@
                         <h3 class="reel-title"><a class="reel-title-link" href="https://www.instagram.com/reel/DWv0irgEWIX/" target="_blank" rel="noopener noreferrer">Vastra Silai Ghar</a></h3>
                         <p class="reel-description">Original footage captured and edited by MD Abdulla.</p>
                         <div class="reels-embed-wrap">
-                          <video class="reel-video" autoplay muted loop playsinline controls preload="metadata" aria-label="Instagram Reel 09">
+                          <video class="reel-video" muted loop playsinline controls preload="none" aria-label="Instagram Reel 09">
                             <source src="assets/videos/awesomebilasipara-20261003-0009.mp4" type="video/mp4" />
                           </video>
                         </div>
@@ -5708,7 +5745,7 @@
                         <h3 class="reel-title"><a class="reel-title-link" href="https://www.instagram.com/reel/DW-1mymkYbL/" target="_blank" rel="noopener noreferrer">Ramakrishna Mission, Surjaykhata</a></h3>
                         <p class="reel-description">Original footage captured and edited by MD Abdulla.</p>
                         <div class="reels-embed-wrap">
-                          <video class="reel-video" autoplay muted loop playsinline controls preload="metadata" aria-label="Instagram Reel 10">
+                          <video class="reel-video" muted loop playsinline controls preload="none" aria-label="Instagram Reel 10">
                             <source src="assets/videos/awesomebilasipara-20261003-0010.mp4" type="video/mp4" />
                           </video>
                         </div>
@@ -5722,7 +5759,7 @@
                         <h3 class="reel-title"><a class="reel-title-link" href="https://www.instagram.com/reel/DXBo8uAkcvG/" target="_blank" rel="noopener noreferrer">Bilasipara After Dark</a></h3>
                         <p class="reel-description">Original footage captured and edited by MD Abdulla.</p>
                         <div class="reels-embed-wrap">
-                          <video class="reel-video" autoplay muted loop playsinline controls preload="metadata" aria-label="Instagram Reel 11">
+                          <video class="reel-video" muted loop playsinline controls preload="none" aria-label="Instagram Reel 11">
                             <source src="assets/videos/awesomebilasipara-20261003-0011.mp4" type="video/mp4" />
                           </video>
                         </div>
@@ -7014,7 +7051,7 @@ const photos = [
 
     function loadingFrame(now) {
       const duration =
-        reduceMotion ? 350 : 1700;
+        reduceMotion ? 350 : 1000;
 
       const progress = Math.min(
         (now - loadingStart) / duration,
@@ -7038,7 +7075,7 @@ const photos = [
         setTimeout(() => {
           loadingScreen.classList.add("is-hidden");
           initAnimations();
-        }, reduceMotion ? 0 : 300);
+        }, reduceMotion ? 0 : 120);
       }
     }
 
@@ -7049,7 +7086,14 @@ const photos = [
     const heroVideo =
       document.getElementById("heroVideo");
 
-    if (!reduceMotion) {
+    /* Hero stream is desktop-only: on phones the poster image shows and
+       no HLS manifest is ever fetched or decoded. Paused offscreen. */
+    if (heroVideo && mobilePerformanceMode) {
+      heroVideo.removeAttribute("autoplay");
+      heroVideo.preload = "none";
+    }
+
+    if (!reduceMotion && !mobilePerformanceMode) {
       if (window.Hls && Hls.isSupported()) {
         const hls = new Hls({
           enableWorker: true,
@@ -7688,22 +7732,45 @@ const photos = [
     const hero =
       document.querySelector(".hero");
 
-    if (!reduceMotion) {
+    /* Cursor glow + hero mouse gradient are pointer-only effects. On touch
+       screens they burn rAF cycles and repaints during every scroll/drag. */
+    const finePointer =
+      window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+    if (cursorGlow && !finePointer) cursorGlow.style.display = "none";
+
+    if (!reduceMotion && finePointer) {
       let cursorX = window.innerWidth / 2;
       let cursorY = window.innerHeight / 2;
       let glowX = cursorX;
       let glowY = cursorY;
       let cursorRaf = 0;
       let heroRect = hero ? hero.getBoundingClientRect() : null;
+      let heroScrollY = window.scrollY;
       if (hero) {
         window.addEventListener("resize", () => { heroRect = hero.getBoundingClientRect(); });
-        window.addEventListener("scroll", () => { heroRect = hero.getBoundingClientRect(); }, { passive: true });
+        /* No per-scroll getBoundingClientRect (forces layout on every
+           pixel). The rect is refreshed inside the rAF tick only when the
+           page actually scrolled since the last pointer frame. */
       }
 
       window.addEventListener("pointermove", event => {
         cursorX = event.clientX;
         cursorY = event.clientY;
 
+        if (!cursorRaf) cursorRaf = requestAnimationFrame(animateCursor);
+      }, { passive: true });
+
+      function animateCursor() {
+        glowX += (cursorX - glowX) * .16;
+        glowY += (cursorY - glowY) * .16;
+
+        /* Hero spotlight vars update here on the rAF tick, not per
+           pointermove event — each write repaints the hero gradient. */
+        if (hero && window.scrollY !== heroScrollY) {
+          heroScrollY = window.scrollY;
+          heroRect = hero.getBoundingClientRect();
+        }
         if (hero && heroRect) {
           hero.style.setProperty(
             "--mouse-x",
@@ -7715,13 +7782,6 @@ const photos = [
             `${((cursorY - heroRect.top) / heroRect.height) * 100}%`
           );
         }
-
-        if (!cursorRaf) cursorRaf = requestAnimationFrame(animateCursor);
-      }, { passive: true });
-
-      function animateCursor() {
-        glowX += (cursorX - glowX) * .16;
-        glowY += (cursorY - glowY) * .16;
 
         if (cursorGlow) {
           cursorGlow.style.transform = `translate3d(${glowX.toFixed(1)}px, ${glowY.toFixed(1)}px, 0)`;
@@ -7742,9 +7802,10 @@ const photos = [
       }, { passive: true });
     }
 
-    /* Magnetic controls */
+    /* Magnetic controls (fine pointers only: meaningless on touch,
+       and each pointermove fires a GSAP tween) */
 
-    if (!reduceMotion && window.gsap) {
+    if (!reduceMotion && finePointer && window.gsap) {
       document
         .querySelectorAll(
           ".button, .logo, .nav-instagram, .certs-arrow, .mode-button"
@@ -7792,9 +7853,12 @@ const photos = [
     /* Gallery card tilt */
 
     function attachCardTilt() {
+      /* Tilt is pointer-only: on touch screens every scroll-drag over a
+         card would spawn competing GSAP tweens and jank the scroll. */
       if (
         reduceMotion ||
-        !window.gsap
+        !window.gsap ||
+        !window.matchMedia("(hover: hover) and (pointer: fine)").matches
       ) {
         return;
       }
@@ -8063,27 +8127,31 @@ const photos = [
           });
         });
 
-      gsap.to(".hero-video", {
-        yPercent: 8,
-        ease: "none",
-        scrollTrigger: {
-          trigger: ".hero",
-          start: "top top",
-          end: "bottom top",
-          scrub: true
-        }
-      });
+      /* Scrub parallax is desktop-only: it runs layout work on every
+         scroll frame, which janks phone GPUs. */
+      if (!mobilePerformanceMode) {
+        gsap.to(".hero-video", {
+          yPercent: 8,
+          ease: "none",
+          scrollTrigger: {
+            trigger: ".hero",
+            start: "top top",
+            end: "bottom top",
+            scrub: true
+          }
+        });
 
-      gsap.to("#featuredImage", {
-        yPercent: -12,
-        ease: "none",
-        scrollTrigger: {
-          trigger: ".featured",
-          start: "top bottom",
-          end: "bottom top",
-          scrub: true
-        }
-      });
+        gsap.to("#featuredImage", {
+          yPercent: -12,
+          ease: "none",
+          scrollTrigger: {
+            trigger: ".featured",
+            start: "top bottom",
+            end: "bottom top",
+            scrub: true
+          }
+        });
+      }
 
       if (!mobilePerformanceMode) {
         gsap.utils
@@ -8136,13 +8204,21 @@ const photos = [
       ScrollTrigger.refresh();
     }
 
+    /* One rAF-throttled scroll tick: unthrottled scroll handlers that
+       write styles force layout on every pixel scrolled. */
+    let navTick = false;
     window.addEventListener("scroll", () => {
-      document
-        .getElementById("nav")
-        .classList.toggle(
-          "scrolled",
-          window.scrollY > 30
-        );
+      if (navTick) return;
+      navTick = true;
+      requestAnimationFrame(() => {
+        document
+          .getElementById("nav")
+          .classList.toggle(
+            "scrolled",
+            window.scrollY > 30
+          );
+        navTick = false;
+      });
     }, { passive: true });
 
     document.getElementById("copyright").textContent =
@@ -9217,6 +9293,9 @@ const photos = [
 const reelCards = document.querySelectorAll(".reel-card");
 const reelVideos = document.querySelectorAll(".reel-video");
 
+/* Reels load lazily: videos start with preload="none" so all 11 files
+   are never fetched/decoded at once. The first visit to a card loads it,
+   the most-visible card plays, everything else stays paused. */
 function playReel(card) {
   const currentVideo = card.querySelector(".reel-video");
   if (!currentVideo) return;
@@ -9225,8 +9304,17 @@ function playReel(card) {
     if (video !== currentVideo) video.pause();
   });
 
-  currentVideo.muted = true;
+  if (currentVideo.preload === "none") {
+    currentVideo.preload = "metadata";
+    try { currentVideo.load(); } catch (error) {}
+  }
+  if (!currentVideo.dataset.unmuted) currentVideo.muted = true;
   currentVideo.play().catch(() => {});
+}
+
+function pauseReel(card) {
+  const video = card.querySelector(".reel-video");
+  if (video) video.pause();
 }
 
 if (reelCards.length) {
@@ -9235,14 +9323,19 @@ if (reelCards.length) {
       entry.target.classList.toggle("is-active", entry.isIntersecting);
       if (entry.isIntersecting && entry.intersectionRatio >= 0.45) {
         playReel(entry.target);
+      } else if (!entry.isIntersecting) {
+        pauseReel(entry.target);
       }
     });
-  }, { threshold: [0.45] });
+  }, { threshold: [0, 0.45] });
   reelCards.forEach(card => reelObserver.observe(card));
 }
 
 document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState !== "visible") return;
+  if (document.visibilityState !== "visible") {
+    reelVideos.forEach(video => video.pause());
+    return;
+  }
 
   const activeCard = document.querySelector(".reel-card.is-active");
   if (activeCard) playReel(activeCard);
@@ -9266,9 +9359,16 @@ document.addEventListener("visibilitychange", () => {
     toastTimer = setTimeout(() => toast.classList.remove("show"), 2600);
   }
 
-  /* Scroll progress */
+  /* Scroll progress + back-to-top (single rAF-throttled tick) */
   const bar = document.getElementById("scrollProgressBar");
+  let scrollTick = false;
   function onScroll() {
+    if (scrollTick) return;
+    scrollTick = true;
+    requestAnimationFrame(updateScroll);
+  }
+  function updateScroll() {
+    scrollTick = false;
     const max = document.documentElement.scrollHeight - window.innerHeight;
     const p = max > 0 ? Math.min(1, window.scrollY / max) : 0;
     if (bar) bar.style.transform = `scaleX(${p})`;
@@ -9298,14 +9398,19 @@ document.addEventListener("visibilitychange", () => {
      their own GSAP tilt — sharing the transform property would fight it. */
   if (finePointer && !reduced) {
     let raf = 0;
+    /* Cached once: reel cards are static markup, no need to re-query
+       the DOM on every pointermove. */
+    const tiltCards = [...document.querySelectorAll(".reel-card")];
+    let activeTilt = null;
     document.addEventListener("pointermove", event => {
       const card = event.target.closest && event.target.closest(".reel-card");
-      document.querySelectorAll(".reel-card").forEach(el => {
-        if (el !== card) {
-          el.style.setProperty("--rx", "0deg");
-          el.style.setProperty("--ry", "0deg");
+      if (card !== activeTilt) {
+        if (activeTilt) {
+          activeTilt.style.setProperty("--rx", "0deg");
+          activeTilt.style.setProperty("--ry", "0deg");
         }
-      });
+        activeTilt = card || null;
+      }
       if (!card) return;
       const rect = card.getBoundingClientRect();
       const x = (event.clientX - rect.left) / rect.width;
@@ -9319,15 +9424,17 @@ document.addEventListener("visibilitychange", () => {
       });
     }, { passive: true });
     document.addEventListener("pointerleave", () => {
-      document.querySelectorAll(".reel-card").forEach(el => {
+      tiltCards.forEach(el => {
         el.style.setProperty("--rx", "0deg");
         el.style.setProperty("--ry", "0deg");
       });
+      activeTilt = null;
     }, true);
   }
 
-  /* Hero + exploration dust (little floating light) */
-  if (!reduced) {
+  /* Hero dust (little floating light) — desktop pointers only: six
+     infinitely-animating layers keep mobile GPUs awake. */
+  if (!reduced && finePointer) {
     const hero = document.querySelector(".hero");
     if (hero && !hero.querySelector(".dust")) {
       const dust = document.createElement("div");
@@ -9336,20 +9443,32 @@ document.addEventListener("visibilitychange", () => {
       dust.innerHTML = "<i></i><i></i><i></i><i></i><i></i><i></i>";
       hero.appendChild(dust);
     }
-    /* Hero mouse depth: layered translateZ per element */
+    /* Hero mouse depth: layered translateZ per element (rAF-throttled:
+       raw pointermove can fire 100+ style writes per second). */
     if (hero && finePointer) {
       const layers = hero.querySelectorAll(".hero-animate");
+      let heroRaf = 0;
+      let lastEvent = null;
       hero.addEventListener("pointermove", event => {
-        const rect = hero.getBoundingClientRect();
-        const dx = (event.clientX - rect.left) / rect.width - .5;
-        const dy = (event.clientY - rect.top) / rect.height - .5;
-        layers.forEach((el, i) => {
-          const depth = (i + 1) * 6;
-          el.style.setProperty("--hz", `${depth}px`);
-          el.style.transform = `translate3d(${(dx * depth).toFixed(1)}px, ${(dy * depth).toFixed(1)}px, ${depth}px)`;
+        lastEvent = event;
+        if (heroRaf) return;
+        heroRaf = requestAnimationFrame(() => {
+          heroRaf = 0;
+          if (!lastEvent) return;
+          const rect = hero.getBoundingClientRect();
+          const dx = (lastEvent.clientX - rect.left) / rect.width - .5;
+          const dy = (lastEvent.clientY - rect.top) / rect.height - .5;
+          layers.forEach((el, i) => {
+            const depth = (i + 1) * 6;
+            el.style.setProperty("--hz", `${depth}px`);
+            el.style.transform = `translate3d(${(dx * depth).toFixed(1)}px, ${(dy * depth).toFixed(1)}px, ${depth}px)`;
+          });
         });
       }, { passive: true });
       hero.addEventListener("pointerleave", () => {
+        cancelAnimationFrame(heroRaf);
+        heroRaf = 0;
+        lastEvent = null;
         layers.forEach(el => { el.style.transform = ""; });
       });
     }
