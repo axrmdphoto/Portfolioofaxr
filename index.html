@@ -56,6 +56,43 @@
       --ease: cubic-bezier(.22, .8, .25, 1);
     }
 
+    /* Atmospheric Film Mood Palettes */
+    html[data-theme="golden-hour"] {
+      --bg: #0d0c0a;
+      --surface: #181512;
+      --surface-2: #231f1a;
+      --text: #f7f3ec;
+      --muted: #aa9f92;
+      --stroke: #332b21;
+      --accent-1: #e2a866;
+      --accent-2: #c57e38;
+      --green: #8cb87c;
+    }
+
+    html[data-theme="nordic-slate"] {
+      --bg: #0a0e14;
+      --surface: #121922;
+      --surface-2: #192330;
+      --text: #f0f4f8;
+      --muted: #889bb0;
+      --stroke: #212c3d;
+      --accent-1: #7db4db;
+      --accent-2: #458ab8;
+      --green: #6fbfa0;
+    }
+
+    html[data-theme="tokyo-emerald"] {
+      --bg: #080d0b;
+      --surface: #101915;
+      --surface-2: #16241e;
+      --text: #eef7f2;
+      --muted: #87a396;
+      --stroke: #1f332a;
+      --accent-1: #5ac59b;
+      --accent-2: #2e9b72;
+      --green: #5ac59b;
+    }
+
     * {
       box-sizing: border-box;
     }
@@ -3875,6 +3912,638 @@
   .reels-grid.swipe-mode .reel-card {
     transition: none;
   }
+  /* Atmospheric Film Mood Switcher */
+  .mood-selector {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .mood-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 12px;
+    border: 1px solid var(--stroke);
+    border-radius: 999px;
+    background: rgba(255,255,255,.05);
+    color: var(--text);
+    font-size: .7rem;
+    font-weight: 500;
+    letter-spacing: .02em;
+    cursor: pointer;
+    transition: background .25s ease, border-color .25s ease, transform .2s ease;
+  }
+
+  .mood-btn:hover {
+    background: rgba(255,255,255,.1);
+    border-color: var(--accent-1);
+  }
+
+  .mood-swatch-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--accent-1);
+    box-shadow: 0 0 8px var(--accent-1);
+    transition: background .3s ease, box-shadow .3s ease;
+    flex-shrink: 0;
+  }
+
+  .mood-caret {
+    font-size: .62rem;
+    opacity: .7;
+    transition: transform .2s ease;
+  }
+
+  .mood-btn[aria-expanded="true"] .mood-caret {
+    transform: rotate(180deg);
+  }
+
+  .mood-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    z-index: 120;
+    width: 260px;
+    padding: 8px;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 18px;
+    background: rgba(18,20,24,.96);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    box-shadow: 0 20px 60px rgba(0,0,0,.6), 0 0 30px rgba(78,133,191,.15);
+    animation: mood-menu-in .25s var(--ease);
+  }
+
+  @keyframes mood-menu-in {
+    from { opacity: 0; transform: translateY(-8px) scale(.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .mood-menu-header {
+    padding: 6px 10px 8px;
+    font-size: .62rem;
+    font-weight: 700;
+    letter-spacing: .2em;
+    color: var(--muted);
+    border-bottom: 1px solid rgba(255,255,255,.07);
+    margin-bottom: 4px;
+  }
+
+  .mood-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--text);
+    text-align: left;
+    cursor: pointer;
+    transition: background .2s ease, border-color .2s ease;
+  }
+
+  .mood-item:hover {
+    background: rgba(255,255,255,.06);
+  }
+
+  .mood-item.active {
+    background: rgba(255,255,255,.09);
+    border-color: rgba(255,255,255,.14);
+  }
+
+  .mood-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .swatch-obsidian { background: #89aacc; box-shadow: 0 0 8px rgba(137,170,204,.5); }
+  .swatch-golden { background: #e0a35c; box-shadow: 0 0 8px rgba(224,163,92,.5); }
+  .swatch-nordic { background: #7db4db; box-shadow: 0 0 8px rgba(125,180,219,.5); }
+  .swatch-tokyo { background: #5ac59b; box-shadow: 0 0 8px rgba(90,197,155,.5); }
+
+  .mood-meta {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    line-height: 1.2;
+  }
+
+  .mood-meta strong {
+    font-size: .74rem;
+    color: var(--text);
+  }
+
+  .mood-meta small {
+    font-size: .62rem;
+    color: var(--muted);
+  }
+
+  .mood-check {
+    font-size: .8rem;
+    color: var(--accent-1);
+    opacity: 0;
+    transition: opacity .2s ease;
+  }
+
+  .mood-item.active .mood-check {
+    opacity: 1;
+  }
+
+  @media (max-width: 760px) {
+    .nav.mobile-open .mood-selector {
+      grid-column: span 2;
+      width: 100%;
+      margin-top: 6px;
+    }
+    .nav.mobile-open .mood-btn {
+      width: 100%;
+      justify-content: center;
+      min-height: 44px;
+    }
+    .nav.mobile-open .mood-menu {
+      position: static;
+      width: 100%;
+      margin-top: 8px;
+    }
+  }
+
+  /* Certificate Inspection Modal */
+  .cert-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+    transition: opacity .35s var(--ease), visibility .35s;
+  }
+
+  .cert-modal.is-open {
+    opacity: 1;
+    pointer-events: auto;
+    visibility: visible;
+  }
+
+  .cert-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(6,7,9,.88);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+  }
+
+  .cert-modal-container {
+    position: relative;
+    z-index: 2;
+    width: min(1140px, 100%);
+    max-height: min(92vh, 880px);
+    background: linear-gradient(150deg, rgba(24,28,34,.96), rgba(13,16,20,.98));
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: 24px;
+    box-shadow: 0 35px 90px rgba(0,0,0,.75), 0 0 50px rgba(78,133,191,.15);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: scale(.96) translateY(12px);
+    transition: transform .35s var(--ease);
+  }
+
+  .cert-modal.is-open .cert-modal-container {
+    transform: scale(1) translateY(0);
+  }
+
+  .cert-modal-close {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    z-index: 10;
+    width: 42px;
+    height: 42px;
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: 50%;
+    background: rgba(18,22,28,.8);
+    color: var(--text);
+    font-size: 1.4rem;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: background .2s ease, transform .2s ease, border-color .2s ease;
+  }
+
+  .cert-modal-close:hover {
+    background: rgba(255,255,255,.15);
+    border-color: var(--accent-1);
+    transform: scale(1.08);
+  }
+
+  .cert-modal-body {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    overflow-y: auto;
+    max-height: inherit;
+  }
+
+  .cert-modal-visual {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 36px 28px;
+    background: rgba(0,0,0,.35);
+    border-right: 1px solid rgba(255,255,255,.08);
+  }
+
+  .cert-modal-frame {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 16px 45px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.1);
+    background: #0d1015;
+  }
+
+  .cert-modal-img {
+    width: 100%;
+    height: auto;
+    max-height: min(68vh, 600px);
+    object-fit: contain;
+    display: block;
+    transition: opacity .25s ease;
+  }
+
+  .cert-modal-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgba(255,255,255,.18);
+    border-radius: 50%;
+    background: rgba(15,19,26,.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: var(--text);
+    font-size: 1.2rem;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: transform .2s ease, background .2s ease, border-color .2s ease;
+    z-index: 5;
+  }
+
+  .cert-modal-nav:hover {
+    background: rgba(255,255,255,.2);
+    border-color: var(--accent-1);
+    transform: translateY(-50%) scale(1.1);
+  }
+
+  .cert-modal-prev { left: 14px; }
+  .cert-modal-next { right: 14px; }
+
+  .cert-modal-details {
+    padding: 40px 36px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .cert-modal-meta-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .cert-modal-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 11px;
+    border-radius: 999px;
+    border: 1px solid rgba(137,170,204,.35);
+    background: rgba(137,170,204,.1);
+    color: var(--accent-1);
+    font-size: .65rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  .cert-modal-verified {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--green);
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+  }
+
+  .cert-verified-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: cert-dot-pulse 2s infinite ease-in-out;
+  }
+
+  @keyframes cert-dot-pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.3); opacity: .75; }
+  }
+
+  .cert-modal-counter {
+    color: var(--muted);
+    font-size: .74rem;
+    letter-spacing: .2em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cert-modal-title {
+    margin: 4px 0 10px;
+    font-size: clamp(1.4rem, 2.2vw, 2rem);
+    line-height: 1.15;
+    font-weight: 500;
+    letter-spacing: -.03em;
+  }
+
+  .cert-modal-desc {
+    color: var(--muted);
+    font-size: .84rem;
+    line-height: 1.6;
+    margin: 0 0 16px;
+  }
+
+  .cert-modal-specs {
+    display: grid;
+    gap: 12px;
+    padding: 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,.07);
+    background: rgba(255,255,255,.025);
+  }
+
+  .cert-spec-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: .78rem;
+  }
+
+  .cert-spec-label {
+    color: var(--muted);
+    font-size: .7rem;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+
+  .cert-spec-value {
+    font-weight: 500;
+    color: var(--text);
+    text-align: right;
+  }
+
+  .cert-spec-id-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .cert-spec-code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: .75rem;
+    color: var(--accent-1);
+    background: rgba(137,170,204,.12);
+    padding: 3px 7px;
+    border-radius: 6px;
+    border: 1px solid rgba(137,170,204,.25);
+  }
+
+  .cert-copy-btn {
+    padding: 4px 9px;
+    border: 1px solid rgba(255,255,255,.16);
+    border-radius: 6px;
+    background: rgba(255,255,255,.08);
+    font-size: .68rem;
+    color: var(--text);
+    cursor: pointer;
+    transition: background .2s ease, border-color .2s ease;
+  }
+
+  .cert-copy-btn:hover {
+    background: rgba(255,255,255,.18);
+    border-color: var(--accent-1);
+  }
+
+  .cert-modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .cert-modal-link {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+    font-size: .8rem;
+    padding: 12px 18px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  @media (max-width: 860px) {
+    .cert-modal {
+      padding: 12px;
+    }
+    .cert-modal-container {
+      max-height: 92vh;
+    }
+    .cert-modal-body {
+      grid-template-columns: 1fr;
+    }
+    .cert-modal-visual {
+      padding: 24px 16px;
+      border-right: none;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .cert-modal-details {
+      padding: 24px 20px;
+    }
+  }
+
+  /* Gear & Production Toolkit Section */
+  .gear-section {
+    position: relative;
+    padding: 140px 0;
+  }
+
+  .gear-header-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 32px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+
+  .gear-filter-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    background: rgba(255,255,255,.03);
+    padding: 6px;
+    border-radius: 999px;
+    border: 1px solid var(--stroke);
+  }
+
+  .gear-tab-btn {
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--muted);
+    font-size: .74rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color .25s ease, background .25s ease, border-color .25s ease;
+  }
+
+  .gear-tab-btn:hover {
+    color: var(--text);
+  }
+
+  .gear-tab-btn.active {
+    color: var(--text);
+    background: rgba(255,255,255,.1);
+    border-color: rgba(255,255,255,.12);
+    box-shadow: 0 4px 14px rgba(0,0,0,.25);
+  }
+
+  .gear-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .gear-card {
+    position: relative;
+    padding: 26px;
+    border-radius: 20px;
+    border: 1px solid var(--stroke);
+    background: linear-gradient(150deg, rgba(22,28,36,.75), rgba(12,15,19,.75));
+    box-shadow: 0 16px 45px rgba(0,0,0,.25);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 16px;
+    transition: transform .35s var(--ease), border-color .35s ease, box-shadow .35s ease, opacity .3s ease;
+  }
+
+  .gear-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(137,170,204,.45);
+    box-shadow: 0 24px 60px rgba(0,0,0,.4), 0 0 30px rgba(78,133,191,.12);
+  }
+
+  .gear-card.is-hidden {
+    display: none;
+  }
+
+  .gear-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .gear-badge {
+    font-size: .64rem;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent-1);
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(137,170,204,.1);
+    border: 1px solid rgba(137,170,204,.2);
+  }
+
+  .gear-status {
+    font-size: .66rem;
+    color: var(--muted);
+    letter-spacing: .04em;
+  }
+
+  .gear-card h3 {
+    font-size: 1.15rem;
+    font-weight: 500;
+    margin: 0;
+    line-height: 1.3;
+    letter-spacing: -.02em;
+  }
+
+  .gear-desc {
+    font-size: .82rem;
+    line-height: 1.55;
+    color: var(--muted);
+    margin: 0;
+    flex: 1;
+  }
+
+  .gear-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255,255,255,.07);
+    font-size: .72rem;
+    color: var(--muted);
+  }
+
+  .gear-meta span {
+    display: block;
+  }
+
+  @media (max-width: 960px) {
+    .gear-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 600px) {
+    .gear-grid {
+      grid-template-columns: 1fr;
+    }
+    .gear-filter-tabs {
+      width: 100%;
+      border-radius: 16px;
+    }
+    .gear-tab-btn {
+      flex: 1;
+      text-align: center;
+    }
+    .gear-section {
+      padding: 90px 0;
+    }
+  }
 }
 </style>
 </head>
@@ -3962,6 +4631,9 @@
                 <a class="nav-link" href="#certificates">
                   Certifications
                 </a>
+                <a class="nav-link" href="#gear">
+                  Gear
+                </a>
                 <a class="nav-link" href="#gallery">
                   Work
                 </a>
@@ -3976,6 +4648,48 @@
                   >
                   Instagram ↗
                 </a>
+                <div class="mood-selector" id="moodSelector">
+                  <button class="mood-btn" id="moodBtn" type="button" aria-label="Select film mood palette" aria-haspopup="true" aria-expanded="false" title="Atmospheric Film Mood">
+                    <span class="mood-swatch-dot" id="moodCurrentDot" aria-hidden="true"></span>
+                    <span class="mood-btn-label" id="moodCurrentName">Obsidian</span>
+                    <span class="mood-caret" aria-hidden="true">▾</span>
+                  </button>
+                  <div class="mood-menu" id="moodMenu" role="menu" aria-label="Film Mood Palettes" hidden>
+                    <div class="mood-menu-header">ATMOSPHERIC FILM MOOD</div>
+                    <button class="mood-item active" type="button" role="menuitem" data-mood="obsidian">
+                      <span class="mood-swatch swatch-obsidian"></span>
+                      <span class="mood-meta">
+                        <strong>Obsidian Noir</strong>
+                        <small>Signature monochrome &amp; cool steel</small>
+                      </span>
+                      <span class="mood-check">✓</span>
+                    </button>
+                    <button class="mood-item" type="button" role="menuitem" data-mood="golden-hour">
+                      <span class="mood-swatch swatch-golden"></span>
+                      <span class="mood-meta">
+                        <strong>Golden Hour</strong>
+                        <small>Kodak Portra amber dusk tones</small>
+                      </span>
+                      <span class="mood-check">✓</span>
+                    </button>
+                    <button class="mood-item" type="button" role="menuitem" data-mood="nordic-slate">
+                      <span class="mood-swatch swatch-nordic"></span>
+                      <span class="mood-meta">
+                        <strong>Nordic Slate</strong>
+                        <small>Glacier daylight &amp; Leica cool gray</small>
+                      </span>
+                      <span class="mood-check">✓</span>
+                    </button>
+                    <button class="mood-item" type="button" role="menuitem" data-mood="tokyo-emerald">
+                      <span class="mood-swatch swatch-tokyo"></span>
+                      <span class="mood-meta">
+                        <strong>Tokyo Emerald</strong>
+                        <small>Cinestill 800T teal shadow bloom</small>
+                      </span>
+                      <span class="mood-check">✓</span>
+                    </button>
+                  </div>
+                </div>
               </nav>
             </header>
             <main id="main-content">
@@ -4751,6 +5465,196 @@
                     </div>
                   </div>
                 </section>
+                <section class="section gear-section" id="gear" aria-labelledby="gear-title">
+                  <div class="container">
+                    <div class="gear-header-row">
+                      <div>
+                        <div class="eyebrow">09 — Creative Gear &amp; Production Stack</div>
+                        <h2 class="section-title" id="gear-title">
+                          Optics, bodies &amp; <span class="serif">craft</span>
+                        </h2>
+                        <p class="section-copy">
+                          The intentional hardware and precision software suite powering every still frame, motion cut, and digital interface.
+                        </p>
+                      </div>
+                      <div class="gear-filter-tabs" role="tablist" aria-label="Filter equipment categories">
+                        <button class="gear-tab-btn active" type="button" data-gear-filter="all" role="tab" aria-selected="true">All Stack (12)</button>
+                        <button class="gear-tab-btn" type="button" data-gear-filter="cameras" role="tab" aria-selected="false">Cameras &amp; Glass (5)</button>
+                        <button class="gear-tab-btn" type="button" data-gear-filter="post" role="tab" aria-selected="false">Color &amp; Motion (3)</button>
+                        <button class="gear-tab-btn" type="button" data-gear-filter="code" role="tab" aria-selected="false">Design &amp; AI (4)</button>
+                      </div>
+                    </div>
+                    <div class="gear-grid" id="gearGrid">
+                      <!-- 01: 35mm Prime -->
+                      <article class="gear-card" data-gear-cat="cameras">
+                        <div class="gear-card-top">
+                          <span class="gear-badge">Optics</span>
+                          <span class="gear-status">Primary Glass</span>
+                        </div>
+                        <h3>35mm f/1.4 High-Aperture Prime</h3>
+                        <p class="gear-desc">Signature focal length for intimate street chronicles, environmental portraiture, and natural low-light character.</p>
+                        <div class="gear-meta">
+                          <span>Format: Full Frame</span>
+                          <span>Aperture: f/1.4 – f/16</span>
+                        </div>
+                      </article>
+
+                      <!-- 02: 50mm Prime -->
+                      <article class="gear-card" data-gear-cat="cameras">
+                        <div class="gear-card-top">
+                          <span class="gear-badge">Optics</span>
+                          <span class="gear-status">Portrait Glass</span>
+                        </div>
+                        <h3>50mm f/1.8 Natural Perspective Prime</h3>
+                        <p class="gear-desc">Human-eye field of view with subtle edge rolloff and cream bokeh for authentic editorial and portrait sessions.</p>
+                        <div class="gear-meta">
+                          <span>Format: Full Frame</span>
+                          <span>Role: Editorial &amp; Still Life</span>
+                        </div>
+                      </article>
+
+                      <!-- 03: 85mm Prime -->
+                      <article class="gear-card" data-gear-cat="cameras">
+                        <div class="gear-card-top">
+                          <span class="gear-badge">Optics</span>
+                          <span class="gear-status">Cine Telephoto</span>
+                        </div>
+                        <h3>85mm f/1.8 Portrait &amp; Compression Glass</h3>
+                        <p class="gear-desc">Flattering perspective compression, isolating subjects with smooth background separation in landscape and candid captures.</p>
+                        <div class="gear-meta">
+                          <span>Format: Full Frame</span>
+                          <span>Role: Compression &amp; Detail</span>
+                        </div>
+                      </article>
+
+                      <!-- 04: Camera System -->
+                      <article class="gear-card" data-gear-cat="cameras">
+                        <div class="gear-card-top">
+                          <span class="gear-badge">Camera Body</span>
+                          <span class="gear-status">Hybrid Rig</span>
+                        </div>
+                        <h3>4K Full-Frame Mirrorless System</h3>
+                        <p class="gear-desc">Dual native ISO sensor with high dynamic range, 10-bit 4:2:2 internal recording, and custom color profiles.</p>
+                        <div class="gear-meta">
+                          <span>Capability: 4K 60fps / 14+ stops DR</span>
+                          <span>Sensor: 35mm BSI Sensor</span>
+                        </div>
+                      </article>
+
+                      <!-- 05: ND & Cine Filters -->
+                      <article class="gear-card" data-gear-cat="cameras">
+                        <div class="gear-card-top">
+                          <span class="gear-badge">Glass Filters</span>
+                          <span class="gear-status">Optical Kit</span>
+                        </div>
+                        <h3>True-Color Variable ND &amp; Black Mist</h3>
+                        <p class="gear-desc">Cinema-grade diffusion filter preserving highlight halation and warm shadow rolloff without digital clipping.</p>
+                        <div class="gear-meta">
+                          <span>Strength: 1/8 Black Mist &amp; 2-5 Stop ND</span>
+                          <span>Coating: Multi-Coated German Optics</span>
+                        </div>
+                      </article>
+
+                      <!-- 06: DaVinci Resolve -->
+                      <article class="gear-card" data-gear-cat="post">
+                        <div class="gear-card-top">
+                          <span class="gear-badge">Color Science</span>
+                          <span class="gear-status">Studio Standard</span>
+                        </div>
+                        <h3>DaVinci Resolve Studio</h3>
+                        <p class="gear-desc">Node-based color grading, ACES color management pipeline, and film print emulation curves for cinematic reels.</p>
+                        <div class="gear-meta">
+                          <span>Workflow: Node Tree Color Science</span>
+                          <span>Color Space: Rec.709 &amp; DCI-P3</span>
+                        </div>
+                      </article>
+
+                      <!-- 07: Lightroom Classic -->
+                      <article class="gear-card" data-gear-cat="post">
+                        <div class="gear-card-top">
+                          <span class="gear-badge">Post-Production</span>
+                          <span class="gear-status">Darkroom Suite</span>
+                        </div>
+                        <h3>Adobe Lightroom Classic &amp; Custom LUTs</h3>
+                        <p class="gear-desc">Non-destructive RAW development featuring custom Kodak Portra and Ilford HP5+ grain response profiles.</p>
+                        <div class="gear-meta">
+                          <span>Specialty: Custom Film Presets</span>
+                          <span>Format: 14-bit Uncompressed RAW</span>
+                        </div>
+                      </article>
+
+                      <!-- 08: Premiere Pro -->
+                      <article class="gear-card" data-gear-cat="post">
+                        <div class="gear-card-top">
+                          <span class="gear-badge">Editorial Cut</span>
+                          <span class="gear-status">Motion Rig</span>
+                        </div>
+                        <h3>Adobe Premiere Pro</h3>
+                        <p class="gear-desc">Non-linear narrative timeline editing, speed ramp design, and sound synchronization for short-form visual stories.</p>
+                        <div class="gear-meta">
+                          <span>Timeline: Multi-Cam &amp; Vertical 9:16</span>
+                          <span>Audio: Dual-Mono Mastering</span>
+                        </div>
+                      </article>
+
+                      <!-- 09: Figma -->
+                      <article class="gear-card" data-gear-cat="code">
+                        <div class="gear-card-top">
+                          <span class="gear-badge">Product Design</span>
+                          <span class="gear-status">Design Systems</span>
+                        </div>
+                        <h3>Figma &amp; Token Architecture</h3>
+                        <p class="gear-desc">Design token pipelines, responsive mobile-first autolayout frameworks, and high-fidelity interactive prototypes.</p>
+                        <div class="gear-meta">
+                          <span>Systems: Typography &amp; Spacing Scales</span>
+                          <span>Output: Production-Ready Specs</span>
+                        </div>
+                      </article>
+
+                      <!-- 10: Google Cloud & Vertex AI -->
+                      <article class="gear-card" data-gear-cat="code">
+                        <div class="gear-card-top">
+                          <span class="gear-badge">AI Systems</span>
+                          <span class="gear-status">Certified Stack</span>
+                        </div>
+                        <h3>Google Cloud GenAI Studio &amp; Vertex</h3>
+                        <p class="gear-desc">Foundation model tuning, prompt synthesis, multimodal Gemini pipelines, and generative creative asset production.</p>
+                        <div class="gear-meta">
+                          <span>Certifications: GenAI Studio &amp; Attention</span>
+                          <span>Infrastructure: Google Cloud Platform</span>
+                        </div>
+                      </article>
+
+                      <!-- 11: Anthropic Claude -->
+                      <article class="gear-card" data-gear-cat="code">
+                        <div class="gear-card-top">
+                          <span class="gear-badge">AI Systems</span>
+                          <span class="gear-status">Certified Stack</span>
+                        </div>
+                        <h3>Anthropic Claude 3.5 &amp; Prompt Engineering</h3>
+                        <p class="gear-desc">Creative ideation, architectural design analysis, automated content restructuring, and intelligent code review.</p>
+                        <div class="gear-meta">
+                          <span>Certification: Claude 101 Certified</span>
+                          <span>Focus: Context &amp; High-Recall Prompts</span>
+                        </div>
+                      </article>
+
+                      <!-- 12: Modern Web Performance -->
+                      <article class="gear-card" data-gear-cat="code">
+                        <div class="gear-card-top">
+                          <span class="gear-badge">Web Architecture</span>
+                          <span class="gear-status">High Performance</span>
+                        </div>
+                        <h3>Vanilla Modern Web &amp; GSAP 120fps</h3>
+                        <p class="gear-desc">High-framerate hardware-accelerated animations, zero-overhead static distribution, and responsive accessibility.</p>
+                        <div class="gear-meta">
+                          <span>Performance: 60-120fps GPU Paint</span>
+                          <span>Standards: Semantic HTML5, CSS3, ES2024</span>
+                        </div>
+                      </article>
+                    </div>
+                  </div>
+                </section>
                 <section
                   class="section cta"
                   id="contact"
@@ -4758,7 +5662,7 @@
                   >
                   <div class="container">
                     <div class="eyebrow">
-                      09 — Stay in the frame
+                      10 — Stay in the frame
                     </div>
                     <h2 id="cta-title">
                       Let's capture something beautiful.
@@ -4958,6 +5862,62 @@
                     </div>
                     <p class="capture-privacy">Processed on your device · Created by @axr.md</p>
                   </section>
+                </div>
+                <div class="cert-modal" id="certModal" role="dialog" aria-modal="true" aria-labelledby="certModalTitle" aria-hidden="true">
+                  <div class="cert-modal-backdrop" id="certModalBackdrop"></div>
+                  <div class="cert-modal-container">
+                    <button class="cert-modal-close" id="certModalClose" type="button" aria-label="Close certificate inspection">×</button>
+                    <div class="cert-modal-body">
+                      <!-- Visual Stage -->
+                      <div class="cert-modal-visual">
+                        <button class="cert-modal-nav cert-modal-prev" id="certModalPrev" type="button" aria-label="Previous certificate">←</button>
+                        <div class="cert-modal-frame">
+                          <img class="cert-modal-img" id="certModalImg" src="" alt="" />
+                        </div>
+                        <button class="cert-modal-nav cert-modal-next" id="certModalNext" type="button" aria-label="Next certificate">→</button>
+                      </div>
+                      <!-- Information Panel -->
+                      <div class="cert-modal-details">
+                        <div>
+                          <div class="cert-modal-meta-top">
+                            <span class="cert-modal-badge" id="certModalTrack">Track: AI &amp; Cloud</span>
+                            <span class="cert-modal-verified"><span class="cert-verified-dot" aria-hidden="true"></span> Authenticated Credential</span>
+                          </div>
+                          <div class="cert-modal-counter" id="certModalIndex">01 / 17</div>
+                          <h3 class="cert-modal-title" id="certModalTitle">Introduction to Generative AI Studio</h3>
+                          <p class="cert-modal-desc" id="certModalDesc"></p>
+
+                          <div class="cert-modal-specs">
+                            <div class="cert-spec-item">
+                              <span class="cert-spec-label">Authority</span>
+                              <span class="cert-spec-value" id="certModalIssuer">Google Cloud · Simplilearn SkillUP</span>
+                            </div>
+                            <div class="cert-spec-item">
+                              <span class="cert-spec-label">Recipient</span>
+                              <span class="cert-spec-value">MD Abdulla</span>
+                            </div>
+                            <div class="cert-spec-item">
+                              <span class="cert-spec-label">Completed</span>
+                              <span class="cert-spec-value" id="certModalDate">October 6, 2026</span>
+                            </div>
+                            <div class="cert-spec-item">
+                              <span class="cert-spec-label">Credential ID</span>
+                              <div class="cert-spec-id-row">
+                                <code class="cert-spec-code" id="certModalCode">10843652-GC-GENAI</code>
+                                <button class="cert-copy-btn" id="certModalCopyBtn" type="button" aria-label="Copy Credential ID">Copy ID</button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="cert-modal-actions">
+                          <a class="button button-primary cert-modal-link" id="certModalExtLink" href="" target="_blank" rel="noopener noreferrer">
+                            Open Original File ↗
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
                 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
@@ -8213,6 +9173,403 @@ document.addEventListener("visibilitychange", () => {
 
       setCertsMode("swipe");
     }
+  } catch (error) {}
+
+  /* Atmospheric Film Mood Theme Switcher */
+  try {
+    const moodSelector = document.getElementById("moodSelector");
+    const moodBtn = document.getElementById("moodBtn");
+    const moodMenu = document.getElementById("moodMenu");
+    const moodCurrentName = document.getElementById("moodCurrentName");
+    const moodCurrentDot = document.getElementById("moodCurrentDot");
+    const moodItems = document.querySelectorAll(".mood-item");
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+
+    const themes = {
+      "obsidian": { name: "Obsidian", color: "#89aacc", bg: "#0a0a0a" },
+      "golden-hour": { name: "Golden Hour", color: "#e0a35c", bg: "#0d0c0a" },
+      "nordic-slate": { name: "Nordic Slate", color: "#7db4db", bg: "#0a0e14" },
+      "tokyo-emerald": { name: "Tokyo Emerald", color: "#5ac59b", bg: "#080d0b" }
+    };
+
+    function applyMood(moodKey, save = true) {
+      if (!themes[moodKey]) moodKey = "obsidian";
+      if (moodKey === "obsidian") {
+        document.documentElement.removeAttribute("data-theme");
+      } else {
+        document.documentElement.setAttribute("data-theme", moodKey);
+      }
+
+      const themeData = themes[moodKey];
+      if (moodCurrentName) moodCurrentName.textContent = themeData.name;
+      if (moodCurrentDot) {
+        moodCurrentDot.style.background = themeData.color;
+        moodCurrentDot.style.boxShadow = `0 0 8px ${themeData.color}`;
+      }
+      if (themeMeta) themeMeta.setAttribute("content", themeData.bg);
+
+      moodItems.forEach(item => {
+        const active = item.dataset.mood === moodKey;
+        item.classList.toggle("active", active);
+        item.setAttribute("aria-selected", String(active));
+      });
+
+      if (save) {
+        try { localStorage.setItem("axr_film_mood", moodKey); } catch (e) {}
+        showToast(`Film mood: ${themeData.name}`);
+      }
+    }
+
+    if (moodBtn && moodMenu) {
+      moodBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isOpen = !moodMenu.hidden;
+        moodMenu.hidden = isOpen;
+        moodBtn.setAttribute("aria-expanded", String(!isOpen));
+      });
+
+      moodItems.forEach(item => {
+        item.addEventListener("click", () => {
+          applyMood(item.dataset.mood, true);
+          moodMenu.hidden = true;
+          moodBtn.setAttribute("aria-expanded", "false");
+        });
+      });
+
+      document.addEventListener("click", (e) => {
+        if (moodSelector && !moodSelector.contains(e.target)) {
+          moodMenu.hidden = true;
+          moodBtn.setAttribute("aria-expanded", "false");
+        }
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && !moodMenu.hidden) {
+          moodMenu.hidden = true;
+          moodBtn.setAttribute("aria-expanded", "false");
+          moodBtn.focus();
+        }
+      });
+    }
+
+    /* Restore persisted mood from localStorage */
+    try {
+      const saved = localStorage.getItem("axr_film_mood");
+      if (saved && themes[saved]) {
+        applyMood(saved, false);
+      }
+    } catch (e) {}
+  } catch (error) {}
+
+  /* Gear & Production Toolkit Filter */
+  try {
+    const gearTabs = document.querySelectorAll(".gear-tab-btn");
+    const gearCards = document.querySelectorAll(".gear-card");
+    gearTabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        const filter = tab.dataset.gearFilter;
+        gearTabs.forEach(t => {
+          const sel = t === tab;
+          t.classList.toggle("active", sel);
+          t.setAttribute("aria-selected", String(sel));
+        });
+        gearCards.forEach(card => {
+          const match = filter === "all" || card.dataset.gearCat === filter;
+          card.classList.toggle("is-hidden", !match);
+        });
+      });
+    });
+  } catch (error) {}
+
+  /* Certificate Inspection & Verification Modal Engine */
+  try {
+    const certModal = document.getElementById("certModal");
+    const certModalClose = document.getElementById("certModalClose");
+    const certModalBackdrop = document.getElementById("certModalBackdrop");
+    const certModalPrev = document.getElementById("certModalPrev");
+    const certModalNext = document.getElementById("certModalNext");
+    const certModalImg = document.getElementById("certModalImg");
+    const certModalTitle = document.getElementById("certModalTitle");
+    const certModalDesc = document.getElementById("certModalDesc");
+    const certModalTrack = document.getElementById("certModalTrack");
+    const certModalIndex = document.getElementById("certModalIndex");
+    const certModalIssuer = document.getElementById("certModalIssuer");
+    const certModalDate = document.getElementById("certModalDate");
+    const certModalCode = document.getElementById("certModalCode");
+    const certModalCopyBtn = document.getElementById("certModalCopyBtn");
+    const certModalExtLink = document.getElementById("certModalExtLink");
+
+    const certCards = [...document.querySelectorAll(".certificate-card")];
+
+    const certsData = [
+      {
+        num: "01",
+        title: "Introduction to Generative AI Studio",
+        track: "AI & Cloud Systems",
+        issuer: "Google Cloud · Simplilearn SkillUP",
+        date: "October 6, 2026",
+        code: "10843652-GC-GENAI",
+        desc: "Mastery of Generative AI Studio on Google Cloud, foundation models, prompt tuning, and multimodal asset generation.",
+        src: "https://i.supaimg.com/8e0923ed-9bb9-4654-8b98-67c158f6c70c/381eba3e-3588-494e-b451-3bb41b1db661.jpg"
+      },
+      {
+        num: "02",
+        title: "Attention Mechanism",
+        track: "AI & Cloud Systems",
+        issuer: "Google Cloud · Simplilearn SkillUP",
+        date: "October 6, 2026",
+        code: "10843621-GC-ATTN",
+        desc: "Architectural deep dive into self-attention dynamics, multi-head attention in transformer networks, and sequence representation.",
+        src: "https://i.supaimg.com/8e0923ed-9bb9-4654-8b98-67c158f6c70c/f365312d-bc26-444c-8ff4-c3b3995d51b2.jpg"
+      },
+      {
+        num: "03",
+        title: "Gemini for Google Workspace",
+        track: "AI & Cloud Systems",
+        issuer: "Google Cloud · Simplilearn SkillUP",
+        date: "October 5, 2026",
+        code: "8441920-GC-GEMINI",
+        desc: "Generative workflow design, automated document intelligence, and enterprise-grade prompt modeling.",
+        src: "https://i.supaimg.com/8e0923ed-9bb9-4654-8b98-67c158f6c70c/ad6af2ce-c8e6-4e48-888d-0cfa84e49f2b.png"
+      },
+      {
+        num: "04",
+        title: "Claude 101",
+        track: "AI & Cloud Systems",
+        issuer: "Anthropic",
+        date: "October 2026",
+        code: "ANT-101-CLAUDE-EXP",
+        desc: "Anthropic model capabilities, context window optimization, precision prompt architecture, and ethical AI alignment.",
+        src: "https://i.supaimg.com/8e0923ed-9bb9-4654-8b98-67c158f6c70c/e79673cf-a152-4845-a3ba-48a2af8c23ae.png"
+      },
+      {
+        num: "05",
+        title: "Build a Computer Vision App with Azure Cognitive Services",
+        track: "AI & Cloud Systems",
+        issuer: "Microsoft · Coursera Project Network",
+        date: "2026",
+        code: "MS-AZURE-CV-98214",
+        desc: "Practical computer vision deployment with Azure Cognitive Services, visual feature tagging, and image analytics.",
+        src: "assets/images/certificates/computer-vision-azure.png"
+      },
+      {
+        num: "06",
+        title: "Data Analyst 101",
+        track: "Growth & Analytics",
+        issuer: "Microsoft · Simplilearn SkillUP",
+        date: "October 6, 2026",
+        code: "10844516-MS-DA101",
+        desc: "Foundations of data analysis, exploratory metrics, transformation logic, and interactive visual reporting.",
+        src: "https://i.supaimg.com/8e0923ed-9bb9-4654-8b98-67c158f6c70c/241127c9-c172-46d1-b2d4-5ceb427ecd94.jpg"
+      },
+      {
+        num: "07",
+        title: "Website UI/UX Designing using ChatGPT",
+        track: "UI/UX & Design",
+        issuer: "Simplilearn SkillUP",
+        date: "October 2026",
+        code: "SL-UIUX-GPT-5542",
+        desc: "AI-assisted interface prototyping, user journey mapping, design system components, and layout architecture.",
+        src: "https://i.supaimg.com/8e0923ed-9bb9-4654-8b98-67c158f6c70c/097a8803-7cb5-45cb-92c4-27c9a93ae071.png"
+      },
+      {
+        num: "08",
+        title: "Create Engaging Video with Google Vids",
+        track: "Growth & Analytics",
+        issuer: "Google Cloud · Simplilearn SkillUP",
+        date: "October 2026",
+        code: "GC-VIDS-882194",
+        desc: "AI-powered multimodal video creation, visual pacing, narrative structure, and dynamic motion communication.",
+        src: "https://i.supaimg.com/8e0923ed-9bb9-4654-8b98-67c158f6c70c/2a9a463c-dcbf-463d-82d8-04f7678516d7.png"
+      },
+      {
+        num: "09",
+        title: "Video Editing Course",
+        track: "UI/UX & Design",
+        issuer: "European Open University",
+        date: "2026",
+        code: "EOU-VE-173H-981",
+        desc: "173 hours of structured post-production learning covering timeline pacing, sound design, and color grading.",
+        src: "assets/images/certificates/video-editing.png"
+      },
+      {
+        num: "10",
+        title: "Basics of Digital Marketing",
+        track: "Growth & Analytics",
+        issuer: "UniAthena · Cambridge International Qualifications",
+        date: "2026",
+        code: "UA-CIQ-MKT-3341",
+        desc: "Blockchain-verified certificate in campaign distribution, content positioning, audience acquisition, and marketing ROI.",
+        src: "https://i.supaimg.com/8e0923ed-9bb9-4654-8b98-67c158f6c70c/58e23f00-349f-4f81-a957-c8c381c15f9b.png"
+      },
+      {
+        num: "11",
+        title: "Getting Started in Google Analytics",
+        track: "Growth & Analytics",
+        issuer: "Google · Coursera Project Network",
+        date: "2026",
+        code: "GGL-GA4-CRS-771",
+        desc: "Event tracking implementation, audience segmentation, and measurement modeling in Google Analytics 4.",
+        src: "assets/images/certificates/google-analytics.png"
+      },
+      {
+        num: "12",
+        title: "Master ChatGPT",
+        track: "AI & Cloud Systems",
+        issuer: "UniAthena · Cambridge International Qualifications",
+        date: "2026",
+        code: "UA-CIQ-CGPT-8819",
+        desc: "Advanced LLM workflows, contextual prompt synthesis, and generative task orchestration.",
+        src: "https://i.supaimg.com/8e0923ed-9bb9-4654-8b98-67c158f6c70c/c289b677-053b-4cc7-8541-4ab76c11453a.png"
+      },
+      {
+        num: "13",
+        title: "HTML Programming Course",
+        track: "Web & Systems",
+        issuer: "European Open University",
+        date: "2026",
+        code: "EOU-HTML-46H-112",
+        desc: "46 hours covering semantic HTML5 structure, web accessibility standards, DOM hierarchy, and SEO architecture.",
+        src: "assets/images/certificates/html-programming.png"
+      },
+      {
+        num: "14",
+        title: "Build a Free Website with WordPress",
+        track: "Web & Systems",
+        issuer: "Coursera Project Network",
+        date: "2026",
+        code: "CRS-WP-WEB-4421",
+        desc: "Full CMS lifecycle, responsive layout systems, database connections, and web asset optimization.",
+        src: "assets/images/certificates/build-website-wordpress.png"
+      },
+      {
+        num: "15",
+        title: "Marketing Design with Easil",
+        track: "UI/UX & Design",
+        issuer: "Coursera Project Network",
+        date: "2026",
+        code: "CRS-MD-EASIL-339",
+        desc: "Commercial visual branding, creative assets for multi-channel marketing, typography hierarchy, and composition.",
+        src: "assets/images/certificates/marketing-design-easil.png"
+      },
+      {
+        num: "16",
+        title: "Basics of Cyber Law",
+        track: "Web & Systems",
+        issuer: "UniAthena · Cambridge International Qualifications",
+        date: "2026",
+        code: "UA-CIQ-CYBER-5091",
+        desc: "Blockchain-verified legal credential covering digital intellectual property, international privacy laws, and compliance.",
+        src: "https://i.supaimg.com/8e0923ed-9bb9-4654-8b98-67c158f6c70c/bb5e4d88-18bc-465a-94db-7db610baae77.png"
+      },
+      {
+        num: "17",
+        title: "Basics of ESG Regulatory Landscape",
+        track: "Web & Systems",
+        issuer: "UniAthena · Cambridge International Qualifications",
+        date: "2026",
+        code: "UA-CIQ-ESG-6028",
+        desc: "Global ESG compliance protocols, sustainability reporting governance, and ethical corporate impact auditing.",
+        src: "https://i.supaimg.com/8e0923ed-9bb9-4654-8b98-67c158f6c70c/a4f43487-4bc2-461a-9479-9d6527cf7b58.png"
+      }
+    ];
+
+    let currentCertIndex = 0;
+
+    function renderCertModal(index) {
+      currentCertIndex = (index + certsData.length) % certsData.length;
+      const cert = certsData[currentCertIndex];
+      if (!cert) return;
+
+      if (certModalImg) {
+        certModalImg.src = cert.src;
+        certModalImg.alt = `${cert.title} certificate for MD Abdulla`;
+      }
+      if (certModalTitle) certModalTitle.textContent = cert.title;
+      if (certModalDesc) certModalDesc.textContent = cert.desc;
+      if (certModalTrack) certModalTrack.textContent = `Track: ${cert.track}`;
+      if (certModalIndex) certModalIndex.textContent = `${cert.num} / ${String(certsData.length).padStart(2, "0")}`;
+      if (certModalIssuer) certModalIssuer.textContent = cert.issuer;
+      if (certModalDate) certModalDate.textContent = cert.date;
+      if (certModalCode) certModalCode.textContent = cert.code;
+      if (certModalExtLink) certModalExtLink.href = cert.src;
+      if (certModalCopyBtn) {
+        certModalCopyBtn.textContent = "Copy ID";
+        certModalCopyBtn.dataset.code = cert.code;
+      }
+    }
+
+    function openCertModal(index) {
+      if (!certModal) return;
+      renderCertModal(index);
+      certModal.classList.add("is-open");
+      certModal.setAttribute("aria-hidden", "false");
+      document.body.classList.add("modal-open");
+      if (certModalClose) certModalClose.focus();
+    }
+
+    function closeCertModal() {
+      if (!certModal) return;
+      certModal.classList.remove("is-open");
+      certModal.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("modal-open");
+    }
+
+    if (certModalClose) certModalClose.addEventListener("click", closeCertModal);
+    if (certModalBackdrop) certModalBackdrop.addEventListener("click", closeCertModal);
+    if (certModalPrev) certModalPrev.addEventListener("click", () => renderCertModal(currentCertIndex - 1));
+    if (certModalNext) certModalNext.addEventListener("click", () => renderCertModal(currentCertIndex + 1));
+
+    if (certModalCopyBtn) {
+      certModalCopyBtn.addEventListener("click", async () => {
+        const code = certModalCopyBtn.dataset.code || certModalCode?.textContent;
+        if (!code) return;
+        try {
+          await navigator.clipboard.writeText(code);
+          certModalCopyBtn.textContent = "✓ Copied!";
+          showToast(`Credential ID copied: ${code}`);
+          setTimeout(() => {
+            certModalCopyBtn.textContent = "Copy ID";
+          }, 2000);
+        } catch (e) {
+          showToast(`Credential ID: ${code}`);
+        }
+      });
+    }
+
+    /* Intercept clicks on certificate cards to open modal */
+    certCards.forEach((card, idx) => {
+      const preview = card.querySelector(".certificate-preview");
+      const action = card.querySelector(".certificate-action");
+
+      if (preview) {
+        preview.addEventListener("click", (e) => {
+          e.preventDefault();
+          openCertModal(idx);
+        });
+      }
+      if (action) {
+        action.addEventListener("click", (e) => {
+          e.preventDefault();
+          openCertModal(idx);
+        });
+      }
+    });
+
+    /* Keyboard controls for cert modal */
+    document.addEventListener("keydown", (e) => {
+      if (!certModal || !certModal.classList.contains("is-open")) return;
+      if (e.key === "Escape") {
+        e.preventDefault();
+        closeCertModal();
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        renderCertModal(currentCertIndex - 1);
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        renderCertModal(currentCertIndex + 1);
+      }
+    });
   } catch (error) {}
 
   /* Copy email on click (still opens mail app) */
