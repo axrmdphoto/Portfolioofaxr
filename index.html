@@ -7040,7 +7040,24 @@ const photos = [
       filters.appendChild(button);
     });
 
+    /* Gallery reveal: IntersectionObserver, not ScrollTrigger. Lazy
+       images constantly reflow the masonry columns, which leaves
+       pre-computed trigger positions stale and cards stuck invisible.
+       The observer uses live geometry and reveals each card once. */
+    const galleryReveal =
+      ("IntersectionObserver" in window)
+        ? new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add("is-in");
+                galleryReveal.unobserve(entry.target);
+              }
+            });
+          }, { threshold: .1, rootMargin: "0px 0px -4% 0px" })
+        : null;
+
     function renderGallery() {
+      if (galleryReveal) galleryReveal.disconnect();
       galleryGrid.innerHTML = "";
 
       const visiblePhotos =
@@ -7106,27 +7123,15 @@ const photos = [
           }
         });
 
+        if (!reduceMotion && galleryReveal) {
+          article.setAttribute("data-reveal", "");
+          galleryReveal.observe(article);
+        } else {
+          article.classList.add("is-in");
+        }
+
         galleryGrid.appendChild(article);
       });
-
-      if (!reduceMotion && window.gsap) {
-        gsap.fromTo(
-          ".photo-card",
-          {
-            opacity: 0,
-            y: 35,
-            scale: .94
-          },
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: .65,
-            stagger: .07,
-            ease: "power3.out"
-          }
-        );
-      }
 
       attachCardTilt();
     }
@@ -7870,7 +7875,7 @@ const photos = [
             scrollTrigger: {
               trigger: element,
               start: "top 82%",
-              toggleActions: "play none none reverse"
+              toggleActions: "play none none none"
             }
           });
         });
@@ -7888,29 +7893,14 @@ const photos = [
             scrollTrigger: {
               trigger: element,
               start: "top 88%",
-              toggleActions: "play none none reverse"
+              toggleActions: "play none none none"
             }
           });
         });
 
-      gsap.utils
-        .toArray(".photo-card")
-        .forEach((card, index) => {
-          gsap.from(card, {
-            opacity: 0,
-            y: 55,
-            scale: .96,
-            duration: .8,
-            delay: (index % 3) * .08,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: card,
-              start: "top 90%",
-              toggleActions: "play none none reverse"
-            }
-          });
-        });
-
+      /* Photo-cards reveal via IntersectionObserver (see renderGallery):
+         live positions, no stale ScrollTrigger math in the masonry
+         columns, and they never re-hide. GSAP stays off them. */
       gsap.utils
         .toArray(".journal-card")
         .forEach((card, index) => {
@@ -7922,7 +7912,7 @@ const photos = [
             scrollTrigger: {
               trigger: card,
               start: "top 88%",
-              toggleActions: "play none none reverse"
+              toggleActions: "play none none none"
             }
           });
         });
@@ -7943,7 +7933,7 @@ const photos = [
             scrollTrigger: {
               trigger: card,
               start: "top 90%",
-              toggleActions: "play none none reverse"
+              toggleActions: "play none none none"
             }
           });
         });
@@ -7956,7 +7946,7 @@ const photos = [
         scrollTrigger: {
           trigger: ".contact-actions",
           start: "top 92%",
-          toggleActions: "play none none reverse"
+          toggleActions: "play none none none"
         }
       });
 
@@ -7972,7 +7962,7 @@ const photos = [
               scrollTrigger: {
                 trigger: image,
                 start: "top 90%",
-                toggleActions: "play none none reverse"
+                toggleActions: "play none none none"
               }
             });
           });
@@ -7990,7 +7980,7 @@ const photos = [
             scrollTrigger: {
               trigger: number,
               start: "top 85%",
-              toggleActions: "play none none reverse"
+              toggleActions: "play none none none"
             }
           });
         });
