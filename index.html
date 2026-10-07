@@ -6954,14 +6954,13 @@ const photos = [
     const heroVideo =
       document.getElementById("heroVideo");
 
-    /* Hero stream is desktop-only: on phones the poster image shows and
-       no HLS manifest is ever fetched or decoded. Paused offscreen. */
-    if (heroVideo && mobilePerformanceMode) {
-      heroVideo.removeAttribute("autoplay");
-      heroVideo.preload = "none";
+    /* Hero video is essential: stream loads on all devices, with the
+       poster image underneath as the instant fallback. */
+    if (heroVideo) {
+      heroVideo.muted = true;
     }
 
-    if (!reduceMotion && !mobilePerformanceMode) {
+    if (!reduceMotion) {
       if (window.Hls && Hls.isSupported()) {
         const hls = new Hls({
           enableWorker: true,
@@ -6992,6 +6991,7 @@ const photos = [
         )
       ) {
         heroVideo.src = heroVideoUrl;
+        heroVideo.play().catch(() => {});
       }
     }
 
